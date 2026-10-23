@@ -8,7 +8,7 @@ Rujukan skrin: prototaip ASUH Digital di claude.ai (7 skrin: utama, katalog, hal
 ## Peraturan kerja (wajib)
 
 - Jangan push ke `main`, deploy ke server, atau jalankan migrasi di production tanpa pengesahan saya dalam chat.
-- Jangan sesekali commit rahsia (kata laluan, API key, kredensial cPanel, kunci BCL). Semua dalam `.env`, dan `.env` mesti ada dalam `.gitignore`.
+- Jangan sesekali commit rahsia (kata laluan, API key, kredensial cPanel, kunci CHIP). Semua dalam `.env`, dan `.env` mesti ada dalam `.gitignore`.
 - Sebelum mula kerja baru, baca semula fail ini dan nyatakan fasa yang sedang dibina.
 - Semua teks yang dilihat pengguna dalam Bahasa Melayu. Kod, nama jadual dan komen dalam Bahasa Inggeris.
 - Setiap fasa mesti ada ujian (Pest atau PHPUnit) untuk aliran bayaran, akses e-book dan pintu ibu bapa.
@@ -51,7 +51,8 @@ Rujukan skrin: prototaip ASUH Digital di claude.ai (7 skrin: utama, katalog, hal
 - `book_files`: `book_id`, edisi (`original` / `enhanced`), path fail peribadi, bilangan halaman
 - `syariah_reviews`: `book_id`, penyemak, status, catatan, tarikh. **Buku tidak boleh diterbitkan tanpa semakan yang lulus.**
 - `plans`: `pas_tahunan` (RM99), `pas_tahunan_early` (RM79), `pas_plus` (Fasa 2), `single`
-- `orders`: `user_id`, `plan_id` / `book_id`, jumlah, status (`pending` / `paid` / `failed` / `refunded`), rujukan BCL
+- `orders`: `user_id`, `plan_id` / `book_id`, jumlah, kaedah (`chip` / `bank_transfer`), status (`pending` / `paid` / `failed` / `refunded`), rujukan CHIP, resit pindahan bank, disahkan oleh dan bila
+- `settings`: tetapan yang boleh disunting di admin (harga, had slot, teks landing page, butiran bank, maklumat syarikat, e-mel notifikasi)
 - `passes`: `user_id`, `plan_id`, `starts_at`, `ends_at`
 - `entitlements`: akses buku single yang dibeli
 - `institutions`, `licenses`, `pilot_requests`
@@ -72,13 +73,29 @@ Widget papan pemuka:
 
 Peranan: `admin` boleh akses semua. `editor` hanya boleh urus buku, kuiz dan semakan, tanpa akses kewangan.
 
-## Bayaran FPX (BCL)
+## Bayaran (CHIP dan pindahan bank)
 
-- Setiap pesanan menjana pautan bayaran BCL dengan rujukan pesanan yang unik.
-- Pengaktifan Pas **hanya melalui webhook** yang disahkan, bukan melalui halaman redirect selepas bayaran.
+Gateway ialah **CHIP** (chip-in.asia), bukan BCL. Semua kaedah CHIP dibenarkan (FPX, kad, e-wallet). Kunci CHIP (Brand ID, API key, public key webhook) hanya dalam `.env`.
+
+- Setiap pesanan mencipta *purchase* CHIP dengan rujukan pesanan yang unik.
+- Pengaktifan Pas **hanya melalui webhook CHIP** yang tandatangannya disahkan, bukan melalui halaman redirect selepas bayaran.
 - Webhook mesti idempotent: rujukan yang sama tidak boleh mengaktifkan pas dua kali. Log setiap panggilan webhook.
+- **Pindahan bank:** pembeli muat naik resit, pesanan kekal `pending`, dan hanya `admin` boleh klik **Sahkan bayaran**. Rekod siapa yang mengesahkan dan bila. Butiran bank ialah tetapan admin.
 - Tiada caj berulang automatik. Bayaran sekali setahun.
-- Hantar resit melalui e-mel selepas status pesanan bertukar kepada `paid`.
+- Hantar resit melalui e-mel selepas status pesanan bertukar kepada `paid`. Maklumat syarikat pada resit (nama, SSM, alamat, SST) ialah tetapan admin.
+
+## Skop Fasa A (dipersetujui 2026-10-24)
+
+- Pre-order **Pas Tahunan harga early bird RM79**, bayar penuh, terhad **100 slot**. Slot ditempah sementara (~30 minit) semasa bayaran dan dilepaskan jika tidak dibayar.
+- Pas 12 bulan bermula **selepas bayaran disahkan**. Peraturan tarikh mula boleh ditukar di admin (contohnya kepada tarikh launch).
+- Pembeli **cipta akaun semasa checkout** (e-mel dan kata laluan, pengesahan e-mel, lupa kata laluan). Halaman "Akaun saya" memaparkan status pesanan dan pas, dan muat naik resit pindahan bank.
+- Maklumat pembeli: nama, e-mel, telefon, negeri, bilangan anak, kumpulan umur anak, dan persetujuan PDPA.
+- Landing page memaparkan kaunter baki slot dan tempoh pilot institusi. Headline, subheadline, FAQ, polisi bayaran balik dan tempoh pilot boleh disunting di admin.
+- Polisi bayaran balik: dibenarkan (teks muktamad disunting di admin).
+- Borang pilot institusi: nama institusi, jenis, negeri dan daerah, pegawai, jawatan, e-mel, telefon, anggaran murid, kumpulan umur, catatan. Notifikasi ke e-mel admin (tetapan) dan status di admin: Baru, Dihubungi, Pilot aktif, Membayar, Tidak meneruskan.
+- Satu Super Admin (role `admin`), dicipta melalui `php artisan asuh:create-admin`. Role `editor` wujud tetapi belum digunakan.
+- Notis privasi dan terma didraf dalam BM, dan **mesti disemak** pihak pengurusan atau undang-undang sebelum go-live.
+- Sasaran live sekitar 7 November 2026 (boleh berubah).
 
 ## Perlindungan e-book
 
@@ -104,7 +121,7 @@ Peranan: `admin` boleh akses semua. `editor` hanya boleh urus buku, kuiz dan sem
 ## Git dan deploy ke cPanel
 
 - Repo GitHub **peribadi**. Cawangan `main` untuk production dan `develop` untuk kerja harian. Hanya `main` yang dideploy.
-- **Tiada staging untuk Fasa A.** Sebelum launch, production (`asuh.galeriilmu.com.my`) diuji dengan BCL mod sandbox, kemudian kunci ditukar kepada live dan pesanan ujian dikosongkan. Staging (`staging-asuh.galeriilmu.com.my`) ditimbang semula sebelum Fasa B.
+- **Tiada staging untuk Fasa A.** Sebelum launch, production (`asuh.galeriilmu.com.my`) diuji dengan CHIP mod ujian (test mode), kemudian kunci ditukar kepada live dan pesanan ujian dikosongkan. Staging (`staging-asuh.galeriilmu.com.my`) ditimbang semula sebelum Fasa B.
 - Struktur server: kod di `/home/galeriil78/asuh-app` (di luar `public_html`), dan `public_html/asuh.galeriilmu.com.my` ialah symlink ke `asuh-app/public`. Laman utama syarikat berada dalam akaun cPanel yang sama, jadi jangan sentuh `public_html` yang lain.
 - DNS di Cloudflare: rekod A `asuh` dalam mod DNS only (awan kelabu) supaya AutoSSL cPanel berfungsi.
 - Deploy melalui GitHub Actions ke cPanel menggunakan SSH. Langkah: `composer install --no-dev`, bina aset, `php artisan migrate --force`, `config:cache`, `route:cache`, `view:cache`.
@@ -128,10 +145,10 @@ Tanya saya dan sahkan perkara ini:
 
 | Fasa | Skop | Sasaran |
 | --- | --- | --- |
-| A | Landing page pre-order, bayaran BCL, borang pilot institusi, panel admin untuk pre-order dan pilot | **Live dalam 2 minggu** (Ujian Permintaan) |
+| A | Landing page pre-order, akaun ibu bapa, bayaran CHIP dan pindahan bank, borang pilot institusi, panel admin untuk pre-order, pesanan, pilot dan tetapan | **Live dalam 2 minggu** (Ujian Permintaan) |
 | B | Katalog, halaman buku, akaun ibu bapa, Pas Tahunan, pembaca e-book, perlindungan fail, admin buku dengan semakan syariah | Sebelum PBAKL |
 | C | Profil anak, Mod Anak dan pintu ibu bapa, laporan bacaan mingguan melalui e-mel, kuiz dan lencana | Sebelum PBAKL |
 | D | Lesen institusi: akaun guru dan kod kelas | Selepas pilot institusi |
 | Fasa 2 | Pas Tahunan Plus dan animasi. Video dihoskan di luar cPanel (contohnya penstriman video berbayar atau YouTube unlisted), bukan dalam server cPanel | 2027 |
 
-Setiap fasa dikira siap apabila: ujian lulus, berjalan di server (staging jika ada, atau production dalam mod sandbox sebelum launch untuk Fasa A), dan saya telah menguji aliran utama sendiri.
+Setiap fasa dikira siap apabila: ujian lulus, berjalan di server (staging jika ada, atau production dalam mod ujian CHIP sebelum launch untuk Fasa A), dan saya telah menguji aliran utama sendiri.
