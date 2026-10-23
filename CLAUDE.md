@@ -15,9 +15,9 @@ Rujukan skrin: prototaip ASUH Digital di claude.ai (7 skrin: utama, katalog, hal
 
 ## Stack
 
-- PHP 8.2+ dengan Laravel 11
-- MySQL 8 atau MariaDB 10.6+ (ikut cPanel)
-- **Filament 3** untuk panel admin di `/admin`
+- PHP 8.3 dengan **Laravel 13**. Laravel 11 tidak digunakan kerana sokongan keselamatannya sudah tamat dan Composer menyekatnya atas amaran keselamatan.
+- MySQL 8.0 di production (cPanel). SQLite untuk pembangunan dan ujian lokal, jadi migrasi mesti serasi dengan kedua-duanya.
+- **Filament 5** untuk panel admin di `/admin`
 - Blade, Tailwind CSS dan Alpine.js untuk bahagian awam. Aset dibina secara lokal atau dalam GitHub Actions. **Tiada Node.js di server.**
 - PDF.js untuk pembaca e-book dalam pelayar
 - Queue: driver `database`, dijalankan melalui cron cPanel (`schedule:run` setiap minit)
@@ -59,7 +59,7 @@ Rujukan skrin: prototaip ASUH Digital di claude.ai (7 skrin: utama, katalog, hal
 - `reading_sessions`: `child_id`, `book_id`, minit, halaman terakhir, tarikh
 - `quizzes`, `quiz_questions`, `quiz_attempts`, `badges`, `child_badges`
 
-## Panel admin (Filament)
+## Panel admin (Filament 5)
 
 Resource: Buku (dengan muat naik fail dan semakan syariah), Kategori, Pelanggan, Profil anak (baca sahaja), Pesanan, Pas, Institusi dan lesen, Permohonan pilot, Pre-order, Kuiz dan lencana, Pengguna admin.
 
@@ -103,7 +103,10 @@ Peranan: `admin` boleh akses semua. `editor` hanya boleh urus buku, kuiz dan sem
 
 ## Git dan deploy ke cPanel
 
-- Repo GitHub **peribadi**. Cawangan `main` untuk production dan `develop` untuk kerja harian.
+- Repo GitHub **peribadi**. Cawangan `main` untuk production dan `develop` untuk kerja harian. Hanya `main` yang dideploy.
+- **Tiada staging untuk Fasa A.** Sebelum launch, production (`asuh.galeriilmu.com.my`) diuji dengan BCL mod sandbox, kemudian kunci ditukar kepada live dan pesanan ujian dikosongkan. Staging (`staging-asuh.galeriilmu.com.my`) ditimbang semula sebelum Fasa B.
+- Struktur server: kod di `/home/galeriil78/asuh-app` (di luar `public_html`), dan `public_html/asuh.galeriilmu.com.my` ialah symlink ke `asuh-app/public`. Laman utama syarikat berada dalam akaun cPanel yang sama, jadi jangan sentuh `public_html` yang lain.
+- DNS di Cloudflare: rekod A `asuh` dalam mod DNS only (awan kelabu) supaya AutoSSL cPanel berfungsi.
 - Deploy melalui GitHub Actions ke cPanel menggunakan SSH. Langkah: `composer install --no-dev`, bina aset, `php artisan migrate --force`, `config:cache`, `route:cache`, `view:cache`.
 - Pilihan alternatif: ciri Git Version Control cPanel dengan fail `.cpanel.yml`.
 - Document root domain mesti menghala ke folder `public/`.
@@ -131,4 +134,4 @@ Tanya saya dan sahkan perkara ini:
 | D | Lesen institusi: akaun guru dan kod kelas | Selepas pilot institusi |
 | Fasa 2 | Pas Tahunan Plus dan animasi. Video dihoskan di luar cPanel (contohnya penstriman video berbayar atau YouTube unlisted), bukan dalam server cPanel | 2027 |
 
-Setiap fasa dikira siap apabila: ujian lulus, berjalan di staging, dan saya telah menguji aliran utama sendiri.
+Setiap fasa dikira siap apabila: ujian lulus, berjalan di server (staging jika ada, atau production dalam mod sandbox sebelum launch untuk Fasa A), dan saya telah menguji aliran utama sendiri.
