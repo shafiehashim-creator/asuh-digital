@@ -57,16 +57,50 @@ rm -rf "$REL/storage"
 ln -sfn "$SHARED/storage" "$REL/storage"
 mkdir -p "$REL/bootstrap/cache"
 
+# --- cPanel-generated .htaccess blocks ---------------------------------------
+#
+# MultiPHP Manager (and the MultiPHP INI Editor) write blocks such as
+#   # php -- BEGIN cPanel-generated handler, do not edit ... END ...
+# into the docroot's .htaccess. That block is what makes the site run PHP 8.3
+# instead of the server default (7.3). Once the docroot is a symlink, cPanel
+# writes into current/public/.htaccess, which the next release would replace,
+# so the blocks are carried forward into every new release.
+
+CPANEL_BLOCKS="$SHARED/cpanel-generated.htaccess"
+cpanel_blocks() { sed -n '/BEGIN cPanel-generated/,/END cPanel-generated/p' "$1"; }
+
+if [ -n "$DOCROOT" ]; then
+    for source in "$DOCROOT/.htaccess" "$APP_DIR/current/public/.htaccess"; do
+        if [ -f "$source" ] && [ -n "$(cpanel_blocks "$source")" ]; then
+            cpanel_blocks "$source" > "$CPANEL_BLOCKS"
+            break
+        fi
+    done
+fi
+
+if [ -s "$CPANEL_BLOCKS" ]; then
+    { cat "$CPANEL_BLOCKS"; echo; cat "$REL/public/.htaccess"; } > "$REL/public/.htaccess.new"
+    mv "$REL/public/.htaccess.new" "$REL/public/.htaccess"
+    echo "Carried cPanel-generated .htaccess blocks into the release."
+fi
+
 # --- Document root (checked before anything changes) -------------------------
 
 if [ -n "$DOCROOT" ]; then
     if [ -L "$DOCROOT" ]; then
         : # already a symlink; repointed below
     elif [ -d "$DOCROOT" ]; then
-        # Only replace a folder cPanel created empty (it may hold cgi-bin or
-        # .well-known from AutoSSL). Never touch a folder with real content.
-        leftovers="$(find "$DOCROOT" -mindepth 1 -maxdepth 1 ! -name cgi-bin ! -name .well-known | head -n 1)"
+        # Only replace a folder cPanel created empty (it may hold cgi-bin,
+        # .well-known from AutoSSL, and a .htaccess holding nothing but
+        # cPanel-generated blocks). Never touch a folder with real content.
+        leftovers="$(find "$DOCROOT" -mindepth 1 -maxdepth 1 ! -name cgi-bin ! -name .well-known ! -name .htaccess | head -n 1)"
         [ -z "$leftovers" ] || fail "$DOCROOT is not empty ($leftovers). Empty it by hand, then deploy again."
+
+        if [ -f "$DOCROOT/.htaccess" ]; then
+            own_rules="$(sed '/BEGIN cPanel-generated/,/END cPanel-generated/d' "$DOCROOT/.htaccess" | grep -vE '^[[:space:]]*$' || true)"
+            [ -z "$own_rules" ] || fail "$DOCROOT/.htaccess has rules that are not cPanel-generated. Review it by hand, then deploy again."
+        fi
+
         mv "$DOCROOT" "$DOCROOT.cpanel-original-$(date +%Y%m%d%H%M%S)"
     elif [ -e "$DOCROOT" ]; then
         fail "$DOCROOT exists but is not a folder or symlink"
