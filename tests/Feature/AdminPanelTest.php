@@ -43,3 +43,27 @@ it('does not allow the role to be mass assigned', function () {
 
     expect($user->role)->toBe(Role::Parent);
 });
+
+it('lets the admin change their own password from the panel profile', function () {
+    $admin = User::factory()->admin()->create(['password' => 'LamaKataLaluan2026']);
+    $this->actingAs($admin);
+
+    $this->get('/admin/profile')->assertOk();
+
+    Livewire\Livewire::test(Filament\Auth\Pages\EditProfile::class)
+        ->fillForm([
+            'name' => $admin->name,
+            'email' => $admin->email,
+            'password' => 'BaharuKataLaluan2026',
+            'passwordConfirmation' => 'BaharuKataLaluan2026',
+            'currentPassword' => 'LamaKataLaluan2026',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(Illuminate\Support\Facades\Hash::check('BaharuKataLaluan2026', $admin->fresh()->password))->toBeTrue();
+});
+
+it('keeps parents out of the admin profile page', function () {
+    $this->actingAs(User::factory()->create())->get('/admin/profile')->assertForbidden();
+});

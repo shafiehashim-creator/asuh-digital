@@ -200,9 +200,27 @@ Kemudian log masuk di `https://asuh.galeriilmu.com.my/admin` → **Tetapan**, da
 
 ## Sebelum launch sebenar
 
-- [ ] Notis privasi dan terma telah disemak (dan versi Bahasa Inggeris notis privasi, PDPA s.7(3))
-- [ ] Tukar ke kunci CHIP **live** dalam `~/asuh-app/shared/.env` dan set `CHIP_TEST_MODE=false`, kemudian jalankan `cd ~/asuh-app/current && /opt/cpanel/ea-php83/root/usr/bin/php artisan optimize`
-- [ ] Kosongkan pesanan ujian (Claude akan sediakan arahan khas yang selamat untuk ini)
+Buat **mengikut urutan ini**:
+
+1. [ ] Notis privasi dan terma telah disemak (dan versi Bahasa Inggeris notis privasi, PDPA s.7(3)).
+2. [ ] **Kosongkan data ujian** (pesanan, pas, pre-order, log bayaran, akaun ibu bapa ujian dan fail resit). Akaun admin, tetapan, harga dan permohonan pilot dikekalkan.
+
+   Tinjau dahulu (tiada apa dipadam):
+
+   ```bash
+   cd ~/asuh-app/current && /opt/cpanel/ea-php83/root/usr/bin/php artisan asuh:purge-test-data
+   ```
+
+   Jika senarai betul, padam (anda akan diminta menaip `KOSONGKAN`):
+
+   ```bash
+   cd ~/asuh-app/current && /opt/cpanel/ea-php83/root/usr/bin/php artisan asuh:purge-test-data --confirm
+   ```
+
+   Tambah `--include-pilots` hanya jika permohonan pilot juga data ujian. Arahan ini **disekat sebaik CHIP dalam mod live**, jadi ia mesti dijalankan **sebelum** langkah 3.
+3. [ ] Tukar ke kunci CHIP **live** dalam `~/asuh-app/shared/.env` dan set `CHIP_TEST_MODE=false`, kemudian jalankan `cd ~/asuh-app/current && /opt/cpanel/ea-php83/root/usr/bin/php artisan optimize`. Status di panel admin → **Tetapan** akan menunjukkan "CHIP: disambungkan (live)".
+
+Untuk menukar nama, e-mel atau kata laluan admin: panel admin → klik ikon pengguna (kanan atas) → **Profil**.
 
 ## Mengubah `.env` selepas deploy
 

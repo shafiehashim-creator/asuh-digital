@@ -28,6 +28,8 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            // Name, e-mail and password for admins, inside the panel (user menu > Profil).
+            ->profile(isSimple: false)
             ->brandName('ASUH Digital')
             ->brandLogo(fn () => Vite::asset('resources/images/brand/logo-asuh.webp'))
             ->brandLogoHeight('2.5rem')
