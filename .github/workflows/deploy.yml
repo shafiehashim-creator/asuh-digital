@@ -1,0 +1,150 @@
+# CI on every push to develop/main; deploy to cPanel only from main.
+#
+# Repository settings needed (docs/DEPLOY.md):
+#   Secrets:   SSH_HOST, SSH_PORT, SSH_USER, SSH_PRIVATE_KEY, SSH_KNOWN_HOSTS
+#   Variables: DEPLOY_PATH, DEPLOY_DOCROOT, DEPLOY_PHP, APP_URL
+# The "production" environment can require a manual approval before deploying.
+
+name: CI dan deploy
+
+on:
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Ujian dan raptai deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: intl, pdo_sqlite, zip, bcmath, gd
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          npm ci
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Run tests
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php vendor/bin/pest
+
+      # Exercise scripts/deploy/*.sh on a fake server layout, so a broken
+      # script fails here instead of on the real server.
+      - name: Rehearse deploy and rollback
+        run: |
+          set -euo pipefail
+          APP=/tmp/asuh-app
+          DOCROOT=/tmp/public_html/asuh.galeriilmu.com.my
+          mkdir -p "$APP/releases" "$APP/shared" "$DOCROOT"
+
+          cp .env.production.example "$APP/shared/.env"
+          sed -i -e 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' \
+                 -e 's#^DB_DATABASE=.*#DB_DATABASE=/tmp/asuh.sqlite#' \
+                 -e 's#^APP_URL=.*#APP_URL=http://localhost#' "$APP/shared/.env"
+          touch /tmp/asuh.sqlite
+
+          for release in r1 r2; do
+            rsync -a --exclude-from=scripts/deploy/rsync-exclude.txt ./ "$APP/releases/$release/"
+            bash scripts/deploy/activate-release.sh "$APP" "$release" php "$DOCROOT"
+            sleep 1
+          done
+
+          test "$(readlink -f "$APP/current")" = "$APP/releases/r2"
+          test -f "$DOCROOT/index.php"
+          test ! -e "$APP/releases/r2/tests"
+          test ! -e "$APP/releases/r2/.git"
+          grep -q '^APP_KEY=base64:' "$APP/shared/.env"
+          test "$(stat -c %a "$APP/shared/.env")" = "600"
+          ls -d /tmp/public_html/asuh.galeriilmu.com.my.cpanel-original-*
+
+          bash "$APP/current/scripts/deploy/rollback.sh" "$APP" php
+          test "$(readlink -f "$APP/current")" = "$APP/releases/r1"
+          echo "Deploy rehearsal passed."
+
+  deploy:
+    name: Deploy ke cPanel
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: intl, zip, bcmath, gd
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Build production release
+        run: |
+          composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-progress
+          npm ci
+          npm run build
+
+      - name: Set up SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          # Pinned host key: no blind trust on first connect.
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Upload and activate release
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+          DEPLOY_DOCROOT: ${{ vars.DEPLOY_DOCROOT }}
+          DEPLOY_PHP: ${{ vars.DEPLOY_PHP }}
+        run: |
+          set -euo pipefail
+          : "${DEPLOY_PATH:?Set the DEPLOY_PATH repository variable}"
+          : "${DEPLOY_DOCROOT:?Set the DEPLOY_DOCROOT repository variable}"
+          RELEASE="$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}"
+          SSH="ssh -i $HOME/.ssh/deploy_key -p ${SSH_PORT:-22} -o BatchMode=yes"
+
+          $SSH "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH/releases'"
+          rsync -az --delete --exclude-from=scripts/deploy/rsync-exclude.txt -e "$SSH" \
+            ./ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/releases/$RELEASE/"
+          $SSH "$SSH_USER@$SSH_HOST" \
+            "bash '$DEPLOY_PATH/releases/$RELEASE/scripts/deploy/activate-release.sh' '$DEPLOY_PATH' '$RELEASE' '${DEPLOY_PHP:-php}' '$DEPLOY_DOCROOT'"
+
+      - name: Check the live site
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+        run: |
+          curl --fail --silent --show-error --retry 3 --retry-delay 5 "${APP_URL:-https://asuh.galeriilmu.com.my}/up" > /dev/null
+          echo "Site is up."

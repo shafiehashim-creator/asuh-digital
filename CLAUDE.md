@@ -128,13 +128,13 @@ Gateway ialah **CHIP** (chip-in.asia), bukan BCL. Semua kaedah CHIP dibenarkan (
 
 - Repo GitHub **peribadi**. Cawangan `main` untuk production dan `develop` untuk kerja harian. Hanya `main` yang dideploy.
 - **Tiada staging untuk Fasa A.** Sebelum launch, production (`asuh.galeriilmu.com.my`) diuji dengan CHIP mod ujian (test mode), kemudian kunci ditukar kepada live dan pesanan ujian dikosongkan. Staging (`staging-asuh.galeriilmu.com.my`) ditimbang semula sebelum Fasa B.
-- Struktur server: kod di `/home/galeriil78/asuh-app` (di luar `public_html`), dan `public_html/asuh.galeriilmu.com.my` ialah symlink ke `asuh-app/public`. Laman utama syarikat berada dalam akaun cPanel yang sama, jadi jangan sentuh `public_html` yang lain.
+- Struktur server: kod di `/home/galeriil78/asuh-app` (di luar `public_html`) dengan `releases/<masa>-<sha>/`, `current` (symlink ke release aktif) dan `shared/` (`.env` serta `storage/`). `public_html/asuh.galeriilmu.com.my` ialah symlink ke `asuh-app/current/public`. Laman utama syarikat berada dalam akaun cPanel yang sama, jadi jangan sentuh `public_html` yang lain.
+- Panduan penuh dan senarai tugasan pengguna: `docs/DEPLOY.md`. Skrip server: `scripts/deploy/activate-release.sh` dan `rollback.sh`, diuji dalam CI melalui raptai deploy sebelum deploy sebenar.
 - DNS di Cloudflare: rekod A `asuh` dalam mod DNS only (awan kelabu) supaya AutoSSL cPanel berfungsi.
-- Deploy melalui GitHub Actions ke cPanel menggunakan SSH. Langkah: `composer install --no-dev`, bina aset, `php artisan migrate --force`, `config:cache`, `route:cache`, `view:cache`.
-- Pilihan alternatif: ciri Git Version Control cPanel dengan fail `.cpanel.yml`.
+- Deploy melalui GitHub Actions ke cPanel menggunakan SSH (`.github/workflows/deploy.yml`), hanya dari `main` dan selepas ujian serta raptai lulus. Aset dan `vendor` dibina di GitHub, kemudian rsync ke release baharu. Di server: `migrate --force`, `PlanSeeder`, `optimize`, `filament:optimize`, kemudian tukar `current` secara atomik.
 - Document root domain mesti menghala ke folder `public/`.
 - Kredensial SSH disimpan dalam GitHub Secrets, bukan dalam repo.
-- Pasang cron: `* * * * * php /path/artisan schedule:run`
+- Pasang cron: `* * * * * cd /home/galeriil78/asuh-app/current && php artisan schedule:run >> /dev/null 2>&1`
 
 ## Semak cPanel dulu (langkah pertama sebelum menulis kod)
 
