@@ -33,7 +33,9 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Private files (receipts, later e-books) are only served by our own
+            // controllers after an access check, never by the built-in route.
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],

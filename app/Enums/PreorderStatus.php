@@ -2,9 +2,10 @@
 
 namespace App\Enums;
 
+use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
-enum PreorderStatus: string implements HasLabel
+enum PreorderStatus: string implements HasColor, HasLabel
 {
     // Holds a slot until reserved_until while the buyer is paying.
     case Reserved = 'reserved';
@@ -33,5 +34,16 @@ enum PreorderStatus: string implements HasLabel
     public static function holdingSlot(): array
     {
         return [self::Reserved, self::AwaitingConfirmation, self::Paid];
+    }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Paid => 'success',
+            self::Reserved => 'info',
+            self::AwaitingConfirmation => 'warning',
+            self::Expired => 'gray',
+            self::Refunded => 'gray',
+        };
     }
 }

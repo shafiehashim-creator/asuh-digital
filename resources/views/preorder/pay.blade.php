@@ -21,6 +21,8 @@
             <h1 class="font-display text-3xl font-extrabold text-magenta sm:text-4xl">
                 @if ($order->isPaid())
                     Bayaran diterima. Terima kasih!
+                @elseif ($awaitingConfirmation)
+                    Resit diterima
                 @elseif ($isExpired)
                     Tempahan telah tamat tempoh
                 @else
@@ -61,10 +63,24 @@
                 <p>Resit telah dihantar ke e-mel anda. Status Pas Tahunan boleh dilihat di halaman Akaun saya.</p>
                 <a href="{{ route('account') }}" class="btn-utama mt-4">Ke Akaun saya</a>
             </section>
-        @elseif ($isExpired)
+        @elseif ($awaitingConfirmation)
             <section class="{{ $cardClass }}">
+                @if (session('receipt_uploaded'))
+                    <p role="status" class="mb-3 font-semibold text-biru">Terima kasih, resit anda telah dihantar.</p>
+                @endif
+                <p>Kami akan menyemak pindahan anda dan mengesahkan bayaran secepat mungkin. Anda akan menerima resit melalui e-mel sebaik sahaja Pas Tahunan diaktifkan. Slot anda kekal ditempah sepanjang semakan.</p>
+                @if ($canUploadReceipt && $receiptUrl)
+                    <a href="{{ $receiptUrl }}" class="pautan mt-4 inline-block">Tersalah resit? Hantar semula</a>
+                @endif
+            </section>
+        @elseif ($isExpired)
+            <section class="{{ $cardClass }} space-y-4">
                 <p>Slot yang ditempah untuk pesanan ini telah dilepaskan kerana bayaran tidak diterima dalam masa yang ditetapkan.</p>
-                <a href="{{ route('preorder.create') }}" class="btn-utama mt-4">Tempah semula</a>
+                @if ($canUploadReceipt && $receiptUrl)
+                    <p>Jika anda <strong>sudah membuat pindahan</strong>, muat naik resit dan kami akan menyemaknya.</p>
+                    <a href="{{ $receiptUrl }}" class="btn-utama">Muat naik resit</a>
+                @endif
+                <a href="{{ route('preorder.create') }}" @class(['btn-gelap' => $canUploadReceipt, 'btn-utama' => ! $canUploadReceipt])>Tempah semula</a>
             </section>
         @elseif ($order->payment_method === PaymentMethod::Chip)
             <section class="{{ $cardClass }}">

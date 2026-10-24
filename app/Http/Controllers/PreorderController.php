@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Enums\OrderStatus;
+use App\Enums\PreorderStatus;
 use App\Exceptions\PreorderUnavailable;
 use App\Http\Requests\StorePreorderRequest;
 use App\Models\Order;
 use App\Models\Setting;
+use App\Services\BankTransfers;
 use App\Services\PreorderCheckout;
 use App\Services\PreorderSlots;
 use Illuminate\Contracts\Cache\LockTimeoutException;
@@ -65,7 +67,7 @@ class PreorderController extends Controller
         return redirect()->route('preorder.pay', $preorder->order);
     }
 
-    public function pay(Request $request, Order $order): View
+    public function pay(Request $request, Order $order, BankTransfers $bankTransfers): View
     {
         // Orders are only visible to their owner; 404 so references cannot be probed.
         abort_unless($order->user_id === $request->user()->id, 404);
@@ -77,12 +79,18 @@ class PreorderController extends Controller
             $request->session()->flash('payment_checking', true);
         }
 
+        $awaitingConfirmation = $order->status === OrderStatus::Pending
+            && $order->preorder?->status === PreorderStatus::AwaitingConfirmation;
+
         return view('preorder.pay', [
             'order' => $order,
             'preorder' => $order->preorder,
-            'isPending' => $order->status === OrderStatus::Pending,
-            'isExpired' => $order->status === OrderStatus::Failed
-                || ($order->preorder?->reserved_until?->isPast() && $order->status === OrderStatus::Pending),
+            'awaitingConfirmation' => $awaitingConfirmation,
+            'canUploadReceipt' => $bankTransfers->canUploadReceipt($order),
+            'isExpired' => ! $awaitingConfirmation && (
+                $order->status === OrderStatus::Failed
+                || ($order->preorder?->reserved_until?->isPast() && $order->status === OrderStatus::Pending)
+            ),
         ]);
     }
 }

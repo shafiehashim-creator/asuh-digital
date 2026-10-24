@@ -84,6 +84,9 @@ Gateway ialah **CHIP** (chip-in.asia), bukan BCL. Semua kaedah CHIP dibenarkan (
 - CHIP menolak URL callback yang mempunyai nombor port, jadi callback hanya sampai di server sebenar (bukan `localhost:8000`).
 - Bayaran yang sampai **selepas tempahan luput tetap dihormati** (keputusan pengguna): pas diaktifkan walaupun kiraan slot terlebih sedikit. Admin boleh kenal pasti kes ini kerana `paid_at` lebih lewat daripada `reserved_until`.
 - **Pindahan bank:** pembeli muat naik resit, pesanan kekal `pending`, dan hanya `admin` boleh klik **Sahkan bayaran**. Rekod siapa yang mengesahkan dan bila. Butiran bank ialah tetapan admin.
+  - Resit (JPG/PNG/WEBP/PDF, maks 5 MB) disimpan dalam `storage/app/private/receipts` dan hanya dipaparkan kepada `admin` melalui `/admin/resit/{rujukan}`.
+  - Resit yang dihantar mengekalkan slot sehingga admin membuat keputusan. Resit untuk tempahan yang sudah luput tetap diterima (selaras dengan dasar menghormati bayaran lewat).
+  - Admin boleh **Tolak** dengan sebab (dilog); slot dilepaskan dan pembeli boleh menghantar resit baharu. Pesanan dalam panel admin adalah baca sahaja.
 - Tiada caj berulang automatik. Bayaran sekali setahun.
 - Hantar resit melalui e-mel selepas status pesanan bertukar kepada `paid`. Maklumat syarikat pada resit (nama, SSM, alamat, SST) ialah tetapan admin.
 
