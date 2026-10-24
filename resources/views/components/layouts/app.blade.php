@@ -12,19 +12,19 @@
     <body class="min-h-screen bg-latar font-sans text-ink antialiased">
         <header class="bg-plum text-white">
             <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-                <a href="{{ url('/') }}" class="flex items-center gap-2 rounded-lg focus-visible:outline-3 focus-visible:outline-kuning">
-                    <img src="{{ Vite::asset('resources/images/brand/logo-asuh.png') }}" alt="ASUH Digital" class="h-10 w-auto">
+                <a href="{{ url('/') }}" class="flex min-h-11 items-center gap-2 rounded-lg focus-visible:outline-3 focus-visible:outline-kuning">
+                    <img src="{{ Vite::asset('resources/images/brand/logo-asuh.webp') }}" alt="ASUH Digital" width="94" height="40" class="h-10 w-auto">
                 </a>
 
                 <nav class="flex items-center gap-3 text-sm font-bold">
                     @auth
-                        <a href="{{ route('account') }}" class="rounded-full px-3 py-2 hover:bg-white/10">Akaun saya</a>
+                        <a href="{{ route('account') }}" class="inline-flex min-h-11 items-center rounded-full px-3 hover:bg-white/10">Akaun saya</a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="min-h-11 rounded-full px-3 py-2 hover:bg-white/10">Log keluar</button>
                         </form>
                     @else
-                        <a href="{{ route('login') }}" class="rounded-full px-3 py-2 hover:bg-white/10">Log masuk</a>
+                        <a href="{{ route('login') }}" class="inline-flex min-h-11 items-center rounded-full px-3 hover:bg-white/10">Log masuk</a>
                     @endauth
                 </nav>
             </div>
