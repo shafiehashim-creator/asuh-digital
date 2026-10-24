@@ -5,8 +5,9 @@ Panduan untuk deploy pertama ke `https://asuh.galeriilmu.com.my` dan cara kerja 
 ## Cara ia berfungsi
 
 1. Setiap push ke `develop` atau `main` menjalankan **ujian** dan **raptai deploy** di GitHub Actions (`.github/workflows/deploy.yml`).
-2. Push atau merge ke `main` juga **deploy** ke cPanel melalui SSH, selepas anda klik *Approve* (jika environment `production` mempunyai *required reviewer*).
-3. Setiap deploy ialah satu *release* baharu. Trafik hanya ditukar selepas migrasi berjaya, jadi laman tidak rosak di tengah-tengah deploy.
+2. Push atau merge ke `main` juga **membina release lengkap** (`vendor` dan aset) dan menyimpannya dalam cawangan `deploy-build`.
+3. **Anda** deploy dari cPanel → **Git™ Version Control** → *Update from Remote* → *Deploy HEAD Commit*. Fail `.cpanel.yml` menjalankan `scripts/deploy/cpanel-deploy.sh`. GitHub tidak pernah masuk ke server, jadi tiada SSH dari luar atau Secrets diperlukan.
+4. Setiap deploy ialah satu *release* baharu. Trafik hanya ditukar selepas migrasi berjaya, jadi laman tidak rosak di tengah-tengah deploy.
 
 Susunan di server (akaun `galeriil78`):
 
@@ -14,6 +15,7 @@ Susunan di server (akaun `galeriil78`):
 /home/galeriil78/
 ├── public_html/                          laman utama syarikat (tidak disentuh)
 │   └── asuh.galeriilmu.com.my  ──►  /home/galeriil78/asuh-app/current/public
+├── repositories/asuh-digital/            klon cPanel Git (cawangan deploy-build)
 └── asuh-app/                             di luar public_html: .env tidak boleh dicapai dari web
     ├── releases/20261107093000-abc1234/  5 release terakhir disimpan
     ├── current  ──►  releases/<terkini>
@@ -60,11 +62,11 @@ cPanel → **Manage My Databases**
 
 ### 5. PHP 8.3 untuk subdomain dan Terminal ✅
 
-Semakan 2026-10-24: `php` di Terminal ialah **7.3** (lalai sistem, jangan diubah). PHP 8.3 berada di `/opt/cpanel/ea-php83/root/usr/bin/php`, dan laluan inilah yang digunakan oleh deploy dan cron (`DEPLOY_PHP`). Server tiada `rsync`; deploy menggunakan tar melalui SSH, jadi rsync tidak diperlukan.
+Semakan 2026-10-24: `php` di Terminal ialah **7.3** (lalai sistem, jangan diubah). PHP 8.3 berada di `/opt/cpanel/ea-php83/root/usr/bin/php`, dan laluan inilah yang digunakan oleh deploy dan cron (`DEPLOY_PHP`). Server tiada `rsync`; skrip deploy menggunakan `tar`, jadi rsync tidak diperlukan. Laluan PHP boleh diubah dalam `~/asuh-app/shared/deploy.conf` (`DEPLOY_PHP=...`) jika perlu.
 
 Pastikan juga subdomain menggunakan PHP 8.3: cPanel → **MultiPHP Manager** → `asuh.galeriilmu.com.my` mesti **PHP 8.3 (ea-php83)**. Jika tidak, tanda subdomain itu, pilih PHP 8.3 dan klik **Apply**. ☐
 
-### 6. Fail `.env` di server ☐
+### 6. Fail `.env` di server ✅
 
 Di Terminal cPanel:
 
@@ -96,68 +98,49 @@ chmod 600 ~/asuh-app/shared/.env
 
 > Jangan tampal kata laluan atau kunci ini dalam chat atau dalam repo.
 
-### 7. Kunci SSH untuk GitHub Actions ☐
+### 7. Akses server ke repo GitHub ☐
 
-Di Terminal cPanel, cipta kunci khas untuk deploy dan benarkannya masuk ke akaun ini:
-
-```bash
-ssh-keygen -t ed25519 -f ~/.ssh/github_deploy -N "" -C "github-actions-asuh"
-cat ~/.ssh/github_deploy.pub >> ~/.ssh/authorized_keys
-chmod 600 ~/.ssh/authorized_keys
-cat ~/.ssh/github_deploy
-```
-
-Salin **seluruh** output arahan terakhir (dari `-----BEGIN` hingga `-----END ... KEY-----`) ke GitHub Secret `SSH_PRIVATE_KEY` (langkah 8). Selepas disimpan di GitHub, padam salinan kunci peribadi di server:
+Repo `asuh-digital` adalah peribadi, jadi server perlu kunci untuk menariknya. Semak dulu sama ada kunci yang anda guna untuk laman lama sudah boleh. Di Terminal cPanel:
 
 ```bash
-rm ~/.ssh/github_deploy
+ssh -T git@github.com
 ```
 
-Dapatkan juga nama hos dan port SSH: cPanel → **SSH Access** (atau tanya hos). Biasanya port `22`.
+- Jika keluar `Hi shafiehashim-creator! You've successfully authenticated...`, kunci akaun anda sudah ada akses ke semua repo anda. **Langkah ini siap.**
+- Jika keluar `Permission denied` atau ralat lain, cipta kunci khas (deploy key) untuk repo ini:
 
-Untuk `SSH_KNOWN_HOSTS`, jalankan di komputer anda (Git Bash), gantikan HOS dan PORT:
+  1. Jana kunci di Terminal cPanel:
 
-```bash
-ssh-keyscan -p PORT HOS
-```
+     ```bash
+     ssh-keygen -t ed25519 -f ~/.ssh/asuh_deploy -N "" -C "cpanel-asuh-digital" && printf 'Host github.com\n  IdentityFile ~/.ssh/asuh_deploy\n  IdentitiesOnly yes\n' >> ~/.ssh/config && chmod 600 ~/.ssh/config && cat ~/.ssh/asuh_deploy.pub
+     ```
 
-Bandingkan cap jari dengan output arahan ini di Terminal cPanel (mesti sama):
+     Jika anda sudah ada fail `~/.ssh/config` untuk laman lama, beritahu Claude dahulu sebelum menjalankan arahan ini.
 
-```bash
-ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
-```
+  2. Salin baris yang bermula dengan `ssh-ed25519` (ini kunci **awam**, selamat dikongsi).
+  3. GitHub → repo `asuh-digital` → **Settings** → **Deploy keys** → **Add deploy key**. Title: `cPanel asuh`. Tampal kunci. **Jangan** tanda *Allow write access*. Klik **Add key**.
+  4. Uji semula dengan `ssh -T git@github.com`.
 
-### 8. Tetapan repo GitHub ☐
+### 8. Deploy pertama ☐
 
-Repo → **Settings** → **Secrets and variables** → **Actions**
+1. Beritahu Claude dalam chat. Claude akan meminta kelulusan anda untuk merge `develop` ke `main`. GitHub Actions kemudian menjalankan ujian dan raptai, membina release lengkap dan menyimpannya dalam cawangan **`deploy-build`** (beberapa minit).
+2. Selepas cawangan `deploy-build` wujud, di cPanel → **Git™ Version Control** → **Create**:
+   - *Clone a Repository*: **hidup**
+   - Clone URL: `git@github.com:shafiehashim-creator/asuh-digital.git`
+   - Repository Path: `repositories/asuh-digital`
+   - Repository Name: `asuh-digital`
+   - Klik **Create**
+3. Klik **Manage** pada repo itu → tab **Basic Information** → *Checked-Out Branch*: pilih **`deploy-build`** → **Update**.
+4. Tab **Pull or Deploy** → **Deploy HEAD Commit**. Tunggu sehingga selesai, kemudian buka `https://asuh.galeriilmu.com.my`.
 
-**Secrets** (tab *Secrets*):
+Jika deploy gagal, mesej ralat dari skrip (bermula dengan `DEPLOY ERROR`) terpapar dalam log deploy cPanel. Tampal mesej itu kepada Claude. Tiada apa yang berubah pada laman jika deploy gagal.
 
-| Nama | Nilai |
-| --- | --- |
-| `SSH_HOST` | Nama hos atau IP server |
-| `SSH_PORT` | Port SSH (contoh `22`) |
-| `SSH_USER` | `galeriil78` |
-| `SSH_PRIVATE_KEY` | Kunci peribadi dari langkah 7 |
-| `SSH_KNOWN_HOSTS` | Output `ssh-keyscan` dari langkah 7 |
+### 9. Deploy seterusnya
 
-**Variables** (tab *Variables*):
+Setiap kali ada kemas kini yang anda luluskan untuk `main`:
 
-| Nama | Nilai |
-| --- | --- |
-| `DEPLOY_PATH` | `/home/galeriil78/asuh-app` |
-| `DEPLOY_DOCROOT` | `/home/galeriil78/public_html/asuh.galeriilmu.com.my` |
-| `DEPLOY_PHP` | `/opt/cpanel/ea-php83/root/usr/bin/php` |
-| `APP_URL` | `https://asuh.galeriilmu.com.my` |
-
-**Disyorkan:** Repo → **Settings** → **Environments** → **New environment** → `production` → tanda **Required reviewers** dan tambah diri anda. Setiap deploy akan menunggu anda klik *Approve*.
-
-### 9. Push dan deploy ☐
-
-Beritahu Claude dalam chat apabila langkah 1 hingga 8 siap. Claude akan:
-
-1. Push `develop` (ujian dan raptai deploy berjalan di GitHub, tiada apa-apa di server).
-2. Selepas anda luluskan, merge `develop` ke `main`, yang memulakan deploy sebenar.
+1. Tunggu GitHub Actions selesai (tanda ✅ di tab *Actions* repo).
+2. cPanel → **Git™ Version Control** → **Manage** → **Pull or Deploy** → **Update from Remote** → **Deploy HEAD Commit**.
 
 ### 10. Selepas deploy pertama ☐
 

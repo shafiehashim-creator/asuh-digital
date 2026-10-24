@@ -1,9 +1,10 @@
-# CI on every push to develop/main; deploy to cPanel only from main.
+# CI on every push to develop/main. From main, also build a ready-to-run
+# release and publish it to the deploy-build branch.
 #
-# Repository settings needed (docs/DEPLOY.md):
-#   Secrets:   SSH_HOST, SSH_PORT, SSH_USER, SSH_PRIVATE_KEY, SSH_KNOWN_HOSTS
-#   Variables: DEPLOY_PATH, DEPLOY_DOCROOT, DEPLOY_PHP, APP_URL
-# The "production" environment can require a manual approval before deploying.
+# Deploying itself happens on the server: cPanel > Git Version Control pulls
+# deploy-build and runs .cpanel.yml (scripts/deploy/cpanel-deploy.sh) when you
+# click "Deploy HEAD Commit". The server is never reached from GitHub, so no
+# SSH access or secrets are needed. See docs/DEPLOY.md.
 
 name: CI dan deploy
 
@@ -51,48 +52,59 @@ jobs:
           php artisan key:generate
           php vendor/bin/pest
 
-      # Exercise scripts/deploy/*.sh on a fake server layout, so a broken
-      # script fails here instead of on the real server.
-      - name: Rehearse deploy and rollback
+      # Exercise the exact server-side path (.cpanel.yml -> cpanel-deploy.sh ->
+      # activate-release.sh) on a fake cPanel account, so a broken script fails
+      # here instead of on the real server.
+      - name: Rehearse cPanel deploy and rollback
         run: |
           set -euo pipefail
-          APP=/tmp/asuh-app
-          DOCROOT=/tmp/public_html/asuh.galeriilmu.com.my
-          mkdir -p "$APP/releases" "$APP/shared" "$DOCROOT"
+          FAKE_HOME=/tmp/fakehome
+          APP="$FAKE_HOME/asuh-app"
+          DOCROOT="$FAKE_HOME/public_html/asuh.galeriilmu.com.my"
+          CLONE="$FAKE_HOME/repositories/asuh-digital"
+          mkdir -p "$APP/shared" "$DOCROOT" "$CLONE"
 
           cp .env.production.example "$APP/shared/.env"
           sed -i -e 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' \
-                 -e 's#^DB_DATABASE=.*#DB_DATABASE=/tmp/asuh.sqlite#' \
+                 -e "s#^DB_DATABASE=.*#DB_DATABASE=$FAKE_HOME/asuh.sqlite#" \
                  -e 's#^APP_URL=.*#APP_URL=http://localhost#' "$APP/shared/.env"
-          touch /tmp/asuh.sqlite
+          touch "$FAKE_HOME/asuh.sqlite"
+          echo "DEPLOY_PHP=$(command -v php)" > "$APP/shared/deploy.conf"
 
-          # Same packaging and tar-over-a-pipe unpacking as the real deploy.
+          # What the deploy-build branch (and so the cPanel clone) will contain.
           bash scripts/deploy/package-release.sh /tmp/release.tgz
-          for release in r1 r2; do
-            mkdir -p "$APP/releases/$release"
-            tar -xzf - -C "$APP/releases/$release" < /tmp/release.tgz
-            bash "$APP/releases/$release/scripts/deploy/activate-release.sh" "$APP" "$release" php "$DOCROOT"
+          tar -xzf /tmp/release.tgz -C "$CLONE"
+          test -f "$CLONE/.cpanel.yml"
+          test -d "$CLONE/vendor" && test -f "$CLONE/public/build/manifest.json"
+
+          # Run the task line from .cpanel.yml, from the clone, twice.
+          TASK="$(sed -n 's/^ *- //p' "$CLONE/.cpanel.yml")"
+          for run in 1 2; do
+            (cd "$CLONE" && HOME="$FAKE_HOME" bash -c "$TASK")
             sleep 1
           done
 
-          test "$(readlink -f "$APP/current")" = "$APP/releases/r2"
+          releases=("$APP"/releases/*)
+          test "${#releases[@]}" -eq 2
+          test "$(readlink -f "$APP/current")" = "$(ls -d "$APP"/releases/* | sort | tail -n 1)"
           test -f "$DOCROOT/index.php"
-          test ! -e "$APP/releases/r2/tests"
-          test ! -e "$APP/releases/r2/.git"
+          test ! -e "$APP/current/tests"
           grep -q '^APP_KEY=base64:' "$APP/shared/.env"
           test "$(stat -c %a "$APP/shared/.env")" = "600"
-          ls -d /tmp/public_html/asuh.galeriilmu.com.my.cpanel-original-*
+          ls -d "$DOCROOT".cpanel-original-*
 
-          bash "$APP/current/scripts/deploy/rollback.sh" "$APP" php
-          test "$(readlink -f "$APP/current")" = "$APP/releases/r1"
-          echo "Deploy rehearsal passed."
+          first="$(ls -d "$APP"/releases/* | sort | head -n 1)"
+          HOME="$FAKE_HOME" bash "$APP/current/scripts/deploy/rollback.sh" "$APP" "$(command -v php)"
+          test "$(readlink -f "$APP/current")" = "$first"
+          echo "cPanel deploy rehearsal passed."
 
-  deploy:
-    name: Deploy ke cPanel
+  build:
+    name: Bina release untuk cPanel
     needs: test
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment: production
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v5
 
@@ -113,43 +125,10 @@ jobs:
           npm ci
           npm run build
 
-      - name: Set up SSH
+      - name: Publish to the deploy-build branch
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          # Pinned host key: no blind trust on first connect.
-          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-
-      - name: Upload and activate release
-        env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
-          DEPLOY_DOCROOT: ${{ vars.DEPLOY_DOCROOT }}
-          DEPLOY_PHP: ${{ vars.DEPLOY_PHP }}
-        run: |
-          set -euo pipefail
-          : "${DEPLOY_PATH:?Set the DEPLOY_PATH repository variable}"
-          : "${DEPLOY_DOCROOT:?Set the DEPLOY_DOCROOT repository variable}"
-          RELEASE="$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}"
-          SSH="ssh -i $HOME/.ssh/deploy_key -p ${SSH_PORT:-22} -o BatchMode=yes"
-
-          # The server has no rsync: stream one tarball over SSH and unpack it there.
           bash scripts/deploy/package-release.sh "$RUNNER_TEMP/release.tgz"
-          $SSH "$SSH_USER@$SSH_HOST" \
-            "mkdir -p '$DEPLOY_PATH/releases/$RELEASE' && tar -xzf - -C '$DEPLOY_PATH/releases/$RELEASE'" \
-            < "$RUNNER_TEMP/release.tgz"
-          $SSH "$SSH_USER@$SSH_HOST" \
-            "bash '$DEPLOY_PATH/releases/$RELEASE/scripts/deploy/activate-release.sh' '$DEPLOY_PATH' '$RELEASE' '${DEPLOY_PHP:-php}' '$DEPLOY_DOCROOT'"
-
-      - name: Check the live site
-        env:
-          APP_URL: ${{ vars.APP_URL }}
-        run: |
-          curl --fail --silent --show-error --retry 3 --retry-delay 5 "${APP_URL:-https://asuh.galeriilmu.com.my}/up" > /dev/null
-          echo "Site is up."
+          bash scripts/deploy/publish-build-branch.sh "$RUNNER_TEMP/release.tgz" deploy-build
+          echo "Next: cPanel > Git Version Control > Update from Remote > Deploy HEAD Commit" >> "$GITHUB_STEP_SUMMARY"
