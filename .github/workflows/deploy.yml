@@ -91,6 +91,13 @@ jobs:
 
           releases=("$APP"/releases/*)
           test "${#releases[@]}" -eq 2
+
+          # OPcache regression: each release's index.php must carry a fresh
+          # mtime, never the clone's, or PHP keeps serving the old release.
+          clone_mtime="$(stat -c %Y "$CLONE/public/index.php")"
+          for rel in "${releases[@]}"; do
+            test "$(stat -c %Y "$rel/public/index.php")" -gt "$clone_mtime"
+          done
           test "$(readlink -f "$APP/current")" = "$(ls -d "$APP"/releases/* | sort | tail -n 1)"
           test -f "$DOCROOT/index.php"
           test ! -e "$APP/current/tests"

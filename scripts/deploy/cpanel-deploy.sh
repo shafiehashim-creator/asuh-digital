@@ -31,6 +31,9 @@ echo "Deploying $SHA from $REPO to $TARGET"
 
 mkdir -p "$TARGET"
 # tar instead of rsync (not installed on this server); the cPanel clone's .git stays behind.
-tar -C "$REPO" --exclude=./.git -cf - . | tar -C "$TARGET" -xf -
+# -m stamps every file with the current time: OPcache decides whether to
+# recompile by mtime, and unchanged files (public/index.php especially) would
+# otherwise keep their old mtime and keep serving the previous release.
+tar -C "$REPO" --exclude=./.git -cf - . | tar -C "$TARGET" -xmf -
 
 bash "$TARGET/scripts/deploy/activate-release.sh" "$APP_DIR" "$RELEASE" "$PHP" "$DOCROOT"

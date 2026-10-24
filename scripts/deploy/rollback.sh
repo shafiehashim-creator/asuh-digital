@@ -18,6 +18,9 @@ previous="$(find "$APP_DIR/releases" -mindepth 1 -maxdepth 1 -type d -printf '%T
 
 [ -n "$previous" ] || { echo "No earlier release to roll back to." >&2; exit 1; }
 
+# Fresh mtime so OPcache recompiles index.php for the release we switch to.
+touch "$previous/public/index.php"
+
 ln -sfn "$previous" "$APP_DIR/current.tmp"
 mv -Tf "$APP_DIR/current.tmp" "$APP_DIR/current"
 

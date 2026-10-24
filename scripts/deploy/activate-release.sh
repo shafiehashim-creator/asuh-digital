@@ -126,6 +126,12 @@ fi
 
 # --- Switch traffic to the new release (atomic rename) ------------------------
 
+# The web server reaches the app through the docroot -> current symlink, so
+# OPcache keys index.php by that unchanging path (revalidate_path is off).
+# A fresh mtime makes it recompile index.php, whose __DIR__ then points at
+# the new release, within opcache.revalidate_freq seconds.
+touch "$REL/public/index.php"
+
 ln -sfn "$REL" "$APP_DIR/current.tmp"
 mv -Tf "$APP_DIR/current.tmp" "$APP_DIR/current"
 
