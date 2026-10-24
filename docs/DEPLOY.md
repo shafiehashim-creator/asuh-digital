@@ -82,7 +82,13 @@ Tampal kandungan fail `.env.production.example` dari repo GitHub, kemudian isi:
 | `MAIL_PASSWORD` | Kata laluan `noreply@galeriilmu.com.my` |
 | `CHIP_BRAND_ID`, `CHIP_API_KEY` | portal.chip-in.asia → **Developers** (guna kunci **test** dahulu, `CHIP_TEST_MODE=true`) |
 
-Biarkan `APP_KEY` kosong; ia dijana semasa deploy pertama. Simpan (Ctrl+O, Enter, Ctrl+X), kemudian:
+Biarkan `APP_KEY` kosong; ia dijana semasa deploy pertama.
+
+Kunci CHIP **boleh diisi kemudian**. Tanpanya, laman berfungsi seperti biasa, pindahan bank boleh digunakan, dan butang CHIP hanya memaparkan "Bayaran dalam talian belum dibuka". Status CHIP dipaparkan di panel admin → **Tetapan**.
+
+Untuk akaun e-mel, guna akaun khas ASUH (contohnya `asuh@galeriilmu.com.my`) supaya kata laluan `noreply@` yang digunakan oleh sistem lain tidak perlu ditukar. Isi alamat itu dalam `MAIL_USERNAME` dan `MAIL_FROM_ADDRESS`.
+
+Simpan (Ctrl+O, Enter, Ctrl+X), kemudian:
 
 ```bash
 chmod 600 ~/asuh-app/shared/.env
@@ -184,6 +190,14 @@ Kemudian log masuk di `https://asuh.galeriilmu.com.my/admin` → **Tetapan**, da
 - [ ] Notis privasi dan terma telah disemak (dan versi Bahasa Inggeris notis privasi, PDPA s.7(3))
 - [ ] Tukar ke kunci CHIP **live** dalam `~/asuh-app/shared/.env` dan set `CHIP_TEST_MODE=false`, kemudian jalankan `cd ~/asuh-app/current && /opt/cpanel/ea-php83/root/usr/bin/php artisan optimize`
 - [ ] Kosongkan pesanan ujian (Claude akan sediakan arahan khas yang selamat untuk ini)
+
+## Mengubah `.env` selepas deploy
+
+Setiap kali `~/asuh-app/shared/.env` diubah (contohnya mengisi kunci CHIP, menukar kata laluan e-mel, atau beralih ke kunci live), **wajib** jalankan arahan ini. Laravel menyimpan tetapan dalam cache, jadi tanpanya perubahan tidak akan dibaca:
+
+```bash
+cd ~/asuh-app/current && /opt/cpanel/ea-php83/root/usr/bin/php artisan optimize
+```
 
 ## Jika ada masalah selepas deploy
 

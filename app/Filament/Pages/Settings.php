@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Enums\PassStartRule;
 use App\Models\Plan;
 use App\Models\Setting;
+use App\Services\Chip\ChipClient;
 use App\Services\PaymentProcessor;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -17,6 +18,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
@@ -80,6 +82,8 @@ class Settings extends Page
     public function form(Schema $schema): Schema
     {
         return $schema->components([
+            $this->chipStatus(),
+
             Section::make('Harga dan slot pre-order')
                 ->columns(2)
                 ->schema([
@@ -190,6 +194,29 @@ class Settings extends Page
             ->body($scheduled ? "{$scheduled} Pas Tahunan yang menunggu telah dijadualkan." : null)
             ->success()
             ->send();
+    }
+
+    /**
+     * Read-only CHIP status. The keys themselves stay in the server .env
+     * (CLAUDE.md): a stolen admin login must not be able to redirect payments.
+     */
+    private function chipStatus(): Callout
+    {
+        $howTo = 'Kunci CHIP disimpan dalam fail .env di server, bukan di sini, supaya tidak boleh diubah walaupun akaun admin dicerobohi. Lihat docs/DEPLOY.md.';
+
+        if (! app(ChipClient::class)->isConfigured()) {
+            return Callout::make('CHIP: belum disambungkan')
+                ->description('Bayaran FPX, kad dan e-wallet ditutup. Pindahan bank masih berfungsi. '.$howTo)
+                ->warning();
+        }
+
+        return config('services.chip.test_mode')
+            ? Callout::make('CHIP: disambungkan (mod ujian)')
+                ->description('Bayaran menggunakan wang olok-olok. Tukar kepada kunci live sebelum launch. '.$howTo)
+                ->info()
+            : Callout::make('CHIP: disambungkan (live)')
+                ->description('Bayaran sebenar diterima. '.$howTo)
+                ->success();
     }
 
     private function priceInRinggit(string $code): ?string

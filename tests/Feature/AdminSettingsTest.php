@@ -231,3 +231,20 @@ it('hides financial widgets from editors', function () {
     expect(App\Filament\Widgets\SalesOverview::canView())->toBeFalse()
         ->and(App\Filament\Widgets\PassesAndPilotsOverview::canView())->toBeFalse();
 });
+
+it('shows the CHIP connection status without revealing the keys', function (?string $brand, ?string $key, bool $testMode, string $expected) {
+    config([
+        'services.chip.brand_id' => $brand,
+        'services.chip.secret_key' => $key,
+        'services.chip.test_mode' => $testMode,
+    ]);
+    $this->actingAs($this->admin);
+
+    Livewire::test(Settings::class)
+        ->assertSee($expected)
+        ->assertDontSee('rahsia-kunci-chip');
+})->with([
+    'not set' => [null, null, true, 'CHIP: belum disambungkan'],
+    'test mode' => ['brand-1', 'rahsia-kunci-chip', true, 'CHIP: disambungkan (mod ujian)'],
+    'live' => ['brand-1', 'rahsia-kunci-chip', false, 'CHIP: disambungkan (live)'],
+]);
