@@ -1,4 +1,4 @@
-# Files NOT uploaded to the server by the deploy workflow (rsync --exclude-from).
+# Files NOT included in a release (used by package-release.sh via rsync --exclude-from).
 # Leading "/" anchors a pattern to the project root. Do not use "!" here: in
 # rsync it clears the whole list instead of re-including a file.
 /.git/

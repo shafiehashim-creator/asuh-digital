@@ -29,7 +29,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: intl, pdo_sqlite, zip, bcmath, gd
+          extensions: intl, pdo_sqlite, pdo_mysql, zip, bcmath, gd
           coverage: none
 
       - uses: actions/setup-node@v5
@@ -66,9 +66,12 @@ jobs:
                  -e 's#^APP_URL=.*#APP_URL=http://localhost#' "$APP/shared/.env"
           touch /tmp/asuh.sqlite
 
+          # Same packaging and tar-over-a-pipe unpacking as the real deploy.
+          bash scripts/deploy/package-release.sh /tmp/release.tgz
           for release in r1 r2; do
-            rsync -a --exclude-from=scripts/deploy/rsync-exclude.txt ./ "$APP/releases/$release/"
-            bash scripts/deploy/activate-release.sh "$APP" "$release" php "$DOCROOT"
+            mkdir -p "$APP/releases/$release"
+            tar -xzf - -C "$APP/releases/$release" < /tmp/release.tgz
+            bash "$APP/releases/$release/scripts/deploy/activate-release.sh" "$APP" "$release" php "$DOCROOT"
             sleep 1
           done
 
@@ -96,7 +99,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: intl, zip, bcmath, gd
+          extensions: intl, pdo_mysql, zip, bcmath, gd
           coverage: none
 
       - uses: actions/setup-node@v5
@@ -136,9 +139,11 @@ jobs:
           RELEASE="$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}"
           SSH="ssh -i $HOME/.ssh/deploy_key -p ${SSH_PORT:-22} -o BatchMode=yes"
 
-          $SSH "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH/releases'"
-          rsync -az --delete --exclude-from=scripts/deploy/rsync-exclude.txt -e "$SSH" \
-            ./ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/releases/$RELEASE/"
+          # The server has no rsync: stream one tarball over SSH and unpack it there.
+          bash scripts/deploy/package-release.sh "$RUNNER_TEMP/release.tgz"
+          $SSH "$SSH_USER@$SSH_HOST" \
+            "mkdir -p '$DEPLOY_PATH/releases/$RELEASE' && tar -xzf - -C '$DEPLOY_PATH/releases/$RELEASE'" \
+            < "$RUNNER_TEMP/release.tgz"
           $SSH "$SSH_USER@$SSH_HOST" \
             "bash '$DEPLOY_PATH/releases/$RELEASE/scripts/deploy/activate-release.sh' '$DEPLOY_PATH' '$RELEASE' '${DEPLOY_PHP:-php}' '$DEPLOY_DOCROOT'"
 

@@ -28,7 +28,7 @@ Susunan di server (akaun `galeriil78`):
 
 Buat mengikut urutan. Tanda ✅ apabila siap.
 
-### 1. Subdomain ☐
+### 1. Subdomain ✅
 
 cPanel → **Domains** → **Create a New Domain**
 
@@ -37,7 +37,7 @@ cPanel → **Domains** → **Create a New Domain**
 - Document root: biarkan `public_html/asuh.galeriilmu.com.my`
 - Biarkan folder itu **kosong**. Deploy pertama akan menukarnya menjadi symlink secara automatik dan menyimpan folder asal sebagai sandaran.
 
-### 2. Rekod DNS di Cloudflare ☐
+### 2. Rekod DNS di Cloudflare ✅
 
 Cloudflare → `galeriilmu.com.my` → **DNS** → **Add record**
 
@@ -45,12 +45,12 @@ Cloudflare → `galeriilmu.com.my` → **DNS** → **Add record**
 | --- | --- | --- | --- |
 | A | `asuh` | IP server (cPanel → *General Information* → *Shared IP Address*) | **DNS only** (awan kelabu) |
 
-### 3. SSL dan HTTPS ☐
+### 3. SSL dan HTTPS ✅
 
 - cPanel → **SSL/TLS Status** → tanda `asuh.galeriilmu.com.my` → **Run AutoSSL**. Tunggu sehingga hijau.
 - cPanel → **Domains** → hidupkan **Force HTTPS Redirect** untuk `asuh.galeriilmu.com.my`.
 
-### 4. Pangkalan data MySQL ☐
+### 4. Pangkalan data MySQL ✅
 
 cPanel → **Manage My Databases**
 
@@ -58,18 +58,11 @@ cPanel → **Manage My Databases**
 2. *Add New User*: `asuh` (menjadi `galeriil78_asuh`), guna **Password Generator** dan simpan kata laluan di tempat selamat
 3. *Add User To Database*: pilih kedua-duanya → **ALL PRIVILEGES**
 
-### 5. Semak PHP dan rsync di Terminal ☐
+### 5. PHP 8.3 untuk subdomain dan Terminal ✅
 
-cPanel → **Terminal**:
+Semakan 2026-10-24: `php` di Terminal ialah **7.3** (lalai sistem, jangan diubah). PHP 8.3 berada di `/opt/cpanel/ea-php83/root/usr/bin/php`, dan laluan inilah yang digunakan oleh deploy dan cron (`DEPLOY_PHP`). Server tiada `rsync`; deploy menggunakan tar melalui SSH, jadi rsync tidak diperlukan.
 
-```bash
-php -v
-which rsync
-```
-
-- Jika `php -v` menunjukkan **8.3.x**, nilai `DEPLOY_PHP` ialah `php`.
-- Jika bukan 8.3, jalankan `ls /opt/cpanel/ea-php83/root/usr/bin/php`. Jika fail itu wujud, nilai `DEPLOY_PHP` ialah `/opt/cpanel/ea-php83/root/usr/bin/php`.
-- Jika `which rsync` tidak memaparkan apa-apa, beritahu Claude sebelum meneruskan.
+Pastikan juga subdomain menggunakan PHP 8.3: cPanel → **MultiPHP Manager** → `asuh.galeriilmu.com.my` mesti **PHP 8.3 (ea-php83)**. Jika tidak, tanda subdomain itu, pilih PHP 8.3 dan klik **Apply**. ☐
 
 ### 6. Fail `.env` di server ☐
 
@@ -148,7 +141,7 @@ Repo → **Settings** → **Secrets and variables** → **Actions**
 | --- | --- |
 | `DEPLOY_PATH` | `/home/galeriil78/asuh-app` |
 | `DEPLOY_DOCROOT` | `/home/galeriil78/public_html/asuh.galeriilmu.com.my` |
-| `DEPLOY_PHP` | Dari langkah 5 |
+| `DEPLOY_PHP` | `/opt/cpanel/ea-php83/root/usr/bin/php` |
 | `APP_URL` | `https://asuh.galeriilmu.com.my` |
 
 **Disyorkan:** Repo → **Settings** → **Environments** → **New environment** → `production` → tanda **Required reviewers** dan tambah diri anda. Setiap deploy akan menunggu anda klik *Approve*.
@@ -162,16 +155,16 @@ Beritahu Claude dalam chat apabila langkah 1 hingga 8 siap. Claude akan:
 
 ### 10. Selepas deploy pertama ☐
 
-**Cron** (cPanel → **Cron Jobs** → *Once Per Minute*). Gantikan `php` dengan nilai `DEPLOY_PHP` jika berbeza:
+**Cron** (cPanel → **Cron Jobs** → *Once Per Minute*):
 
 ```bash
-cd /home/galeriil78/asuh-app/current && php artisan schedule:run >> /dev/null 2>&1
+cd /home/galeriil78/asuh-app/current && /opt/cpanel/ea-php83/root/usr/bin/php artisan schedule:run >> /dev/null 2>&1
 ```
 
 **Akaun Super Admin** (Terminal cPanel):
 
 ```bash
-cd ~/asuh-app/current && php artisan asuh:create-admin
+cd ~/asuh-app/current && /opt/cpanel/ea-php83/root/usr/bin/php artisan asuh:create-admin
 ```
 
 Kemudian log masuk di `https://asuh.galeriilmu.com.my/admin` → **Tetapan**, dan isi butiran bank, maklumat syarikat, e-mel hubungan dan e-mel admin.
@@ -189,7 +182,7 @@ Kemudian log masuk di `https://asuh.galeriilmu.com.my/admin` → **Tetapan**, da
 ## Sebelum launch sebenar
 
 - [ ] Notis privasi dan terma telah disemak (dan versi Bahasa Inggeris notis privasi, PDPA s.7(3))
-- [ ] Tukar ke kunci CHIP **live** dalam `~/asuh-app/shared/.env` dan set `CHIP_TEST_MODE=false`, kemudian jalankan `cd ~/asuh-app/current && php artisan optimize`
+- [ ] Tukar ke kunci CHIP **live** dalam `~/asuh-app/shared/.env` dan set `CHIP_TEST_MODE=false`, kemudian jalankan `cd ~/asuh-app/current && /opt/cpanel/ea-php83/root/usr/bin/php artisan optimize`
 - [ ] Kosongkan pesanan ujian (Claude akan sediakan arahan khas yang selamat untuk ini)
 
 ## Jika ada masalah selepas deploy
@@ -197,7 +190,7 @@ Kemudian log masuk di `https://asuh.galeriilmu.com.my/admin` → **Tetapan**, da
 Kembali ke release sebelumnya (Terminal cPanel):
 
 ```bash
-bash ~/asuh-app/current/scripts/deploy/rollback.sh ~/asuh-app
+bash ~/asuh-app/current/scripts/deploy/rollback.sh ~/asuh-app /opt/cpanel/ea-php83/root/usr/bin/php
 ```
 
 Log ralat aplikasi: `~/asuh-app/shared/storage/logs/`.

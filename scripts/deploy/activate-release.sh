@@ -32,6 +32,13 @@ fail() { echo "DEPLOY ERROR: $*" >&2; exit 1; }
 "$PHP" -r 'exit(version_compare(PHP_VERSION, "8.3.0", ">=") ? 0 : 1);' \
     || fail "$PHP is $("$PHP" -r 'echo PHP_VERSION;'); PHP 8.3+ is required. Set the DEPLOY_PHP variable (e.g. /opt/cpanel/ea-php83/root/usr/bin/php)."
 
+# The CLI binary can have different extensions from the web PHP; check the ones Laravel and Filament need.
+missing="$("$PHP" -r '
+    $need = ["bcmath", "ctype", "curl", "dom", "fileinfo", "intl", "mbstring", "openssl", "pdo_mysql", "tokenizer", "xml", "zip"];
+    echo implode(" ", array_filter($need, fn ($ext) => ! extension_loaded($ext)));
+')"
+[ -z "$missing" ] || fail "PHP extensions missing for $PHP: $missing. Enable them in cPanel > Select PHP Version / MultiPHP INI Editor."
+
 # --- Shared files ------------------------------------------------------------
 
 mkdir -p \

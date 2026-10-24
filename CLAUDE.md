@@ -131,10 +131,11 @@ Gateway ialah **CHIP** (chip-in.asia), bukan BCL. Semua kaedah CHIP dibenarkan (
 - Struktur server: kod di `/home/galeriil78/asuh-app` (di luar `public_html`) dengan `releases/<masa>-<sha>/`, `current` (symlink ke release aktif) dan `shared/` (`.env` serta `storage/`). `public_html/asuh.galeriilmu.com.my` ialah symlink ke `asuh-app/current/public`. Laman utama syarikat berada dalam akaun cPanel yang sama, jadi jangan sentuh `public_html` yang lain.
 - Panduan penuh dan senarai tugasan pengguna: `docs/DEPLOY.md`. Skrip server: `scripts/deploy/activate-release.sh` dan `rollback.sh`, diuji dalam CI melalui raptai deploy sebelum deploy sebenar.
 - DNS di Cloudflare: rekod A `asuh` dalam mod DNS only (awan kelabu) supaya AutoSSL cPanel berfungsi.
-- Deploy melalui GitHub Actions ke cPanel menggunakan SSH (`.github/workflows/deploy.yml`), hanya dari `main` dan selepas ujian serta raptai lulus. Aset dan `vendor` dibina di GitHub, kemudian rsync ke release baharu. Di server: `migrate --force`, `PlanSeeder`, `optimize`, `filament:optimize`, kemudian tukar `current` secara atomik.
+- Deploy melalui GitHub Actions ke cPanel menggunakan SSH (`.github/workflows/deploy.yml`), hanya dari `main` dan selepas ujian serta raptai lulus. Aset dan `vendor` dibina di GitHub, dipek sebagai tar dan dihantar melalui SSH (server tiada rsync). Di server: `migrate --force`, `PlanSeeder`, `optimize`, `filament:optimize`, kemudian tukar `current` secara atomik.
 - Document root domain mesti menghala ke folder `public/`.
 - Kredensial SSH disimpan dalam GitHub Secrets, bukan dalam repo.
-- Pasang cron: `* * * * * cd /home/galeriil78/asuh-app/current && php artisan schedule:run >> /dev/null 2>&1`
+- PHP CLI lalai server ialah 7.3; sentiasa guna `/opt/cpanel/ea-php83/root/usr/bin/php` untuk artisan, deploy dan cron.
+- Pasang cron: `* * * * * cd /home/galeriil78/asuh-app/current && /opt/cpanel/ea-php83/root/usr/bin/php artisan schedule:run >> /dev/null 2>&1`
 
 ## Semak cPanel dulu (langkah pertama sebelum menulis kod)
 
