@@ -10,6 +10,12 @@ class Phone
     public const PATTERN = '/^01[0-9]{8,9}$/';
 
     /**
+     * Any Malaysian number after normalisation, including landlines such as
+     * 0361234567, for institutions that list an office line.
+     */
+    public const ANY_PATTERN = '/^0[1-9][0-9]{7,9}$/';
+
+    /**
      * Strip spaces, dashes and a leading +60 / 60 so "+60 12-345 6789"
      * is stored as "0123456789".
      */
