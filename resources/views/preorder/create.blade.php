@@ -5,6 +5,7 @@
 
     $user = auth()->user();
     $privacyUrl = Route::has('privacy') ? route('privacy') : null;
+    $termsUrl = Route::has('terms') ? route('terms') : null;
     $cardClass = 'rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)] sm:p-8';
 @endphp
 
@@ -116,13 +117,11 @@
                     <label class="flex cursor-pointer gap-3">
                         <input type="checkbox" name="pdpa_consent" value="1" @checked(old('pdpa_consent')) class="mt-0.5 size-5 shrink-0 rounded border-2 border-ink/30 text-biru" required>
                         <span class="text-sm">
-                            Saya bersetuju data saya dan maklumat keluarga di atas diproses oleh ASUH (Galeri Ilmu Media Group)
+                            Saya bersetuju dengan
+                            @if ($termsUrl) <a href="{{ $termsUrl }}" class="pautan" target="_blank">terma dan syarat</a> @else terma dan syarat @endif
+                            serta membenarkan data saya dan maklumat keluarga di atas diproses oleh ASUH (Galeri Ilmu Media Group)
                             untuk pesanan ini dan akaun ASUH Digital, seperti dalam
-                            @if ($privacyUrl)
-                                <a href="{{ $privacyUrl }}" class="pautan" target="_blank">notis privasi</a>.
-                            @else
-                                notis privasi.
-                            @endif
+                            @if ($privacyUrl) <a href="{{ $privacyUrl }}" class="pautan" target="_blank">notis privasi</a>.@else notis privasi.@endif
                         </span>
                     </label>
                     @error('pdpa_consent') <p class="text-sm font-semibold text-magenta">{{ $message }}</p> @enderror

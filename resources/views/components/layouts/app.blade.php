@@ -37,6 +37,10 @@
         <footer class="mt-16 border-t-2 border-ink/10">
             <div class="mx-auto max-w-6xl px-4 py-8 text-sm text-ink/70">
                 <p class="font-display text-base font-bold text-plum">Jom Jadi Baik!</p>
+                <nav aria-label="Maklumat" class="my-2 flex flex-wrap gap-x-4">
+                    <a href="{{ route('privacy') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">Notis privasi</a>
+                    <a href="{{ route('terms') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">Terma dan syarat</a>
+                </nav>
                 <p>&copy; {{ now()->year }} ASUH, Galeri Ilmu Media Group.</p>
             </div>
         </footer>

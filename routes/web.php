@@ -3,11 +3,14 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ChipPaymentController;
 use App\Http\Controllers\LandingController;
+use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PreorderController;
 use App\Http\Controllers\ReceiptController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', LandingController::class)->name('home');
+Route::get('/privasi', [LegalController::class, 'privacy'])->name('privacy');
+Route::get('/terma', [LegalController::class, 'terms'])->name('terms');
 
 Route::get('/pre-order', [PreorderController::class, 'create'])->name('preorder.create');
 Route::post('/pre-order', [PreorderController::class, 'store'])

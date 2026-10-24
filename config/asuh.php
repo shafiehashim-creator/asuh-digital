@@ -64,7 +64,8 @@ return [
         'bank_account_name' => null,
         'bank_account_number' => null,
 
-        // Company details printed on receipts
+        // Company details printed on receipts and the privacy/terms pages
+        'contact_email' => null,
         'company_name' => null,
         'company_ssm_no' => null,
         'company_address' => null,

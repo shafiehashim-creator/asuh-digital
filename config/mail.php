@@ -115,4 +115,12 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    // Branded theme in resources/views/vendor/mail/html/themes/asuh.css.
+    'markdown' => [
+        'theme' => env('MAIL_MARKDOWN_THEME', 'asuh'),
+        'paths' => [
+            resource_path('views/vendor/mail'),
+        ],
+    ],
+
 ];

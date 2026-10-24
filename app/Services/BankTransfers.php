@@ -5,11 +5,15 @@ namespace App\Services;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PreorderStatus;
+use App\Mail\BankReceiptUploaded;
+use App\Mail\BankTransferRejected;
 use App\Models\Order;
 use App\Models\PaymentLog;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -60,6 +64,12 @@ class BankTransfers
                 Storage::disk(self::DISK)->delete($previous);
             }
         });
+
+        $adminEmails = array_filter((array) Setting::get('admin_notification_emails'));
+
+        if ($adminEmails) {
+            Mail::to($adminEmails)->send(new BankReceiptUploaded($order));
+        }
     }
 
     public function confirm(Order $order, User $admin): bool
@@ -87,6 +97,8 @@ class BankTransfers
 
             $this->log($order, 'rejected', ['by' => $admin->id, 'reason' => $reason]);
         });
+
+        Mail::to($order->user)->send(new BankTransferRejected($order));
     }
 
     private function ensureAdmin(User $user): void
