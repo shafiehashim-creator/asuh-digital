@@ -22,6 +22,10 @@ return [
         'pass_start_rule' => 'on_payment',
         'launch_date' => null,
 
+        // Phase B catalogue and reader stay hidden from the public until the
+        // admin opens them (deploys are automatic, so unfinished work can ship).
+        'catalog_open' => false,
+
         // Landing page copy
         'landing_headline' => 'Rak buku Islamik digital untuk anak 6–13 tahun',
         'landing_subheadline' => 'Komik, kisah nabi, akhlak dan doa harian yang telah disemak syariah. Jom Jadi Baik!',

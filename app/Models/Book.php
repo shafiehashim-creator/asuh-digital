@@ -1,0 +1,133 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\AgeGroup;
+use App\Enums\BookEdition;
+use App\Enums\BookStatus;
+use App\Enums\ReviewStatus;
+use App\Exceptions\BookNotApproved;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Str;
+
+#[Fillable([
+    'title', 'slug', 'author', 'synopsis', 'age_group', 'category_id', 'single_price_sen',
+    'is_enhanced_edition', 'cover_path', 'status', 'published_at',
+])]
+class Book extends Model
+{
+    use HasFactory;
+
+    protected function casts(): array
+    {
+        return [
+            'age_group' => AgeGroup::class,
+            'status' => BookStatus::class,
+            'single_price_sen' => 'integer',
+            'is_enhanced_edition' => 'boolean',
+            'published_at' => 'datetime',
+        ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Book $book) {
+            $book->slug = filled($book->slug) ? $book->slug : static::uniqueSlug($book->title);
+        });
+
+        static::saving(function (Book $book) {
+            if ($book->status !== BookStatus::Published) {
+                return;
+            }
+
+            // The rule is enforced here so no screen or script can skip it.
+            if (! $book->exists || ! $book->hasApprovedReview()) {
+                throw BookNotApproved::make();
+            }
+
+            $book->published_at ??= now();
+        });
+    }
+
+    public static function uniqueSlug(string $title): string
+    {
+        $base = Str::slug($title) ?: 'buku';
+        $slug = $base;
+
+        for ($i = 2; static::query()->where('slug', $slug)->exists(); $i++) {
+            $slug = "{$base}-{$i}";
+        }
+
+        return $slug;
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    /**
+     * Visible to readers: published, with a publish date that has arrived.
+     */
+    public function scopePublished(Builder $query): void
+    {
+        $query->where('status', BookStatus::Published)->where('published_at', '<=', now());
+    }
+
+    /**
+     * Books suitable for a child's age group (books for both ages included).
+     */
+    public function scopeForAge(Builder $query, AgeGroup $age): void
+    {
+        $query->whereIn('age_group', $age === AgeGroup::Both
+            ? AgeGroup::cases()
+            : [$age, AgeGroup::Both]);
+    }
+
+    public function hasApprovedReview(): bool
+    {
+        return $this->latestReview()->first()?->status === ReviewStatus::Approved;
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->status === BookStatus::Published && $this->published_at?->isPast();
+    }
+
+    /**
+     * The file to read: the enhanced edition when the book has one, else the original.
+     */
+    public function readableFile(): ?BookFile
+    {
+        $files = $this->files->keyBy(fn (BookFile $file) => $file->edition->value);
+
+        return ($this->is_enhanced_edition ? $files->get(BookEdition::Enhanced->value) : null)
+            ?? $files->get(BookEdition::Original->value);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function files(): HasMany
+    {
+        return $this->hasMany(BookFile::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(SyariahReview::class)->latest();
+    }
+
+    public function latestReview(): HasOne
+    {
+        return $this->hasOne(SyariahReview::class)->latestOfMany();
+    }
+}

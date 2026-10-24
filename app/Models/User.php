@@ -64,4 +64,33 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     {
         return $this->passes()->active()->latest('ends_at')->first();
     }
+
+    public function entitlements(): HasMany
+    {
+        return $this->hasMany(Entitlement::class);
+    }
+
+    public function isStaff(): bool
+    {
+        return in_array($this->role, [Role::Admin, Role::Editor], true);
+    }
+
+    /**
+     * CLAUDE.md: e-books open only with an active pass or a purchased
+     * entitlement (institution licences come in Phase D). Staff may preview
+     * any book, published or not, for editing and syariah review.
+     */
+    public function canReadBook(Book $book): bool
+    {
+        if ($this->isStaff()) {
+            return true;
+        }
+
+        if (! $book->isPublished()) {
+            return false;
+        }
+
+        return $this->passes()->active()->exists()
+            || $this->entitlements()->where('book_id', $book->id)->exists();
+    }
 }
