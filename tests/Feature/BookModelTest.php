@@ -136,3 +136,16 @@ it('does not open books for an expired pass or one still waiting for the launch 
 it('lets staff preview unpublished books for review', function (Role $role) {
     expect(User::factory()->role($role)->create()->canReadBook(Book::factory()->create()))->toBeTrue();
 })->with([Role::Admin, Role::Editor]);
+
+it('builds a valid demo PDF and refuses demo books in production', function () {
+    $pdf = App\Support\DemoPdf::make('Ujian (contoh)', 3);
+
+    expect($pdf)->toStartWith('%PDF-1.4')->toEndWith("%%EOF\n")->toContain('/Count 3');
+
+    $this->artisan('asuh:demo-books')->assertSuccessful();
+    expect(Book::query()->published()->count())->toBe(8)
+        ->and(Book::query()->first()->files()->exists())->toBeTrue();
+
+    app()->detectEnvironment(fn () => 'production');
+    $this->artisan('asuh:demo-books')->assertFailed();
+});
