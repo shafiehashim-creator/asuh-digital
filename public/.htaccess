@@ -1,3 +1,9 @@
+# The PDF.js worker is an ES module (.mjs); browsers refuse module scripts
+# served without a JavaScript MIME type, and older Apache configs lack one.
+<IfModule mod_mime.c>
+    AddType text/javascript .mjs
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

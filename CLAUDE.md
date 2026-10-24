@@ -103,6 +103,13 @@ Gateway ialah **CHIP** (chip-in.asia), bukan BCL. Semua kaedah CHIP dibenarkan (
 - Notis privasi dan terma didraf dalam BM, dan **mesti disemak** pihak pengurusan atau undang-undang sebelum go-live.
 - Sasaran live sekitar 7 November 2026 (boleh berubah).
 
+## Status Fasa B (2026-10-25)
+
+- Dibina: model buku/kategori/fail/semakan syariah/entitlement, admin Buku dan Kategori (aliran Hantar → Semak → Terbitkan), katalog `/buku`, halaman buku, pembaca `/baca/{buku}` (PDF.js 4.10.38).
+- **Katalog dan pembaca disembunyikan (404) daripada orang ramai** sehingga suis "Buka katalog" (`catalog_open`) dihidupkan di Tetapan; staf sentiasa boleh pratonton. Deploy adalah automatik, jadi kerja Fasa B boleh dihantar berperingkat dengan selamat.
+- `php artisan asuh:demo-books` menjana buku contoh untuk pembangunan lokal sahaja (disekat di production).
+- Belum dibina: pembelian Pas Tahunan harga biasa selepas slot early bird habis, dan pembelian buku single (jadual `entitlements` sudah sedia).
+
 ## Perlindungan e-book
 
 - Fail disimpan dalam `storage/app/private`, **tidak** dalam `public/`.

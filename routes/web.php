@@ -1,17 +1,33 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\CatalogController;
+use App\Http\Middleware\EnsureCatalogOpen;
 use App\Http\Controllers\ChipPaymentController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PilotRequestController;
 use App\Http\Controllers\PreorderController;
+use App\Http\Controllers\ReaderController;
 use App\Http\Controllers\ReceiptController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', LandingController::class)->name('home');
 Route::get('/privasi', [LegalController::class, 'privacy'])->name('privacy');
 Route::get('/terma', [LegalController::class, 'terms'])->name('terms');
+
+// Phase B: hidden (404) until the admin opens the catalogue; staff can always preview.
+Route::middleware(EnsureCatalogOpen::class)->group(function () {
+    Route::get('/buku', [CatalogController::class, 'index'])->name('catalog.index');
+    Route::get('/buku/{book:slug}', [CatalogController::class, 'show'])->name('catalog.show');
+
+    Route::middleware('auth')->group(function () {
+        Route::get('/baca/{book:slug}', [ReaderController::class, 'show'])->name('reader.show');
+        Route::get('/baca/{book:slug}/fail/{file}', [ReaderController::class, 'file'])
+            ->middleware(['signed', 'throttle:30,1'])
+            ->name('reader.file');
+    });
+});
 
 Route::get('/pilot', [PilotRequestController::class, 'create'])->name('pilot.create');
 Route::post('/pilot', [PilotRequestController::class, 'store'])

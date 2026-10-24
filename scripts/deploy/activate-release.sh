@@ -123,6 +123,8 @@ fi
 "$PHP" artisan db:seed --class='Database\Seeders\PlanSeeder' --force
 "$PHP" artisan optimize
 "$PHP" artisan filament:optimize
+# Book covers live on the public disk (shared storage); expose them as public/storage.
+"$PHP" artisan storage:link --force
 
 # --- Switch traffic to the new release (atomic rename) ------------------------
 

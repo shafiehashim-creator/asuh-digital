@@ -59,8 +59,12 @@
     "file": "assets/nunito-800-normal-Dz8SOQK_.woff2",
     "src": "_nunito-800-normal-Dz8SOQK_.woff2"
   },
+  "node_modules/pdfjs-dist/build/pdf.worker.min.mjs": {
+    "file": "assets/pdf.worker.min-yatZIOMy.mjs",
+    "src": "node_modules/pdfjs-dist/build/pdf.worker.min.mjs"
+  },
   "resources/css/app.css": {
-    "file": "assets/app-NyW7LeiS.css",
+    "file": "assets/app-CzFTiEfM.css",
     "name": "app",
     "names": [
       "app.css"
@@ -93,5 +97,14 @@
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true
+  },
+  "resources/js/reader.js": {
+    "file": "assets/reader-C4lSZPmS.js",
+    "name": "reader",
+    "src": "resources/js/reader.js",
+    "isEntry": true,
+    "assets": [
+      "assets/pdf.worker.min-yatZIOMy.mjs"
+    ]
   }
 }
