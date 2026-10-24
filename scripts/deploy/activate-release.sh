@@ -126,8 +126,21 @@ fi
 
 # --- Switch traffic to the new release (atomic rename) ------------------------
 
+# The web server reaches the app through the docroot -> current symlink.
+# With revalidate_path off, OPcache keys index.php by that unchanging path but
+# checks freshness against the file it first compiled: the PREVIOUS release's
+# index.php. Touching that file after the switch makes OPcache recompile
+# index.php through the symlink, so __DIR__ points at the new release
+# (verified on the live server, 2026-10-25).
+previous_rel="$(readlink -f "$APP_DIR/current" 2> /dev/null || true)"
+touch "$REL/public/index.php"
+
 ln -sfn "$REL" "$APP_DIR/current.tmp"
 mv -Tf "$APP_DIR/current.tmp" "$APP_DIR/current"
+
+if [ -n "$previous_rel" ] && [ -f "$previous_rel/public/index.php" ]; then
+    touch "$previous_rel/public/index.php"
+fi
 
 if [ -n "$DOCROOT" ]; then
     if [ "${REPLACE_DOCROOT_FOLDER:-0}" = 1 ]; then
