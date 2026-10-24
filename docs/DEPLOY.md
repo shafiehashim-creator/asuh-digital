@@ -109,10 +109,10 @@ ssh -T git@github.com
 - Jika keluar `Hi shafiehashim-creator!` (tanpa nama repo), kunci akaun anda sudah ada akses ke semua repo anda. Guna Clone URL `git@github.com:...` dalam langkah 8. **Langkah ini siap.**
 - Jika keluar `Hi shafiehashim-creator/<repo-lain>!`, kunci itu ialah **deploy key untuk repo lain** (contohnya `galeri-ilmu-lms`) dan tidak boleh menarik `asuh-digital`. **Jangan ubah kunci itu**, kerana laman lain bergantung padanya. Cipta kunci khas dengan alias hos tersendiri:
 
-  1. Jana kunci dan alias `github-asuh` (hanya digunakan oleh repo ASUH, sambungan `github.com` yang lain tidak terjejas):
+  1. Jana kunci dan alias `github-asuh` (hanya digunakan oleh repo ASUH, sambungan `github.com` yang lain tidak terjejas). Server ini menyekat port 22 keluar, jadi alias menggunakan `ssh.github.com` port 443, sama seperti alias LMS sedia ada:
 
      ```bash
-     ssh-keygen -t ed25519 -f ~/.ssh/asuh_deploy -N "" -C "cpanel-asuh-digital" && printf '\nHost github-asuh\n  HostName github.com\n  User git\n  IdentityFile ~/.ssh/asuh_deploy\n  IdentitiesOnly yes\n' >> ~/.ssh/config && chmod 600 ~/.ssh/config && cat ~/.ssh/asuh_deploy.pub
+     ssh-keygen -t ed25519 -f ~/.ssh/asuh_deploy -N "" -C "cpanel-asuh-digital" && printf '\nHost github-asuh\n    HostName ssh.github.com\n    Port 443\n    User git\n    IdentityFile ~/.ssh/asuh_deploy\n    IdentitiesOnly yes\n' >> ~/.ssh/config && cat ~/.ssh/asuh_deploy.pub
      ```
 
   2. Salin baris yang bermula dengan `ssh-ed25519` (ini kunci **awam**, selamat dikongsi).
