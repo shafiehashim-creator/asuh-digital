@@ -9,3 +9,7 @@
 /.github export-ignore
 CHANGELOG.md export-ignore
 .styleci.yml export-ignore
+
+# Shell scripts run on the Linux server: always LF line endings.
+*.sh text eol=lf
+.cpanel.yml text eol=lf

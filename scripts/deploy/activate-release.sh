@@ -21,6 +21,7 @@ APP_DIR="${1:?app dir required}"
 RELEASE="${2:?release name required}"
 PHP="${3:-php}"
 DOCROOT="${4:-}"
+REPLACE_DOCROOT_FOLDER=0
 
 REL="$APP_DIR/releases/$RELEASE"
 SHARED="$APP_DIR/shared"
@@ -101,7 +102,9 @@ if [ -n "$DOCROOT" ]; then
             [ -z "$own_rules" ] || fail "$DOCROOT/.htaccess has rules that are not cPanel-generated. Review it by hand, then deploy again."
         fi
 
-        mv "$DOCROOT" "$DOCROOT.cpanel-original-$(date +%Y%m%d%H%M%S)"
+        # Moved aside only at switch time below, so a failed migration never
+        # leaves the subdomain without a document root.
+        REPLACE_DOCROOT_FOLDER=1
     elif [ -e "$DOCROOT" ]; then
         fail "$DOCROOT exists but is not a folder or symlink"
     fi
@@ -127,6 +130,9 @@ ln -sfn "$REL" "$APP_DIR/current.tmp"
 mv -Tf "$APP_DIR/current.tmp" "$APP_DIR/current"
 
 if [ -n "$DOCROOT" ]; then
+    if [ "${REPLACE_DOCROOT_FOLDER:-0}" = 1 ]; then
+        mv "$DOCROOT" "$DOCROOT.cpanel-original-$(date +%Y%m%d%H%M%S)"
+    fi
     ln -sfn "$APP_DIR/current/public" "$DOCROOT"
 fi
 

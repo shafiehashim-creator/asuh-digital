@@ -120,34 +120,65 @@ ssh -T git@github.com
   4. Uji: `ssh -T git@github-asuh` mesti memaparkan `Hi shafiehashim-creator/asuh-digital!`, dan `ssh -T git@github.com` masih memaparkan repo lama anda.
   5. Dalam langkah 8, guna Clone URL `git@github-asuh:shafiehashim-creator/asuh-digital.git`.
 
-### 8. Deploy pertama ☐
+### 8. Deploy pertama ✅ (2026-10-25)
 
-1. Beritahu Claude dalam chat. Claude akan meminta kelulusan anda untuk merge `develop` ke `main`. GitHub Actions kemudian menjalankan ujian dan raptai, membina release lengkap dan menyimpannya dalam cawangan **`deploy-build`** (beberapa minit).
-2. Selepas cawangan `deploy-build` wujud, di cPanel → **Git™ Version Control** → **Create**:
-   - *Clone a Repository*: **hidup**
-   - Clone URL: `git@github-asuh:shafiehashim-creator/asuh-digital.git` (atau `git@github.com:...` jika langkah 7 menunjukkan kunci akaun)
-   - Repository Path: `repositories/asuh-digital`
-   - Repository Name: `asuh-digital`
-   - Klik **Create**
-3. Klik **Manage** pada repo itu → tab **Basic Information** → *Checked-Out Branch*: pilih **`deploy-build`** → **Update**.
-4. Tab **Pull or Deploy** → **Deploy HEAD Commit**. Tunggu sehingga selesai, kemudian buka `https://asuh.galeriilmu.com.my`.
+Dibuat begini (cPanel tidak menerima alias `github-asuh` dalam borang *Clone*):
 
-Jika deploy gagal, mesej ralat dari skrip (bermula dengan `DEPLOY ERROR`) terpapar dalam log deploy cPanel. Tampal mesej itu kepada Claude. Tiada apa yang berubah pada laman jika deploy gagal.
+1. GitHub Actions membina release ke cawangan **`deploy-build`** selepas merge ke `main`.
+2. Klon dari Terminal cPanel, yang mengenali alias dalam `~/.ssh/config`:
 
-### 9. Deploy seterusnya
+   ```bash
+   git clone --branch deploy-build git@github-asuh:shafiehashim-creator/asuh-digital.git ~/repositories/asuh-digital
+   ```
 
-Setiap kali ada kemas kini yang anda luluskan untuk `main`:
+3. cPanel → **Git™ Version Control** → **Create** → **matikan** *Clone a Repository* → Repository Path `repositories/asuh-digital` → Repository Name `asuh-digital` → **Create**. cPanel mendaftarkan klon yang sudah wujud.
+4. **Manage** → **Pull or Deploy** → **Deploy HEAD Commit**.
 
-1. Tunggu GitHub Actions selesai (tanda ✅ di tab *Actions* repo).
-2. cPanel → **Git™ Version Control** → **Manage** → **Pull or Deploy** → **Update from Remote** → **Deploy HEAD Commit**.
+Jika deploy gagal, cari baris `DEPLOY ERROR` atau ralat lain dalam log terkini:
+
+```bash
+f=$(ls -t ~/.cpanel/logs/*deploy* | head -1); tail -n 40 "$f" | cut -c1-300
+```
+
+Deploy yang gagal tidak menukar laman yang sedang berjalan.
+
+### 9. Deploy seterusnya (automatik melalui cron)
+
+1. Claude membina perubahan, kemudian **anda sahkan dalam chat** sebelum Claude push ke `main`. Ini satu-satunya pintu kelulusan.
+2. GitHub Actions menguji dan membina release ke `deploy-build` (2 hingga 3 minit).
+3. Cron **auto-deploy** di server (langkah 10) mengesan release baharu dalam masa 5 minit dan men-deploynya. Tiada butang perlu ditekan.
+
+Semak sejarah deploy automatik:
+
+```bash
+tail -n 20 ~/asuh-app/deploy.log
+```
+
+Setiap deploy direkodkan sebagai `BERJAYA` atau `GAGAL`. Deploy yang gagal **tidak** dicuba semula secara automatik, dan laman kekal pada release sebelumnya. Tampal log itu kepada Claude.
+
+**Cara manual (sandaran):** jika cron dimatikan, tarik release di Terminal, kemudian klik **Deploy HEAD Commit** di cPanel → Git™ Version Control → Manage → Pull or Deploy. Butang *Update from Remote* cPanel tidak menggunakan alias SSH `github-asuh`, jadi gunakan arahan ini:
+
+```bash
+git -C ~/repositories/asuh-digital pull --ff-only && git -C ~/repositories/asuh-digital log --oneline -1
+```
 
 ### 10. Selepas deploy pertama ☐
 
-**Cron** (cPanel → **Cron Jobs** → *Once Per Minute*):
+**Dua cron** (cPanel → **Cron Jobs** → *Add New Cron Job*):
 
-```bash
-cd /home/galeriil78/asuh-app/current && /opt/cpanel/ea-php83/root/usr/bin/php artisan schedule:run >> /dev/null 2>&1
-```
+1. **Aplikasi** (e-mel, pelepasan slot). *Common Settings*: **Once Per Minute**:
+
+   ```bash
+   cd /home/galeriil78/asuh-app/current && /opt/cpanel/ea-php83/root/usr/bin/php artisan schedule:run >> /dev/null 2>&1
+   ```
+
+2. **Auto-deploy**. *Common Settings*: **Once Per Five Minutes**:
+
+   ```bash
+   /bin/bash /home/galeriil78/repositories/asuh-digital/scripts/deploy/auto-deploy.sh >> /home/galeriil78/asuh-app/deploy.log 2>&1
+   ```
+
+Pasang cron auto-deploy **selepas** release yang mengandungi `auto-deploy.sh` sudah di-deploy (fail itu mesti wujud dalam `~/repositories/asuh-digital/scripts/deploy/`).
 
 **Akaun Super Admin** (Terminal cPanel):
 
