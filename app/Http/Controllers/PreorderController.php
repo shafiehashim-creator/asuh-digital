@@ -72,6 +72,11 @@ class PreorderController extends Controller
 
         $order->load(['plan', 'preorder']);
 
+        // Keep the "checking payment" notice across the auto-refreshes.
+        if ($request->boolean('semak') && $order->status === OrderStatus::Pending) {
+            $request->session()->flash('payment_checking', true);
+        }
+
         return view('preorder.pay', [
             'order' => $order,
             'preorder' => $order->preorder,

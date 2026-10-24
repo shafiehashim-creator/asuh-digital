@@ -80,6 +80,9 @@ Gateway ialah **CHIP** (chip-in.asia), bukan BCL. Semua kaedah CHIP dibenarkan (
 - Setiap pesanan mencipta *purchase* CHIP dengan rujukan pesanan yang unik.
 - Pengaktifan Pas **hanya melalui webhook CHIP** yang tandatangannya disahkan, bukan melalui halaman redirect selepas bayaran.
 - Webhook mesti idempotent: rujukan yang sama tidak boleh mengaktifkan pas dua kali. Log setiap panggilan webhook.
+- Aliran CHIP (dibina 2026-10-24): callback `POST /webhooks/chip` disahkan dengan `X-Signature` (RSA-SHA256, kunci awam dari `GET /public_key/`), kemudian server **bertanya semula** `GET /purchases/{id}/` dan hanya mengaktifkan pas jika status `paid`, jumlah dan mata wang sepadan, dan `is_test` sepadan dengan `CHIP_TEST_MODE`. Semua pengaktifan melalui `App\Services\PaymentProcessor::markPaid()`.
+- CHIP menolak URL callback yang mempunyai nombor port, jadi callback hanya sampai di server sebenar (bukan `localhost:8000`).
+- Bayaran yang sampai **selepas tempahan luput tetap dihormati** (keputusan pengguna): pas diaktifkan walaupun kiraan slot terlebih sedikit. Admin boleh kenal pasti kes ini kerana `paid_at` lebih lewat daripada `reserved_until`.
 - **Pindahan bank:** pembeli muat naik resit, pesanan kekal `pending`, dan hanya `admin` boleh klik **Sahkan bayaran**. Rekod siapa yang mengesahkan dan bila. Butiran bank ialah tetapan admin.
 - Tiada caj berulang automatik. Bayaran sekali setahun.
 - Hantar resit melalui e-mel selepas status pesanan bertukar kepada `paid`. Maklumat syarikat pada resit (nama, SSM, alamat, SST) ialah tetapan admin.

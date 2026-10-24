@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    // CHIP Collect (https://docs.chip-in.asia). Test and live use the same
+    // host; the secret key decides the mode.
+    'chip' => [
+        'base_url' => env('CHIP_BASE_URL', 'https://gate.chip-in.asia/api/v1'),
+        'brand_id' => env('CHIP_BRAND_ID'),
+        'secret_key' => env('CHIP_API_KEY'),
+        'test_mode' => (bool) env('CHIP_TEST_MODE', true),
+        // Only for webhooks created in the CHIP portal; success callbacks are
+        // verified with the company key from GET /public_key/.
+        'webhook_public_key' => env('CHIP_WEBHOOK_PUBLIC_KEY'),
+    ],
+
 ];

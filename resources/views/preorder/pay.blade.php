@@ -29,6 +29,18 @@
             </h1>
         </div>
 
+        @error('payment')
+            <div role="alert" class="rounded-xl border-2 border-magenta bg-magenta/5 px-4 py-3 font-semibold text-magenta">{{ $message }}</div>
+        @enderror
+
+        @if (session('payment_checking') && ! $order->isPaid())
+            {{-- Reload until the signed CHIP callback has marked the order as paid. --}}
+            <meta http-equiv="refresh" content="5;url={{ route('preorder.pay', $order) }}?semak=1">
+            <div role="status" class="rounded-xl border-2 border-biru/30 bg-biru/5 px-4 py-3 font-semibold text-biru">
+                Kami sedang mengesahkan bayaran anda dengan CHIP. Halaman ini akan dikemas kini sendiri dalam beberapa saat.
+            </div>
+        @endif
+
         @unless ($user->hasVerifiedEmail())
             <div role="status" class="rounded-xl border-2 border-biru/30 bg-biru/5 px-4 py-3 text-sm">
                 Kami telah menghantar pautan pengesahan ke <strong>{{ $user->email }}</strong>. Sahkan e-mel anda untuk membuka halaman Akaun saya.
