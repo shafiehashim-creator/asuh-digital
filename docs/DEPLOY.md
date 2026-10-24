@@ -106,27 +106,26 @@ Repo `asuh-digital` adalah peribadi, jadi server perlu kunci untuk menariknya. S
 ssh -T git@github.com
 ```
 
-- Jika keluar `Hi shafiehashim-creator! You've successfully authenticated...`, kunci akaun anda sudah ada akses ke semua repo anda. **Langkah ini siap.**
-- Jika keluar `Permission denied` atau ralat lain, cipta kunci khas (deploy key) untuk repo ini:
+- Jika keluar `Hi shafiehashim-creator!` (tanpa nama repo), kunci akaun anda sudah ada akses ke semua repo anda. Guna Clone URL `git@github.com:...` dalam langkah 8. **Langkah ini siap.**
+- Jika keluar `Hi shafiehashim-creator/<repo-lain>!`, kunci itu ialah **deploy key untuk repo lain** (contohnya `galeri-ilmu-lms`) dan tidak boleh menarik `asuh-digital`. **Jangan ubah kunci itu**, kerana laman lain bergantung padanya. Cipta kunci khas dengan alias hos tersendiri:
 
-  1. Jana kunci di Terminal cPanel:
+  1. Jana kunci dan alias `github-asuh` (hanya digunakan oleh repo ASUH, sambungan `github.com` yang lain tidak terjejas):
 
      ```bash
-     ssh-keygen -t ed25519 -f ~/.ssh/asuh_deploy -N "" -C "cpanel-asuh-digital" && printf 'Host github.com\n  IdentityFile ~/.ssh/asuh_deploy\n  IdentitiesOnly yes\n' >> ~/.ssh/config && chmod 600 ~/.ssh/config && cat ~/.ssh/asuh_deploy.pub
+     ssh-keygen -t ed25519 -f ~/.ssh/asuh_deploy -N "" -C "cpanel-asuh-digital" && printf '\nHost github-asuh\n  HostName github.com\n  User git\n  IdentityFile ~/.ssh/asuh_deploy\n  IdentitiesOnly yes\n' >> ~/.ssh/config && chmod 600 ~/.ssh/config && cat ~/.ssh/asuh_deploy.pub
      ```
-
-     Jika anda sudah ada fail `~/.ssh/config` untuk laman lama, beritahu Claude dahulu sebelum menjalankan arahan ini.
 
   2. Salin baris yang bermula dengan `ssh-ed25519` (ini kunci **awam**, selamat dikongsi).
   3. GitHub → repo `asuh-digital` → **Settings** → **Deploy keys** → **Add deploy key**. Title: `cPanel asuh`. Tampal kunci. **Jangan** tanda *Allow write access*. Klik **Add key**.
-  4. Uji semula dengan `ssh -T git@github.com`.
+  4. Uji: `ssh -T git@github-asuh` mesti memaparkan `Hi shafiehashim-creator/asuh-digital!`, dan `ssh -T git@github.com` masih memaparkan repo lama anda.
+  5. Dalam langkah 8, guna Clone URL `git@github-asuh:shafiehashim-creator/asuh-digital.git`.
 
 ### 8. Deploy pertama ☐
 
 1. Beritahu Claude dalam chat. Claude akan meminta kelulusan anda untuk merge `develop` ke `main`. GitHub Actions kemudian menjalankan ujian dan raptai, membina release lengkap dan menyimpannya dalam cawangan **`deploy-build`** (beberapa minit).
 2. Selepas cawangan `deploy-build` wujud, di cPanel → **Git™ Version Control** → **Create**:
    - *Clone a Repository*: **hidup**
-   - Clone URL: `git@github.com:shafiehashim-creator/asuh-digital.git`
+   - Clone URL: `git@github-asuh:shafiehashim-creator/asuh-digital.git` (atau `git@github.com:...` jika langkah 7 menunjukkan kunci akaun)
    - Repository Path: `repositories/asuh-digital`
    - Repository Name: `asuh-digital`
    - Klik **Create**
