@@ -17,6 +17,8 @@ return [
         'preorder_plan_code' => 'pas_tahunan_early',
         'preorder_slot_limit' => 100,
         'preorder_reservation_minutes' => 30,
+        // Bank transfer buyers need time to transfer and upload a receipt.
+        'bank_transfer_reservation_hours' => 24,
         'pass_start_rule' => 'on_payment',
         'launch_date' => null,
 

@@ -59,6 +59,9 @@
                                 <span class="rounded-full px-3 py-1 text-sm font-bold {{ $statusClasses[$order->status->value] }}">
                                     {{ $order->status->getLabel() }}
                                 </span>
+                                @if ($order->status === OrderStatus::Pending)
+                                    <a href="{{ route('preorder.pay', $order) }}" class="pautan text-sm">Teruskan bayaran</a>
+                                @endif
                             </div>
                         </li>
                     @endforeach
