@@ -1,0 +1,97 @@
+{
+  "_baloo-2-600-normal-B4tNaogw.woff": {
+    "file": "assets/baloo-2-600-normal-B4tNaogw.woff",
+    "src": "_baloo-2-600-normal-B4tNaogw.woff"
+  },
+  "_baloo-2-600-normal-tIfxVoAe.woff2": {
+    "file": "assets/baloo-2-600-normal-tIfxVoAe.woff2",
+    "src": "_baloo-2-600-normal-tIfxVoAe.woff2"
+  },
+  "_baloo-2-700-normal-CqTg7A15.woff2": {
+    "file": "assets/baloo-2-700-normal-CqTg7A15.woff2",
+    "src": "_baloo-2-700-normal-CqTg7A15.woff2"
+  },
+  "_baloo-2-700-normal-Ld3Zm3l2.woff": {
+    "file": "assets/baloo-2-700-normal-Ld3Zm3l2.woff",
+    "src": "_baloo-2-700-normal-Ld3Zm3l2.woff"
+  },
+  "_baloo-2-800-normal-B8BXfZF7.woff": {
+    "file": "assets/baloo-2-800-normal-B8BXfZF7.woff",
+    "src": "_baloo-2-800-normal-B8BXfZF7.woff"
+  },
+  "_baloo-2-800-normal-BbF3Etk1.woff2": {
+    "file": "assets/baloo-2-800-normal-BbF3Etk1.woff2",
+    "src": "_baloo-2-800-normal-BbF3Etk1.woff2"
+  },
+  "_fonts-CrUEawM6.css": {
+    "file": "assets/fonts-CrUEawM6.css",
+    "src": "_fonts-CrUEawM6.css"
+  },
+  "_nunito-400-normal-DKg4f3fz.woff": {
+    "file": "assets/nunito-400-normal-DKg4f3fz.woff",
+    "src": "_nunito-400-normal-DKg4f3fz.woff"
+  },
+  "_nunito-400-normal-r8SDr6Up.woff2": {
+    "file": "assets/nunito-400-normal-r8SDr6Up.woff2",
+    "src": "_nunito-400-normal-r8SDr6Up.woff2"
+  },
+  "_nunito-600-normal-Br8yIETf.woff2": {
+    "file": "assets/nunito-600-normal-Br8yIETf.woff2",
+    "src": "_nunito-600-normal-Br8yIETf.woff2"
+  },
+  "_nunito-600-normal-Cd0eNu1l.woff": {
+    "file": "assets/nunito-600-normal-Cd0eNu1l.woff",
+    "src": "_nunito-600-normal-Cd0eNu1l.woff"
+  },
+  "_nunito-700-normal-Dort48En.woff2": {
+    "file": "assets/nunito-700-normal-Dort48En.woff2",
+    "src": "_nunito-700-normal-Dort48En.woff2"
+  },
+  "_nunito-700-normal-OcDqTBcA.woff": {
+    "file": "assets/nunito-700-normal-OcDqTBcA.woff",
+    "src": "_nunito-700-normal-OcDqTBcA.woff"
+  },
+  "_nunito-800-normal-D-J0wlBY.woff": {
+    "file": "assets/nunito-800-normal-D-J0wlBY.woff",
+    "src": "_nunito-800-normal-D-J0wlBY.woff"
+  },
+  "_nunito-800-normal-Dz8SOQK_.woff2": {
+    "file": "assets/nunito-800-normal-Dz8SOQK_.woff2",
+    "src": "_nunito-800-normal-Dz8SOQK_.woff2"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-NyW7LeiS.css",
+    "name": "app",
+    "names": [
+      "app.css"
+    ],
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/images/brand/anas.webp": {
+    "file": "assets/anas-DXZCqWK7.webp",
+    "src": "resources/images/brand/anas.webp"
+  },
+  "resources/images/brand/anis.webp": {
+    "file": "assets/anis-D0bIg8Ro.webp",
+    "src": "resources/images/brand/anis.webp"
+  },
+  "resources/images/brand/logo-asuh.webp": {
+    "file": "assets/logo-asuh-Cmduy8HQ.webp",
+    "src": "resources/images/brand/logo-asuh.webp"
+  },
+  "resources/images/brand/syaitan-gemuk.webp": {
+    "file": "assets/syaitan-gemuk-DymHjgYd.webp",
+    "src": "resources/images/brand/syaitan-gemuk.webp"
+  },
+  "resources/images/brand/syaitan-kurus.webp": {
+    "file": "assets/syaitan-kurus-CE3pTzYZ.webp",
+    "src": "resources/images/brand/syaitan-kurus.webp"
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-BvRk9kiK.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  }
+}

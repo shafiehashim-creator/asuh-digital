@@ -1,0 +1,7 @@
+---
+# cPanel > Git Version Control > Manage > Pull or Deploy > "Deploy HEAD Commit".
+# The cPanel clone tracks the deploy-build branch (built by GitHub Actions).
+# See docs/DEPLOY.md and scripts/deploy/cpanel-deploy.sh.
+deployment:
+  tasks:
+    - /bin/bash scripts/deploy/cpanel-deploy.sh

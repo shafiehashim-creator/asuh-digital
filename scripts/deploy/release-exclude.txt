@@ -1,0 +1,16 @@
+# Files NOT included in a release (used by package-release.sh via rsync --exclude-from).
+# Leading "/" anchors a pattern to the project root. Do not use "!" here: in
+# rsync it clears the whole list instead of re-including a file.
+/.git/
+/.github/
+/.claude/
+/node_modules/
+/tests/
+/storage/
+/.env
+/.env.*
+/database/*.sqlite*
+/public/hot
+/phpunit.xml
+# Source art; the site serves the web-sized WebP files from public/build.
+/resources/images/brand/*.png

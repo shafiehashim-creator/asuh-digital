@@ -1,0 +1,43 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Baloo 2', 'Nunito', ui-sans-serif, system-ui, sans-serif;
+
+    /* ASUH brand tokens (see CLAUDE.md) */
+    --color-plum: #3a1f6e;
+    --color-magenta: #c4107a;
+    --color-kuning: #ffde37;
+    --color-oren: #f79521;
+    --color-biru: #1559d6;
+    --color-ink: #231f20;
+    --color-latar: #f7f5ff;
+    --color-lavender: #e9e4fb;
+}
+
+@layer components {
+    /* Sticker-style primary button: yellow pill with an ink border and drop. */
+    .btn-utama {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full border-2 border-ink bg-kuning px-6 py-2.5 font-display text-base font-bold text-ink shadow-[0_3px_0_var(--color-ink)] transition hover:-translate-y-px hover:shadow-[0_4px_0_var(--color-ink)] active:translate-y-0.5 active:shadow-[0_1px_0_var(--color-ink)] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-biru disabled:cursor-not-allowed disabled:opacity-60;
+    }
+
+    .btn-gelap {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full border-2 border-ink bg-plum px-6 py-2.5 font-display text-base font-bold text-white shadow-[0_3px_0_var(--color-ink)] transition hover:-translate-y-px active:translate-y-0.5 active:shadow-[0_1px_0_var(--color-ink)] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-biru;
+    }
+
+    .input {
+        @apply block min-h-11 w-full rounded-xl border-2 border-ink/20 bg-white px-4 py-2.5 text-ink placeholder:text-ink/40 focus:border-biru focus:ring-0 focus:outline-none;
+    }
+
+    .label {
+        @apply mb-1.5 block text-sm font-bold text-ink;
+    }
+
+    .pautan {
+        @apply font-bold text-biru underline underline-offset-2 hover:text-plum;
+    }
+}
