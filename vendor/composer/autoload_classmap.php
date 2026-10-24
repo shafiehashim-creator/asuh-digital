@@ -20,6 +20,7 @@ return array(
     'App\\Actions\\Fortify\\UpdateUserProfileInformation' => $baseDir . '/app/Actions/Fortify/UpdateUserProfileInformation.php',
     'App\\Console\\Commands\\CreateAdmin' => $baseDir . '/app/Console/Commands/CreateAdmin.php',
     'App\\Console\\Commands\\ExpireReservations' => $baseDir . '/app/Console/Commands/ExpireReservations.php',
+    'App\\Console\\Commands\\PurgeTestData' => $baseDir . '/app/Console/Commands/PurgeTestData.php',
     'App\\Enums\\AgeGroup' => $baseDir . '/app/Enums/AgeGroup.php',
     'App\\Enums\\InstitutionType' => $baseDir . '/app/Enums/InstitutionType.php',
     'App\\Enums\\OrderStatus' => $baseDir . '/app/Enums/OrderStatus.php',

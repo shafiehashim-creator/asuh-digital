@@ -810,6 +810,7 @@ class ComposerStaticInitdd831e7fdde172bdfa9c4bc1ead60323
         'App\\Actions\\Fortify\\UpdateUserProfileInformation' => __DIR__ . '/../..' . '/app/Actions/Fortify/UpdateUserProfileInformation.php',
         'App\\Console\\Commands\\CreateAdmin' => __DIR__ . '/../..' . '/app/Console/Commands/CreateAdmin.php',
         'App\\Console\\Commands\\ExpireReservations' => __DIR__ . '/../..' . '/app/Console/Commands/ExpireReservations.php',
+        'App\\Console\\Commands\\PurgeTestData' => __DIR__ . '/../..' . '/app/Console/Commands/PurgeTestData.php',
         'App\\Enums\\AgeGroup' => __DIR__ . '/../..' . '/app/Enums/AgeGroup.php',
         'App\\Enums\\InstitutionType' => __DIR__ . '/../..' . '/app/Enums/InstitutionType.php',
         'App\\Enums\\OrderStatus' => __DIR__ . '/../..' . '/app/Enums/OrderStatus.php',
