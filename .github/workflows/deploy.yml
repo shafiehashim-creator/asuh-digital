@@ -71,6 +71,11 @@ jobs:
           touch "$FAKE_HOME/asuh.sqlite"
           echo "DEPLOY_PHP=$(command -v php)" > "$APP/shared/deploy.conf"
 
+          # The docroot as cPanel leaves it: cgi-bin, .well-known and the
+          # MultiPHP handler that selects PHP 8.3 (copied from the real server).
+          mkdir -p "$DOCROOT/cgi-bin" "$DOCROOT/.well-known/acme-challenge"
+          printf '\n\n# php -- BEGIN cPanel-generated handler, do not edit\n# Set the "ea-php83" package as the default "PHP" programming language.\n<IfModule mime_module>\n  AddHandler application/x-httpd-ea-php83 .php .php8 .phtml\n</IfModule>\n# php -- END cPanel-generated handler, do not edit\n' > "$DOCROOT/.htaccess"
+
           # What the deploy-build branch (and so the cPanel clone) will contain.
           bash scripts/deploy/package-release.sh /tmp/release.tgz
           tar -xzf /tmp/release.tgz -C "$CLONE"
@@ -92,6 +97,23 @@ jobs:
           grep -q '^APP_KEY=base64:' "$APP/shared/.env"
           test "$(stat -c %a "$APP/shared/.env")" = "600"
           ls -d "$DOCROOT".cpanel-original-*
+
+          # The PHP 8.3 handler must survive both deploys, exactly once, at the top.
+          for rel in "$APP"/releases/*; do
+            test "$(grep -c 'application/x-httpd-ea-php83' "$rel/public/.htaccess")" -eq 1
+          done
+          grep -q 'RewriteEngine On' "$DOCROOT/.htaccess"
+          head -n 1 "$DOCROOT/.htaccess" | grep -q 'BEGIN cPanel-generated handler'
+
+          # A docroot .htaccess with hand-written rules must stop the deploy.
+          ODD_HOME=/tmp/oddhome
+          mkdir -p "$ODD_HOME/asuh-app" "$ODD_HOME/public_html/asuh.galeriilmu.com.my"
+          cp -r "$APP/shared" "$ODD_HOME/asuh-app/shared"
+          echo "Redirect 301 / https://example.com/" > "$ODD_HOME/public_html/asuh.galeriilmu.com.my/.htaccess"
+          if (cd "$CLONE" && HOME="$ODD_HOME" bash -c "$TASK"); then
+            echo "Deploy should have refused a docroot with custom rules"; exit 1
+          fi
+          test -f "$ODD_HOME/public_html/asuh.galeriilmu.com.my/.htaccess"
 
           first="$(ls -d "$APP"/releases/* | sort | head -n 1)"
           HOME="$FAKE_HOME" bash "$APP/current/scripts/deploy/rollback.sh" "$APP" "$(command -v php)"
