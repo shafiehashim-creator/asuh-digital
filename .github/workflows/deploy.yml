@@ -132,6 +132,35 @@ jobs:
           first="$(ls -d "$APP"/releases/* | sort | head -n 1)"
           HOME="$FAKE_HOME" bash "$APP/current/scripts/deploy/rollback.sh" "$APP" "$(command -v php)"
           test "$(readlink -f "$APP/current")" = "$first"
+
+          # Cron auto-deploy: deploys a new deploy-build commit exactly once.
+          AUTO_HOME=/tmp/autohome
+          AUTO_REPO="$AUTO_HOME/repositories/asuh-digital"
+          WORK=/tmp/build-work
+          mkdir -p "$AUTO_HOME/asuh-app" "$AUTO_HOME/public_html/asuh.galeriilmu.com.my" "$WORK"
+          cp -r "$APP/shared" "$AUTO_HOME/asuh-app/shared"
+          git init --quiet --bare /tmp/remote.git
+          tar -xzf /tmp/release.tgz -C "$WORK"
+          git -C "$WORK" init --quiet -b deploy-build
+          git -C "$WORK" add --all --force
+          git -C "$WORK" -c user.name=ci -c user.email=ci@example.com commit --quiet -m r1
+          git -C "$WORK" push --quiet /tmp/remote.git deploy-build
+          git clone --quiet --branch deploy-build /tmp/remote.git "$AUTO_REPO"
+
+          HOME="$AUTO_HOME" bash "$AUTO_REPO/scripts/deploy/auto-deploy.sh"
+          test ! -e "$AUTO_HOME/asuh-app/current"   # nothing new, nothing deployed
+
+          echo "ujian" > "$WORK/public/ci-marker.txt"
+          git -C "$WORK" add --all --force
+          git -C "$WORK" -c user.name=ci -c user.email=ci@example.com commit --quiet -m r2
+          git -C "$WORK" push --quiet /tmp/remote.git deploy-build
+
+          HOME="$AUTO_HOME" bash "$AUTO_REPO/scripts/deploy/auto-deploy.sh" | tee /tmp/auto.log
+          grep -q 'BERJAYA' /tmp/auto.log
+          test -f "$AUTO_HOME/asuh-app/current/public/ci-marker.txt"
+          test -z "$(HOME="$AUTO_HOME" bash "$AUTO_REPO/scripts/deploy/auto-deploy.sh")"   # quiet when up to date
+          test ! -e "$AUTO_HOME/asuh-app/.auto-deploy.lock"
+
           echo "cPanel deploy rehearsal passed."
 
   build:
