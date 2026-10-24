@@ -32,7 +32,10 @@ main() {
             exit 0
         fi
     fi
-    trap 'rmdir "$lock" 2> /dev/null || true' EXIT
+    # Expand $lock now: the EXIT trap runs after main() returns, when its
+    # local variables no longer exist (set -u would abort the cleanup).
+    # shellcheck disable=SC2064
+    trap "rmdir '$lock' 2> /dev/null || true" EXIT
 
     git -C "$repo" fetch --quiet origin "$branch"
 
