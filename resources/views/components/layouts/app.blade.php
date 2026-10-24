@@ -17,6 +17,9 @@
                 </a>
 
                 <nav class="flex items-center gap-3 text-sm font-bold">
+                    @if (App\Http\Middleware\EnsureCatalogOpen::isOpenFor(auth()->user()))
+                        <a href="{{ route('catalog.index') }}" class="inline-flex min-h-11 items-center rounded-full px-3 hover:bg-white/10">Katalog</a>
+                    @endif
                     @auth
                         <a href="{{ route('account') }}" class="inline-flex min-h-11 items-center rounded-full px-3 hover:bg-white/10">Akaun saya</a>
                         <form method="POST" action="{{ route('logout') }}">

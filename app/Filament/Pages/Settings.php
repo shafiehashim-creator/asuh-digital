@@ -15,6 +15,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
@@ -54,6 +55,7 @@ class Settings extends Page
         'bank_name', 'bank_account_name', 'bank_account_number',
         'contact_email', 'company_name', 'company_ssm_no', 'company_address', 'company_sst_no',
         'admin_notification_emails',
+        'catalog_open',
     ];
 
     /** @var array<string, mixed> */
@@ -83,6 +85,12 @@ class Settings extends Page
     {
         return $schema->components([
             $this->chipStatus(),
+
+            Section::make('Katalog dan pembaca e-book (Fasa B)')
+                ->schema([
+                    Toggle::make('catalog_open')->label('Buka katalog kepada orang ramai')
+                        ->helperText('Semasa ditutup, /buku dan pembaca memberi 404 kepada pelawat; staf masih boleh pratonton. Buka hanya apabila buku sudah diterbitkan dan diuji.'),
+                ]),
 
             Section::make('Harga dan slot pre-order')
                 ->columns(2)
