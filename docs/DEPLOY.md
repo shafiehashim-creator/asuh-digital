@@ -120,26 +120,40 @@ ssh -T git@github.com
   4. Uji: `ssh -T git@github-asuh` mesti memaparkan `Hi shafiehashim-creator/asuh-digital!`, dan `ssh -T git@github.com` masih memaparkan repo lama anda.
   5. Dalam langkah 8, guna Clone URL `git@github-asuh:shafiehashim-creator/asuh-digital.git`.
 
-### 8. Deploy pertama ☐
+### 8. Deploy pertama ✅ (2026-10-25)
 
-1. Beritahu Claude dalam chat. Claude akan meminta kelulusan anda untuk merge `develop` ke `main`. GitHub Actions kemudian menjalankan ujian dan raptai, membina release lengkap dan menyimpannya dalam cawangan **`deploy-build`** (beberapa minit).
-2. Selepas cawangan `deploy-build` wujud, di cPanel → **Git™ Version Control** → **Create**:
-   - *Clone a Repository*: **hidup**
-   - Clone URL: `git@github-asuh:shafiehashim-creator/asuh-digital.git` (atau `git@github.com:...` jika langkah 7 menunjukkan kunci akaun)
-   - Repository Path: `repositories/asuh-digital`
-   - Repository Name: `asuh-digital`
-   - Klik **Create**
-3. Klik **Manage** pada repo itu → tab **Basic Information** → *Checked-Out Branch*: pilih **`deploy-build`** → **Update**.
-4. Tab **Pull or Deploy** → **Deploy HEAD Commit**. Tunggu sehingga selesai, kemudian buka `https://asuh.galeriilmu.com.my`.
+Dibuat begini (cPanel tidak menerima alias `github-asuh` dalam borang *Clone*):
 
-Jika deploy gagal, mesej ralat dari skrip (bermula dengan `DEPLOY ERROR`) terpapar dalam log deploy cPanel. Tampal mesej itu kepada Claude. Tiada apa yang berubah pada laman jika deploy gagal.
+1. GitHub Actions membina release ke cawangan **`deploy-build`** selepas merge ke `main`.
+2. Klon dari Terminal cPanel, yang mengenali alias dalam `~/.ssh/config`:
+
+   ```bash
+   git clone --branch deploy-build git@github-asuh:shafiehashim-creator/asuh-digital.git ~/repositories/asuh-digital
+   ```
+
+3. cPanel → **Git™ Version Control** → **Create** → **matikan** *Clone a Repository* → Repository Path `repositories/asuh-digital` → Repository Name `asuh-digital` → **Create**. cPanel mendaftarkan klon yang sudah wujud.
+4. **Manage** → **Pull or Deploy** → **Deploy HEAD Commit**.
+
+Jika deploy gagal, cari baris `DEPLOY ERROR` atau ralat lain dalam log terkini:
+
+```bash
+f=$(ls -t ~/.cpanel/logs/*deploy* | head -1); tail -n 40 "$f" | cut -c1-300
+```
+
+Deploy yang gagal tidak menukar laman yang sedang berjalan.
 
 ### 9. Deploy seterusnya
 
-Setiap kali ada kemas kini yang anda luluskan untuk `main`:
+Butang *Update from Remote* di cPanel tidak menggunakan alias SSH `github-asuh`, jadi tarik release baharu dari Terminal:
 
 1. Tunggu GitHub Actions selesai (tanda ✅ di tab *Actions* repo).
-2. cPanel → **Git™ Version Control** → **Manage** → **Pull or Deploy** → **Update from Remote** → **Deploy HEAD Commit**.
+2. Di Terminal cPanel:
+
+   ```bash
+   git -C ~/repositories/asuh-digital pull --ff-only && git -C ~/repositories/asuh-digital log --oneline -1
+   ```
+
+3. Muat semula cPanel → **Git™ Version Control** → **Manage** → **Pull or Deploy**. Pastikan *HEAD Commit* ialah release baharu, kemudian klik **Deploy HEAD Commit**.
 
 ### 10. Selepas deploy pertama ☐
 

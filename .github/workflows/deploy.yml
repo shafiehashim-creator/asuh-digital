@@ -115,6 +115,20 @@ jobs:
           fi
           test -f "$ODD_HOME/public_html/asuh.galeriilmu.com.my/.htaccess"
 
+          # A failed migration (wrong DB password) must leave the subdomain's
+          # folder in place, not a missing document root.
+          BAD_HOME=/tmp/badhome
+          BAD_DOCROOT="$BAD_HOME/public_html/asuh.galeriilmu.com.my"
+          mkdir -p "$BAD_HOME/asuh-app" "$BAD_DOCROOT/cgi-bin"
+          cp -r "$APP/shared" "$BAD_HOME/asuh-app/shared"
+          sed -i -e 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' -e 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' \
+                 -e 's/^DB_PORT=.*/DB_PORT=1/' "$BAD_HOME/asuh-app/shared/.env"
+          if (cd "$CLONE" && HOME="$BAD_HOME" bash -c "$TASK"); then
+            echo "Deploy should have failed without a database"; exit 1
+          fi
+          test -d "$BAD_DOCROOT" && test ! -L "$BAD_DOCROOT"
+          test ! -e "$BAD_HOME/asuh-app/current"
+
           first="$(ls -d "$APP"/releases/* | sort | head -n 1)"
           HOME="$FAKE_HOME" bash "$APP/current/scripts/deploy/rollback.sh" "$APP" "$(command -v php)"
           test "$(readlink -f "$APP/current")" = "$first"
