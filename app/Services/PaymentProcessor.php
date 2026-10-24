@@ -72,6 +72,35 @@ class PaymentProcessor
     }
 
     /**
+     * Give a start and end date to paid passes that are still waiting
+     * (starts_at null), e.g. after the admin sets the launch date or switches
+     * the rule back to "on payment". Returns how many passes were scheduled.
+     */
+    public function scheduleWaitingPasses(): int
+    {
+        $rule = PassStartRule::tryFrom(Setting::get('pass_start_rule')) ?? PassStartRule::OnPayment;
+        $scheduled = 0;
+
+        Pass::query()->whereNull('starts_at')->with(['plan', 'order'])->each(function (Pass $pass) use ($rule, &$scheduled) {
+            $months = $pass->plan->duration_months ?? 12;
+
+            if ($rule === PassStartRule::OnPayment) {
+                $start = $pass->order->paid_at ?? now();
+                $period = [$start, $start->copy()->addMonthsNoOverflow($months)];
+            } else {
+                $period = $this->passPeriod($months);
+            }
+
+            if ($period[0]) {
+                $pass->update(['starts_at' => $period[0], 'ends_at' => $period[1]]);
+                $scheduled++;
+            }
+        });
+
+        return $scheduled;
+    }
+
+    /**
      * @return array{0: ?Carbon, 1: ?Carbon}
      */
     public function passPeriod(int $months): array
