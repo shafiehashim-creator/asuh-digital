@@ -98,7 +98,7 @@ chmod 600 ~/asuh-app/shared/.env
 
 > Jangan tampal kata laluan atau kunci ini dalam chat atau dalam repo.
 
-### 7. Akses server ke repo GitHub ☐
+### 7. Akses server ke repo GitHub ✅
 
 Repo `asuh-digital` adalah peribadi, jadi server perlu kunci untuk menariknya. Semak dulu sama ada kunci yang anda guna untuk laman lama sudah boleh. Di Terminal cPanel:
 
