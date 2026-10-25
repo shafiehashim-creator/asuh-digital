@@ -16,7 +16,7 @@ it('shows an empty account with a call to get the pass', function () {
         ->get('/akaun')
         ->assertOk()
         ->assertSee('Assalamualaikum, Aminah')
-        ->assertSee('Anda belum mempunyai Pas Tahunan yang aktif.')
+        ->assertSee('Anda belum mempunyai Langganan Tahunan yang aktif.')
         ->assertSee('Tiada pesanan lagi.');
 });
 

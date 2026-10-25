@@ -93,8 +93,8 @@ it('sends every other page back to the shelf', function (string $method, string 
 })->with([
     ['GET', '/akaun'],
     ['GET', '/buku'],
-    ['GET', '/pas'],
-    ['GET', '/beli/pas'],
+    ['GET', '/langganan'],
+    ['GET', '/beli/langganan'],
     ['GET', '/'],
     ['POST', '/logout'],
 ]);

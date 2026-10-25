@@ -94,7 +94,7 @@ class Settings extends Page
                     Toggle::make('catalog_open')->label('Buka katalog kepada orang ramai')
                         ->helperText('Semasa ditutup, /buku dan pembaca memberi 404 kepada pelawat; staf masih boleh pratonton. Buka hanya apabila buku sudah diterbitkan dan diuji.'),
                     TextInput::make('preview_pages')->label('Halaman pratonton percuma')
-                        ->helperText('Bilangan halaman awal yang boleh dibaca sesiapa sahaja tanpa Pas. Hanya untuk buku yang ada versi pantas. 0 untuk menutup pratonton.')
+                        ->helperText('Bilangan halaman awal yang boleh dibaca sesiapa sahaja tanpa langganan. Hanya untuk buku yang ada versi pantas. 0 untuk menutup pratonton.')
                         ->integer()->minValue(0)->maxValue(20)->required(),
                 ]),
 
@@ -121,14 +121,14 @@ class Settings extends Page
                         ->integer()->minValue(1)->maxValue(168)->required(),
                 ]),
 
-            Section::make('Tarikh mula Pas Tahunan')
+            Section::make('Tarikh mula Langganan Tahunan')
                 ->columns(2)
                 ->schema([
-                    Select::make('pass_start_rule')->label('Pas bermula')
+                    Select::make('pass_start_rule')->label('Langganan bermula')
                         ->options(PassStartRule::class)->native(false)->required()->live(),
                     DatePicker::make('launch_date')->label('Tarikh launch platform')
                         ->native(false)->displayFormat('j M Y')
-                        ->helperText('Pas yang sedang menunggu akan dijadualkan sebaik tarikh ini disimpan.')
+                        ->helperText('Langganan yang sedang menunggu akan dijadualkan sebaik tarikh ini disimpan.')
                         ->visible(fn (Get $get) => $this->ruleIs($get('pass_start_rule'), PassStartRule::OnLaunch)),
                 ]),
 
@@ -212,7 +212,7 @@ class Settings extends Page
 
         Notification::make()
             ->title('Tetapan disimpan.')
-            ->body($scheduled ? "{$scheduled} Pas Tahunan yang menunggu telah dijadualkan." : null)
+            ->body($scheduled ? "{$scheduled} Langganan Tahunan yang menunggu telah dijadualkan." : null)
             ->success()
             ->send();
     }

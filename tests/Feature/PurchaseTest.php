@@ -57,7 +57,7 @@ it('sends buyers to the early bird pre-order while slots remain', function () {
 it('sells the regular pass at full price once the early bird is sold out', function () {
     sellOutEarlyBird();
 
-    $this->get(route('purchase.pass'))->assertOk()->assertSee('Beli Pas Tahunan')->assertSee('RM99');
+    $this->get(route('purchase.pass'))->assertOk()->assertSee('Beli Langganan Tahunan')->assertSee('RM99');
 
     $this->post(route('purchase.pass.store'), guestBuyer())->assertRedirect();
 
@@ -108,7 +108,7 @@ it('starts a renewed pass when the current one ends', function () {
         'starts_at' => now()->subMonths(11), 'ends_at' => now()->addMonth(),
     ]);
 
-    $this->actingAs($user)->get(route('purchase.pass'))->assertSee('Pas baharu bermula sebaik Pas semasa tamat');
+    $this->actingAs($user)->get(route('purchase.pass'))->assertSee('Langganan baharu bermula sebaik langganan semasa tamat');
     $this->actingAs($user)->post(route('purchase.pass.store'), ['payment_method' => 'chip']);
 
     $renewal = $user->orders()->latest('id')->first();
@@ -125,7 +125,7 @@ it('shows a regular pass order without any slot wording on the pay page', functi
 
     $this->get(route('preorder.pay', $order))
         ->assertOk()
-        ->assertSee('Pas Tahunan')
+        ->assertSee('Langganan Tahunan')
         ->assertDontSee('Slot anda ditempah')
         ->assertSee('muat naik resit');
 });

@@ -47,7 +47,7 @@ class Purchases
      */
     public function buyPass(?User $user, array $input): Order
     {
-        $plan = $this->regularPlan() ?? throw new InvalidArgumentException('Pas Tahunan tidak dijual buat masa ini.');
+        $plan = $this->regularPlan() ?? throw new InvalidArgumentException('Langganan Tahunan tidak dijual buat masa ini.');
 
         return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen);
     }

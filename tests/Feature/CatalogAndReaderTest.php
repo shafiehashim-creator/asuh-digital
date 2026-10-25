@@ -122,7 +122,7 @@ it('sends readers without a pass back to the book page', function () {
         ->get(route('reader.show', $book))
         ->assertRedirect(route('catalog.show', $book));
 
-    $this->get(route('catalog.show', $book))->assertSee('perlukan Pas Tahunan');
+    $this->get(route('catalog.show', $book))->assertSee('perlukan Langganan Tahunan');
 });
 
 it('opens the reader with a watermark and a signed file link for pass holders', function () {
@@ -279,10 +279,10 @@ it('pitches the yearly pass under recommendations only to readers without one', 
     Book::factory()->published()->create(['title' => 'Buku Seterusnya', 'single_price_sen' => 990]);
 
     $this->get(route('catalog.show', $book))
-        ->assertSee('Semua buku ini termasuk dalam Pas Tahunan')
+        ->assertSee('Semua buku ini termasuk dalam Langganan Tahunan')
         ->assertSee('RM9.90');
 
     $this->actingAs(readerWithPass())->get(route('catalog.show', $book))
-        ->assertDontSee('Semua buku ini termasuk dalam Pas Tahunan')
+        ->assertDontSee('Semua buku ini termasuk dalam Langganan Tahunan')
         ->assertSee('✓ Boleh dibaca');
 });

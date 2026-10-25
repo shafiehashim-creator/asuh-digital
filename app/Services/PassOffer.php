@@ -58,7 +58,7 @@ class PassOffer
 
     public function ctaLabel(): string
     {
-        return $this->earlyBird() ? 'Tempah slot saya' : 'Beli Pas Tahunan';
+        return $this->earlyBird() ? 'Tempah slot saya' : 'Beli Langganan Tahunan';
     }
 
     public function slotLimit(): int

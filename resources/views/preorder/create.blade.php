@@ -9,9 +9,9 @@
     $cardClass = 'rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)] sm:p-8';
 @endphp
 
-<x-layouts.app title="Tempah slot Pas Tahunan">
+<x-layouts.app title="Tempah slot Langganan Tahunan">
     <div class="mx-auto max-w-2xl px-4 py-10">
-        <h1 class="font-display text-3xl font-extrabold text-magenta sm:text-4xl">Tempah slot Pas Tahunan</h1>
+        <h1 class="font-display text-3xl font-extrabold text-magenta sm:text-4xl">Tempah slot Langganan Tahunan</h1>
 
         @if ($plan)
             <div class="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border-2 border-ink bg-kuning px-5 py-4">
@@ -28,7 +28,7 @@
         @if ($soldOut || ! $plan)
             <div class="{{ $cardClass }} mt-8">
                 <p class="font-bold">Maaf, semua slot early bird telah ditempah.</p>
-                <p class="mt-2 text-ink/80">Terima kasih atas sokongan anda. Pas Tahunan akan dijual pada harga biasa apabila platform dilancarkan.</p>
+                <p class="mt-2 text-ink/80">Terima kasih atas sokongan anda. Langganan Tahunan akan dijual pada harga biasa apabila platform dilancarkan.</p>
                 <a href="{{ route('home') }}" class="btn-gelap mt-4">Kembali ke laman utama</a>
             </div>
         @else
@@ -99,7 +99,7 @@
 
                     @foreach ([
                         [PaymentMethod::Chip, "Bayar dalam talian sekarang. Slot ditempah selama {$reservationMinutes} minit."],
-                        [PaymentMethod::BankTransfer, "Pindahkan ke akaun bank kami dan muat naik resit dalam masa {$bankTransferHours} jam. Pas diaktifkan selepas kami sahkan bayaran."],
+                        [PaymentMethod::BankTransfer, "Pindahkan ke akaun bank kami dan muat naik resit dalam masa {$bankTransferHours} jam. Langganan diaktifkan selepas kami sahkan bayaran."],
                     ] as [$method, $note])
                         <label class="flex cursor-pointer gap-3 rounded-xl border-2 border-ink/20 p-4 has-checked:border-biru has-checked:bg-biru/5">
                             <input type="radio" name="payment_method" value="{{ $method->value }}" @checked(old('payment_method', PaymentMethod::Chip->value) === $method->value) class="mt-1 size-5 shrink-0 text-biru" required>

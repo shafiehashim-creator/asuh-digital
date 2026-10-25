@@ -15,9 +15,9 @@ Bayaran anda telah diterima. Ini resit untuk rekod anda.
 </x-mail::table>
 
 @if ($pass?->starts_at)
-Pas Tahunan anda **aktif dari {{ $pass->starts_at->translatedFormat('j F Y') }} hingga {{ $pass->ends_at->translatedFormat('j F Y') }}**.
+Langganan Tahunan anda **aktif dari {{ $pass->starts_at->translatedFormat('j F Y') }} hingga {{ $pass->ends_at->translatedFormat('j F Y') }}**.
 @elseif ($pass)
-Pas Tahunan anda akan **bermula pada tarikh platform ASUH Digital dilancarkan**. Kami akan maklumkan tarikhnya melalui e-mel.
+Langganan Tahunan anda akan **bermula pada tarikh platform ASUH Digital dilancarkan**. Kami akan maklumkan tarikhnya melalui e-mel.
 @endif
 
 Bayaran ini dibuat sekali sahaja. Tiada caj automatik akan dikenakan.

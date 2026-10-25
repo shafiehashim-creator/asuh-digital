@@ -222,7 +222,7 @@ it('shows the dashboard widgets to the admin', function () {
     $this->actingAs($this->admin);
 
     Livewire::test(App\Filament\Widgets\SalesOverview::class)->assertSee('Pre-order dibayar')->assertSee('0 / 100');
-    Livewire::test(App\Filament\Widgets\PassesAndPilotsOverview::class)->assertSee('Pas Tahunan aktif');
+    Livewire::test(App\Filament\Widgets\PassesAndPilotsOverview::class)->assertSee('Langganan Tahunan aktif');
 });
 
 it('hides financial widgets from editors', function () {

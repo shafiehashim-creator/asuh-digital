@@ -20,7 +20,7 @@ class OrderFactory extends Factory
             'user_id' => User::factory(),
             'plan_id' => fn () => Plan::query()->firstOrCreate(
                 ['code' => Plan::PAS_TAHUNAN_EARLY],
-                ['name' => 'Pas Tahunan (Early Bird)', 'price_sen' => 7900, 'duration_months' => 12],
+                ['name' => 'Langganan Tahunan (Early Bird)', 'price_sen' => 7900, 'duration_months' => 12],
             )->id,
             'amount_sen' => 7900,
             'payment_method' => PaymentMethod::Chip,

@@ -60,7 +60,7 @@ it('shows the order, amount, pass period and company details on the receipt', fu
     $mail->assertHasReplyTo('tanya@example.com');
     $mail->assertSeeInHtml($order->reference)
         ->assertSeeInHtml('RM79.00')
-        ->assertSeeInHtml('Pas Tahunan (Early Bird)')
+        ->assertSeeInHtml('Langganan Tahunan (Early Bird)')
         ->assertSeeInHtml($order->pass->ends_at->translatedFormat('j F Y'))
         ->assertSeeInHtml('Syarikat Ujian Sdn Bhd')
         ->assertSeeInHtml('202601000001')

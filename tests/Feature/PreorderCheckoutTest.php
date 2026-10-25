@@ -36,7 +36,7 @@ function guestCheckout(array $overrides = []): array
 it('shows the checkout form to guests', function () {
     $this->get('/pre-order')
         ->assertOk()
-        ->assertSee('Tempah slot Pas Tahunan')
+        ->assertSee('Tempah slot Langganan Tahunan')
         ->assertSee('Kata laluan')
         ->assertSee('RM79');
 });

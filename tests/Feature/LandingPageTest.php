@@ -44,7 +44,7 @@ it('switches to the regular pass at full price once every slot is taken', functi
     Preorder::factory()->status(PreorderStatus::Paid)->count(2)->create();
 
     $this->get('/')
-        ->assertSee('Beli Pas Tahunan')
+        ->assertSee('Beli Langganan Tahunan')
         ->assertSee(route('purchase.pass'), false)
         ->assertSee('RM99')
         ->assertDontSee('Tempah slot saya')

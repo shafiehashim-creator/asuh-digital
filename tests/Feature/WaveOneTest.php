@@ -141,7 +141,7 @@ it('pitches the pass with a per-book price and shows reader counts once meaningf
     Book::factory()->published()->count(3)->create();
 
     $this->get(route('catalog.show', $book))
-        ->assertSee('Paling jimat · Pas Tahunan')
+        ->assertSee('Paling jimat · Langganan Tahunan')
         ->assertSee('Tempah slot saya')
         ->assertSee('dan 3 buku lain')
         ->assertSee('Beli buku ini RM9.90')
@@ -162,7 +162,7 @@ it('sells the pass with simple maths when buying one by one costs more', functio
 
     $this->get(route('pass.show'))
         ->assertOk()
-        ->assertSee('Pas Tahunan ASUH Digital')
+        ->assertSee('Langganan Tahunan ASUH Digital')
         ->assertSee('Matematik mudah')
         ->assertSee('RM118.80')
         ->assertSee('Anda jimat 33%')
@@ -175,4 +175,10 @@ it('skips the maths when it would not show a saving', function () {
     Book::factory()->published()->create(['single_price_sen' => 990]);
 
     $this->get(route('pass.show'))->assertOk()->assertDontSee('Matematik mudah')->assertDontSee('Buku yang termasuk');
+});
+
+it('sends the old "Pas" links to the new "Langganan" pages', function () {
+    $this->get('/pas')->assertRedirect('/langganan')->assertStatus(301);
+    $this->get('/beli/pas')->assertRedirect('/beli/langganan')->assertStatus(301);
+    $this->get('/langganan')->assertOk()->assertSee('Langganan Tahunan ASUH Digital')->assertDontSee('Pas Tahunan');
 });

@@ -63,7 +63,7 @@
                 @if ($order->book)
                     <p>Resit telah dihantar ke e-mel anda. <strong>{{ $order->book->title }}</strong> kini terbuka dalam akaun anda.</p>
                 @else
-                    <p>Resit telah dihantar ke e-mel anda. Status Pas Tahunan boleh dilihat di halaman Akaun saya.</p>
+                    <p>Resit telah dihantar ke e-mel anda. Status Langganan Tahunan boleh dilihat di halaman Akaun saya.</p>
                 @endif
                 <a href="{{ route('account') }}" class="btn-utama mt-4">Ke Akaun saya</a>
             </section>
@@ -72,7 +72,7 @@
                 @if (session('receipt_uploaded'))
                     <p role="status" class="mb-3 font-semibold text-biru">Terima kasih, resit anda telah dihantar.</p>
                 @endif
-                <p>Kami akan menyemak pindahan anda dan mengesahkan bayaran secepat mungkin. Anda akan menerima resit melalui e-mel sebaik sahaja {{ $order->book ? 'buku ini dibuka' : 'Pas Tahunan diaktifkan' }}.@if ($preorder) Slot anda kekal ditempah sepanjang semakan.@endif</p>
+                <p>Kami akan menyemak pindahan anda dan mengesahkan bayaran secepat mungkin. Anda akan menerima resit melalui e-mel sebaik sahaja {{ $order->book ? 'buku ini dibuka' : 'Langganan Tahunan diaktifkan' }}.@if ($preorder) Slot anda kekal ditempah sepanjang semakan.@endif</p>
                 @if ($canUploadReceipt && $receiptUrl)
                     <a href="{{ $receiptUrl }}" class="pautan mt-4 inline-block">Tersalah resit? Hantar semula</a>
                 @endif

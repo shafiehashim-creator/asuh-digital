@@ -1,4 +1,4 @@
-<x-auth-card title="Log masuk" intro="Log masuk untuk melihat pesanan dan Pas Tahunan anda.">
+<x-auth-card title="Log masuk" intro="Log masuk untuk melihat pesanan dan Langganan Tahunan anda.">
     <form method="POST" action="{{ route('login') }}" class="space-y-5">
         @csrf
 
@@ -18,6 +18,6 @@
 
     <p class="mt-6 text-center text-sm text-ink/80">
         Belum ada akaun? Akaun dicipta semasa anda membuat
-        <a href="{{ url('/') }}" class="pautan">pre-order Pas Tahunan</a>.
+        <a href="{{ url('/') }}" class="pautan">pre-order Langganan Tahunan</a>.
     </p>
 </x-auth-card>

@@ -30,12 +30,12 @@ class PurchaseController extends Controller
         $this->rememberForLogin($request, route('purchase.pass'));
 
         return view('purchase.create', [
-            'title' => 'Beli Pas Tahunan',
+            'title' => 'Beli Langganan Tahunan',
             'item' => $plan->name,
             'price' => Money::short($plan->price_sen),
             'details' => ['Semua e-book ASUH Digital selama 12 bulan', 'Sehingga 4 profil anak', 'Sekali bayar, tiada caj automatik'],
             'note' => $request->user()?->activePass()
-                ? 'Anda masih ada Pas aktif. Pas baharu bermula sebaik Pas semasa tamat, jadi tiada hari yang hilang.'
+                ? 'Anda masih ada langganan aktif. Langganan baharu bermula sebaik langganan semasa tamat, jadi tiada hari yang hilang.'
                 : null,
             'action' => route('purchase.pass.store'),
         ]);

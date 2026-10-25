@@ -99,7 +99,7 @@ it('locks pupils to the shelf and lets them switch names', function () {
 
     $this->get('/akaun')->assertRedirect('/mod-anak');
     $this->get('/buku')->assertRedirect('/mod-anak');
-    $this->get('/pas')->assertRedirect('/mod-anak');
+    $this->get('/langganan')->assertRedirect('/mod-anak');
 
     $this->post('/kelas/keluar')->assertRedirect('/kelas/pilih');
     $this->get('/mod-anak')->assertRedirect('/login');

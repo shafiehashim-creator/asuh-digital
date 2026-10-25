@@ -86,7 +86,7 @@ class BookResource extends Resource
                             ->helperText('Boleh pilih lebih daripada satu.'),
                         Select::make('age_group')->label('Umur pembaca')->options(AgeGroup::class)->required()->native(false),
                         TextInput::make('single_price_sen')->label('Harga single (RM)')
-                            ->helperText('Kosongkan jika buku hanya melalui Pas Tahunan.')
+                            ->helperText('Kosongkan jika buku hanya melalui Langganan Tahunan.')
                             ->numeric()->minValue(0)->step(0.01)->prefix('RM')
                             ->formatStateUsing(fn ($state) => filled($state) ? number_format($state / 100, 2, '.', '') : null)
                             ->dehydrateStateUsing(fn ($state) => filled($state) ? (int) round(((float) $state) * 100) : null),
