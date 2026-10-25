@@ -38,6 +38,13 @@ class EditBook extends EditRecord
                 ->url(fn () => route('reader.show', $this->record), shouldOpenInNewTab: true)
                 ->visible(fn () => Route::has('reader.show') && $this->record->files()->exists()),
 
+            Action::make('pages')
+                ->label(fn () => $this->needsPageImages() ? 'Buat versi pantas' : 'Versi pantas')
+                ->icon(Heroicon::OutlinedBolt)
+                ->color(fn () => $this->needsPageImages() ? 'warning' : 'gray')
+                ->url(fn () => PreparePages::getUrl(['record' => $this->record]))
+                ->visible(fn () => $this->record->files()->exists()),
+
             Action::make('submitForReview')
                 ->label('Hantar untuk semakan syariah')
                 ->icon(Heroicon::OutlinedPaperAirplane)
@@ -92,6 +99,19 @@ class EditBook extends EditRecord
             DeleteAction::make()
                 ->visible(fn () => $this->record->status !== BookStatus::Published),
         ];
+    }
+
+    /** A new or replaced PDF goes on to "versi pantas" so phones open it quickly. */
+    protected function afterSave(): void
+    {
+        if ($this->needsPageImages()) {
+            $this->redirect(PreparePages::getUrl(['record' => $this->record, 'auto' => 1]));
+        }
+    }
+
+    private function needsPageImages(): bool
+    {
+        return $this->record->files()->whereNull('pages_ready_at')->exists();
     }
 
     private function run(callable $step, string $success): void

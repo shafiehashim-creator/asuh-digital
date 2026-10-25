@@ -59,6 +59,13 @@
     "file": "assets/nunito-800-normal-Dz8SOQK_.woff2",
     "src": "_nunito-800-normal-Dz8SOQK_.woff2"
   },
+  "_pdf.worker.min-VVZ9WdyW.js": {
+    "file": "assets/pdf.worker.min-VVZ9WdyW.js",
+    "name": "pdf.worker.min",
+    "assets": [
+      "assets/pdf.worker.min-yatZIOMy.mjs"
+    ]
+  },
   "node_modules/pdfjs-dist/build/pdf.worker.min.mjs": {
     "file": "assets/pdf.worker.min-yatZIOMy.mjs",
     "src": "node_modules/pdfjs-dist/build/pdf.worker.min.mjs"
@@ -98,13 +105,22 @@
     "src": "resources/js/app.js",
     "isEntry": true
   },
+  "resources/js/page-prep.js": {
+    "file": "assets/page-prep-DmHZz58f.js",
+    "name": "page-prep",
+    "src": "resources/js/page-prep.js",
+    "isEntry": true,
+    "imports": [
+      "_pdf.worker.min-VVZ9WdyW.js"
+    ]
+  },
   "resources/js/reader.js": {
-    "file": "assets/reader-BSGYN_1H.js",
+    "file": "assets/reader-ByiO0-ud.js",
     "name": "reader",
     "src": "resources/js/reader.js",
     "isEntry": true,
-    "assets": [
-      "assets/pdf.worker.min-yatZIOMy.mjs"
+    "imports": [
+      "_pdf.worker.min-VVZ9WdyW.js"
     ]
   }
 }

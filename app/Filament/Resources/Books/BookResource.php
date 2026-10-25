@@ -9,6 +9,7 @@ use App\Enums\ReviewStatus;
 use App\Filament\Resources\Books\Pages\CreateBook;
 use App\Filament\Resources\Books\Pages\EditBook;
 use App\Filament\Resources\Books\Pages\ListBooks;
+use App\Filament\Resources\Books\Pages\PreparePages;
 use App\Filament\Resources\Books\RelationManagers\ReviewsRelationManager;
 use App\Models\Book;
 use App\Models\BookFile;
@@ -169,6 +170,7 @@ class BookResource extends Resource
             'index' => ListBooks::route('/'),
             'create' => CreateBook::route('/create'),
             'edit' => EditBook::route('/{record}/edit'),
+            'pages' => PreparePages::route('/{record}/versi-pantas'),
         ];
     }
 }

@@ -11,7 +11,8 @@
     </head>
     <body class="bg-lavender font-sans text-ink antialiased">
         <div id="reader" class="flex h-dvh flex-col"
-            data-src="{{ $fileUrl }}" data-book="{{ $book->slug }}" data-watermark="{{ $watermark }}">
+            data-src="{{ $fileUrl }}" data-book="{{ $book->slug }}" data-watermark="{{ $watermark }}"
+            @if ($pageImages) data-pages="{{ json_encode($pageImages) }}" @endif>
 
             <header class="flex items-center gap-2 bg-plum px-3 pt-[calc(0.5rem+env(safe-area-inset-top))] pb-2 text-white">
                 <a href="{{ route('catalog.show', $book) }}" class="inline-flex min-h-11 items-center rounded-full px-3 font-bold hover:bg-white/10" aria-label="Tutup pembaca">

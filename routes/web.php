@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\PageImageController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Middleware\EnsureCatalogOpen;
 use App\Http\Controllers\ChipPaymentController;
@@ -38,6 +39,10 @@ Route::middleware(EnsureCatalogOpen::class)->group(function () {
         Route::get('/baca/{book:slug}/fail/{file}', [ReaderController::class, 'file'])
             ->middleware(['signed', 'throttle:180,1']) // the reader fetches the PDF in pieces
             ->name('reader.file');
+        Route::get('/baca/{book:slug}/halaman/{file}/{page}', [ReaderController::class, 'page'])
+            ->whereNumber('page')
+            ->middleware(['signed', 'throttle:600,1'])
+            ->name('reader.page');
     });
 });
 
@@ -67,6 +72,14 @@ Route::middleware('auth')->group(function () {
 
     // Admin only (checked in the controller); used by the Filament order page.
     Route::get('/admin/resit/{order:reference}', [ReceiptController::class, 'show'])->name('admin.receipt');
+
+    // Staff only (checked in the controller): "versi pantas" page images made in the admin's browser.
+    Route::prefix('/admin/versi-pantas/{file}')->name('admin.pages.')->controller(PageImageController::class)->group(function () {
+        Route::get('/pdf', 'pdf')->name('pdf');
+        Route::post('/mula', 'start')->name('start');
+        Route::post('/halaman/{page}', 'store')->whereNumber('page')->middleware('throttle:600,1')->name('store');
+        Route::post('/siap', 'finish')->name('finish');
+    });
 });
 
 // Server-to-server from CHIP; CSRF-exempt in bootstrap/app.php, verified by signature.

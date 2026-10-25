@@ -39,26 +39,28 @@ class ReaderController extends Controller
         $file = $book->load('files')->readableFile();
         abort_unless($file, 404);
 
+        $expires = now()->addMinutes(self::LINK_MINUTES);
+        $link = ['book' => $book->slug, 'file' => $file->id, 'u' => $user->id];
+
         return view('reader.show', [
             'book' => $book,
-            'fileUrl' => URL::temporarySignedRoute('reader.file', now()->addMinutes(self::LINK_MINUTES), [
-                'book' => $book->slug,
-                'file' => $file->id,
-                'u' => $user->id,
-            ]),
+            'fileUrl' => URL::temporarySignedRoute('reader.file', $expires, $link),
+            // "Versi pantas": light page images, one signed link per page; the PDF stays the fallback.
+            'pageImages' => $file->hasPageImages() ? [
+                'width' => $file->page_width,
+                'height' => $file->page_height,
+                'urls' => array_map(
+                    fn (int $page) => URL::temporarySignedRoute('reader.page', $expires, $link + ['page' => $page]),
+                    range(1, $file->page_images),
+                ),
+            ] : null,
             'watermark' => $user->email.' · '.now()->translatedFormat('j M Y'),
         ]);
     }
 
     public function file(Request $request, Book $book, BookFile $file): BinaryFileResponse
     {
-        $user = $request->user();
-
-        // The signature proves the link is ours and fresh; these prove it is
-        // being used by the person it was made for, who may still read it.
-        abort_unless((int) $request->query('u') === $user->id, 403);
-        abort_unless($file->book_id === $book->id, 404);
-        abort_unless($user->canReadBook($book), 403);
+        $this->authorizeLink($request, $book, $file);
         abort_unless(Storage::disk(BookFile::DISK)->exists($file->path), 404);
 
         // A file response (not a stream) answers Range requests, so PDF.js can
@@ -71,5 +73,33 @@ class ReaderController extends Controller
         ]);
 
         return $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $book->slug.'.pdf');
+    }
+
+    public function page(Request $request, Book $book, BookFile $file, int $page): BinaryFileResponse
+    {
+        $this->authorizeLink($request, $book, $file);
+        abort_unless($file->hasPageImages() && $page >= 1 && $page <= $file->page_images, 404);
+
+        $path = $file->pageImagePath($page);
+        abort_unless(Storage::disk(BookFile::DISK)->exists($path), 404);
+
+        return response()->file(Storage::disk(BookFile::DISK)->path($path), [
+            'Content-Type' => BookFile::PAGE_FORMATS[$file->page_format],
+            // The signed link is unique to this reader and session, so a private cache is safe.
+            'Cache-Control' => 'private, max-age=3600',
+            'X-Content-Type-Options' => 'nosniff',
+            'X-Robots-Tag' => 'noindex, nofollow',
+        ]);
+    }
+
+    /**
+     * The signature proves the link is ours and fresh; these prove it is being
+     * used by the person it was made for, who may still read it.
+     */
+    private function authorizeLink(Request $request, Book $book, BookFile $file): void
+    {
+        abort_unless((int) $request->query('u') === $request->user()->id, 403);
+        abort_unless($file->book_id === $book->id, 404);
+        abort_unless($request->user()->canReadBook($book), 403);
     }
 }
