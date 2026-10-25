@@ -42,6 +42,12 @@ Route::post('/beli/langganan', [PurchaseController::class, 'storePass'])
     ->middleware('throttle:10,1')
     ->name('purchase.pass.store');
 
+// Phase 2: Langganan Plus (e-books and animated videos), on sale once the videos open.
+Route::get('/beli/langganan-plus', [PurchaseController::class, 'plus'])->name('purchase.plus');
+Route::post('/beli/langganan-plus', [PurchaseController::class, 'storePlus'])
+    ->middleware('throttle:10,1')
+    ->name('purchase.plus.store');
+
 // Phase B: hidden (404) until the admin opens the catalogue; staff can always preview.
 Route::middleware(EnsureCatalogOpen::class)->group(function () {
     Route::get('/buku', [CatalogController::class, 'index'])->name('catalog.index');

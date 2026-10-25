@@ -47,6 +47,7 @@ function validSettings(array $overrides = []): array
         'contact_email' => 'tanya@example.com',
         'company_address' => "Jalan Ujian\nSelangor",
         'admin_notification_emails' => ['admin@example.com'],
+        'plus_price' => '0',
     ], $overrides);
 }
 

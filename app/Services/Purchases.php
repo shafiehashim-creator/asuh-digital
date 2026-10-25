@@ -23,6 +23,7 @@ class Purchases
     public function __construct(
         private PreorderSlots $slots,
         private CreateNewUser $createNewUser,
+        private PlusOffer $plusOffer,
     ) {}
 
     /**
@@ -53,6 +54,43 @@ class Purchases
     }
 
     /**
+     * A new Langganan Plus, or a renewal of one. Families on Langganan Tahunan
+     * upgrade instead (upgradeToPlus), so they never pay twice for the same days.
+     *
+     * @param  array<string, mixed>  $input
+     */
+    public function buyPlus(?User $user, array $input): Order
+    {
+        $plan = $this->plusOffer->available() ? $this->plusOffer->plan() : null;
+
+        if (! $plan) {
+            throw new InvalidArgumentException('Langganan Plus tidak dijual buat masa ini.');
+        }
+
+        if ($user && $this->plusOffer->upgradablePass($user)) {
+            throw new InvalidArgumentException('Anda sudah ada Langganan Tahunan. Naik taraf ke Langganan Plus dengan membayar bezanya sahaja.');
+        }
+
+        return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen);
+    }
+
+    /**
+     * @param  array<string, mixed>  $input
+     */
+    public function upgradeToPlus(User $user, array $input): Order
+    {
+        $plan = $this->plusOffer->available() ? $this->plusOffer->plan() : null;
+        $pass = $this->plusOffer->upgradablePass($user);
+        $price = $pass ? $this->plusOffer->upgradePriceSen($pass) : null;
+
+        if (! $plan || ! $pass || ! $price) {
+            throw new InvalidArgumentException('Tiada langganan untuk dinaik taraf.');
+        }
+
+        return $this->order($user, $input, ['plan_id' => $plan->id, 'upgrades_pass_id' => $pass->id], $price);
+    }
+
+    /**
      * @param  array<string, mixed>  $input
      */
     public function buyBook(?User $user, Book $book, array $input): Order
@@ -72,7 +110,7 @@ class Purchases
      * Reuses an unpaid order for the same item, so a second click or a
      * change of payment method never creates duplicate orders.
      *
-     * @param  array{plan_id?: int, book_id?: int}  $item
+     * @param  array{plan_id?: int, book_id?: int, upgrades_pass_id?: int}  $item
      */
     private function order(?User $user, array $input, array $item, int $priceSen): Order
     {
@@ -86,6 +124,8 @@ class Purchases
                 ->where('status', OrderStatus::Pending)
                 ->whereDoesntHave('preorder')
                 ->where($item)
+                // A new Langganan Plus is a different item from an upgrade to it.
+                ->when(! isset($item['upgrades_pass_id']), fn ($query) => $query->whereNull('upgrades_pass_id'))
                 ->latest()
                 ->first();
 

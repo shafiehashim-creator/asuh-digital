@@ -28,6 +28,12 @@ class Pass extends Model
         return $this->starts_at?->isPast() && $this->ends_at?->isFuture();
     }
 
+    /** Langganan Plus (Phase 2) adds the animated videos. */
+    public function isPlus(): bool
+    {
+        return $this->plan?->code === Plan::PAS_PLUS;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

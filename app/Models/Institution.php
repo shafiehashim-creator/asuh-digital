@@ -43,6 +43,12 @@ class Institution extends Model
         return Child::query()->whereIn('classroom_id', $this->classrooms()->select('id'))->count();
     }
 
+    /** Phase 2: the active licence includes the animated videos. */
+    public function canWatchVideos(): bool
+    {
+        return (bool) $this->activeLicense()?->includes_videos;
+    }
+
     public function users(): HasMany
     {
         return $this->hasMany(User::class);

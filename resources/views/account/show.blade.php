@@ -24,6 +24,7 @@
 
             @if ($activePass)
                 <p class="mt-2 text-lg">
+                    @if ($activePass->isPlus()) <span class="font-bold">Langganan Plus</span> · @endif
                     <span class="font-bold text-biru">Aktif</span> sehingga
                     <strong>{{ $activePass->ends_at->translatedFormat('j F Y') }}</strong>.
                 </p>
@@ -39,6 +40,14 @@
             @else
                 <p class="mt-2 text-ink/80">Anda belum mempunyai Langganan Tahunan yang aktif.</p>
                 <a href="{{ route('purchase.pass') }}" class="btn-utama mt-4">Dapatkan Langganan Tahunan</a>
+            @endif
+
+            @if ($plusUpgradePrice)
+                <div class="mt-5 rounded-2xl bg-lavender p-4">
+                    <p class="font-display text-lg font-bold text-plum">Baharu: video animasi ASUH</p>
+                    <p class="mt-1 text-ink/80">Naik taraf ke Langganan Plus dan bayar beza harga untuk baki langganan anda sahaja.</p>
+                    <a href="{{ route('purchase.plus') }}" class="btn-gelap mt-3">Naik taraf · {{ App\Support\Money::short($plusUpgradePrice) }}</a>
+                </div>
             @endif
         </section>
 

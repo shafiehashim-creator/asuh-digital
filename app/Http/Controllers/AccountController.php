@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Middleware\EnsureCatalogOpen;
 use App\Models\Book;
 use App\Models\User;
+use App\Services\PlusOffer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,7 +13,7 @@ use Illuminate\View\View;
 
 class AccountController extends Controller
 {
-    public function show(Request $request): View|RedirectResponse
+    public function show(Request $request, PlusOffer $plus): View|RedirectResponse
     {
         $user = $request->user();
 
@@ -35,6 +36,8 @@ class AccountController extends Controller
             'ownedBooks' => $shelfOpen ? $this->ownedBooks($user) : new Collection,
             'canReadAll' => $activePass !== null || $user->isStaff(),
             'children' => $shelfOpen ? $user->children()->get() : new Collection,
+            // Phase 2: offer the Langganan Plus upgrade once it is on sale.
+            'plusUpgradePrice' => $plus->available() && ($pass = $plus->upgradablePass($user)) ? $plus->upgradePriceSen($pass) : null,
         ]);
     }
 

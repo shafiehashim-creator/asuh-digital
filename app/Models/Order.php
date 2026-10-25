@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 #[Fillable([
     'reference', 'user_id', 'plan_id', 'book_id', 'amount_sen', 'currency',
     'payment_method', 'status', 'chip_purchase_id', 'bank_receipt_path',
-    'confirmed_by', 'confirmed_at', 'paid_at',
+    'confirmed_by', 'confirmed_at', 'paid_at', 'upgrades_pass_id',
 ])]
 class Order extends Model
 {
@@ -74,7 +74,17 @@ class Order extends Model
             return 'E-book: '.($this->book?->title ?? 'ASUH Digital');
         }
 
+        if ($this->upgrades_pass_id) {
+            return 'Naik taraf ke '.($this->plan?->name ?? 'Langganan Plus');
+        }
+
         return $this->plan?->name ?? 'ASUH Digital';
+    }
+
+    /** The subscription this order upgrades to Langganan Plus (Phase 2). */
+    public function upgradesPass(): BelongsTo
+    {
+        return $this->belongsTo(Pass::class, 'upgrades_pass_id');
     }
 
     public function user(): BelongsTo

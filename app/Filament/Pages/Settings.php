@@ -57,7 +57,7 @@ class Settings extends Page
         'bank_name', 'bank_account_name', 'bank_account_number',
         'contact_email', 'company_name', 'company_ssm_no', 'company_address', 'company_sst_no',
         'admin_notification_emails',
-        'catalog_open', 'preview_pages', 'whatsapp_number',
+        'catalog_open', 'preview_pages', 'whatsapp_number', 'videos_open',
     ];
 
     /** @var array<string, mixed> */
@@ -75,6 +75,7 @@ class Settings extends Page
         $this->form->fill($values + [
             'early_bird_price' => $this->priceInRinggit(Plan::PAS_TAHUNAN_EARLY),
             'regular_price' => $this->priceInRinggit(Plan::PAS_TAHUNAN),
+            'plus_price' => $this->priceInRinggit(Plan::PAS_PLUS),
         ]);
     }
 
@@ -96,6 +97,17 @@ class Settings extends Page
                     TextInput::make('preview_pages')->label('Halaman pratonton percuma')
                         ->helperText('Bilangan halaman awal yang boleh dibaca sesiapa sahaja tanpa langganan. Hanya untuk buku yang ada versi pantas. 0 untuk menutup pratonton.')
                         ->integer()->minValue(0)->maxValue(20)->required(),
+                ]),
+
+            Section::make('Video animasi dan Langganan Plus (Fasa 2)')
+                ->columns(2)
+                ->schema([
+                    Toggle::make('videos_open')->label('Buka video animasi dan Langganan Plus')
+                        ->helperText('Semasa ditutup, video dan jualan Langganan Plus tersembunyi daripada pelanggan; staf masih boleh pratonton.')
+                        ->columnSpanFull(),
+                    TextInput::make('plus_price')->label('Harga Langganan Plus setahun (RM)')
+                        ->helperText('0 bermaksud belum dijual. Pelanggan Langganan Tahunan membayar beza harga untuk baki hari mereka.')
+                        ->numeric()->minValue(0)->step(0.01)->prefix('RM')->required(),
                 ]),
 
             Section::make('WhatsApp')
@@ -206,6 +218,7 @@ class Settings extends Page
 
             $this->setPrice(Plan::PAS_TAHUNAN_EARLY, $data['early_bird_price']);
             $this->setPrice(Plan::PAS_TAHUNAN, $data['regular_price']);
+            $this->setPrice(Plan::PAS_PLUS, $data['plus_price']);
         });
 
         $scheduled = $payments->scheduleWaitingPasses();
