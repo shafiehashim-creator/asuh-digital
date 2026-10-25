@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 class LockChildMode
 {
     /** Route names a child may use. */
-    private const ALLOWED = ['child-mode.*', 'reader.*'];
+    private const ALLOWED = ['child-mode.*', 'reader.*', 'pupil.*'];
 
     public function __construct(private ChildMode $childMode) {}
 
@@ -25,9 +25,15 @@ class LockChildMode
             return $next($request);
         }
 
-        // Nothing to lock any more: logged out, profile deleted or catalogue closed.
+        // Nothing to lock any more: logged out, profile deleted, licence ended or catalogue closed.
         if (! $this->childMode->child($request->user()) || ! EnsureCatalogOpen::isOpenFor($request->user())) {
+            $wasPupil = $this->childMode->isPupil();
             $this->childMode->leave();
+
+            // A pupil has no account to fall back on: back to the class code page.
+            if ($wasPupil && ! $request->route()?->named('pupil.*')) {
+                return redirect()->route('pupil.join')->with('status', 'pupil-ended');
+            }
 
             return $next($request);
         }

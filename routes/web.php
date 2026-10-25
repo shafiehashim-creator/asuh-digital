@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\PageImageController;
 use App\Http\Controllers\CatalogController;
+use App\Http\Middleware\AuthenticateOrPupil;
 use App\Http\Middleware\EnsureCatalogOpen;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ChildModeController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\PassPageController;
 use App\Http\Controllers\PilotRequestController;
 use App\Http\Controllers\PreorderController;
 use App\Http\Controllers\PreviewController;
+use App\Http\Controllers\PupilAccessController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReaderController;
 use App\Http\Controllers\ReadingProgressController;
@@ -53,7 +55,8 @@ Route::middleware(EnsureCatalogOpen::class)->group(function () {
         ->middleware('throttle:10,1')
         ->name('purchase.book.store');
 
-    Route::middleware('auth')->group(function () {
+    // A signed-in account, or a pupil with a class code (Phase D).
+    Route::middleware(AuthenticateOrPupil::class)->group(function () {
         Route::get('/baca/{book:slug}', [ReaderController::class, 'show'])->name('reader.show');
         Route::get('/baca/{book:slug}/fail/{file}', [ReaderController::class, 'file'])
             ->middleware(['signed', 'throttle:180,1']) // the reader fetches the PDF in pieces
@@ -124,21 +127,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/akaun/pin', [ParentPinController::class, 'update'])->middleware('throttle:10,1')->name('parent-pin.update');
         Route::delete('/akaun/pin', [ParentPinController::class, 'destroy'])->middleware('throttle:10,1')->name('parent-pin.destroy');
 
-        // Mod Anak (LockChildMode keeps the child here until the parent gate is passed).
-        Route::prefix('/mod-anak')->name('child-mode.')->controller(ChildModeController::class)->group(function () {
-            Route::get('/', 'home')->name('home');
-            Route::get('/keluar', 'gate')->name('gate');
-            Route::post('/keluar', 'leave')->middleware('throttle:10,1')->name('leave');
-            Route::get('/lencana', 'badges')->name('badges');
-        });
-        Route::prefix('/mod-anak/kuiz/{book:slug}')->name('child-mode.quiz.')->controller(ChildQuizController::class)->group(function () {
-            Route::get('/', 'show')->name('show');
-            Route::post('/', 'submit')->middleware('throttle:20,1')->name('submit');
-            Route::get('/keputusan', 'result')->name('result');
-        });
-        Route::post('/mod-anak/bacaan/{book:slug}', [ReadingProgressController::class, 'store'])
-            ->middleware('throttle:30,1')
-            ->name('child-mode.progress');
+        // The parent gate out of Mod Anak (pupils switch names instead, see PupilAccessController).
+        Route::get('/mod-anak/keluar', [ChildModeController::class, 'gate'])->name('child-mode.gate');
+        Route::post('/mod-anak/keluar', [ChildModeController::class, 'leave'])->middleware('throttle:10,1')->name('child-mode.leave');
     });
 });
 
@@ -168,4 +159,29 @@ Route::middleware(['auth', 'verified', EnsureInstitutionStaff::class])->prefix('
 
     Route::post('/guru', [Teacher\TeacherController::class, 'store'])->middleware('throttle:10,1')->name('teachers.store');
     Route::delete('/guru/{teacher}', [Teacher\TeacherController::class, 'destroy'])->name('teachers.destroy');
+});
+
+// Mod Anak, for a parent's child or a pupil (LockChildMode keeps them here).
+Route::middleware([EnsureCatalogOpen::class, AuthenticateOrPupil::class])->group(function () {
+    Route::prefix('/mod-anak')->name('child-mode.')->controller(ChildModeController::class)->group(function () {
+        Route::get('/', 'home')->name('home');
+        Route::get('/lencana', 'badges')->name('badges');
+    });
+    Route::prefix('/mod-anak/kuiz/{book:slug}')->name('child-mode.quiz.')->controller(ChildQuizController::class)->group(function () {
+        Route::get('/', 'show')->name('show');
+        Route::post('/', 'submit')->middleware('throttle:20,1')->name('submit');
+        Route::get('/keputusan', 'result')->name('result');
+    });
+    Route::post('/mod-anak/bacaan/{book:slug}', [ReadingProgressController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('child-mode.progress');
+});
+
+// Phase D: pupils join with a class code and pick their name.
+Route::middleware(EnsureCatalogOpen::class)->prefix('/kelas')->name('pupil.')->controller(PupilAccessController::class)->group(function () {
+    Route::get('/', 'join')->name('join');
+    Route::post('/', 'enterCode')->middleware('throttle:10,1')->name('code');
+    Route::get('/pilih', 'names')->name('names');
+    Route::post('/pilih/{pupil}', 'choose')->middleware('throttle:30,1')->name('choose');
+    Route::post('/keluar', 'leave')->name('leave');
 });

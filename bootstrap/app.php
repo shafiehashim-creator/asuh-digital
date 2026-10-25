@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\LockChildMode;
+use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,6 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Mod Anak keeps a child on their shelf until the parent gate is passed.
         $middleware->web(append: [LockChildMode::class]);
+        // Before the login check, so a pupil (no account) is sent back to the shelf, not to the login page.
+        $middleware->prependToPriorityList(before: AuthenticatesRequests::class, prepend: LockChildMode::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
