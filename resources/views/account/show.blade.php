@@ -84,6 +84,22 @@
                     <a href="{{ route('children.create') }}" class="btn-gelap mt-4">Tambah anak</a>
                 @endif
 
+                {{-- Weekly reading report --}}
+                <form method="POST" action="{{ route('weekly-report.update') }}" class="mt-6 border-t-2 border-ink/10 pt-5">
+                    @csrf
+                    @method('PUT')
+                    <h3 class="font-display font-bold">Laporan bacaan mingguan</h3>
+                    @if (session('status') === 'weekly-report-saved')
+                        <p role="status" class="mt-2 text-sm font-semibold text-biru">Tetapan laporan disimpan.</p>
+                    @endif
+                    <input type="hidden" name="weekly_report" value="0">
+                    <label class="mt-2 flex min-h-11 cursor-pointer items-center gap-3">
+                        <input type="checkbox" name="weekly_report" value="1" class="size-5 rounded text-biru" @checked($user->weekly_report)>
+                        <span>Hantar e-mel setiap Isnin: minit membaca, buku, kuiz dan lencana anak minggu lalu.</span>
+                    </label>
+                    <button type="submit" class="btn-gelap mt-2">Simpan</button>
+                </form>
+
                 {{-- Parent PIN for leaving Mod Anak --}}
                 <div class="mt-6 border-t-2 border-ink/10 pt-5">
                     <h3 class="font-display font-bold">PIN ibu bapa</h3>

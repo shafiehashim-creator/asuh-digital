@@ -153,6 +153,11 @@ class Book extends Model
         );
     }
 
+    public function quiz(): HasOne
+    {
+        return $this->hasOne(Quiz::class);
+    }
+
     public function files(): HasMany
     {
         return $this->hasMany(BookFile::class);

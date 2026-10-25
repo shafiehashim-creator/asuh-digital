@@ -29,6 +29,7 @@ if (root) {
     const zoomOut = root.querySelector('[data-zoom-out]');
     const modeToggle = root.querySelector('[data-mode-toggle]');
     const previewCta = root.querySelector('[data-preview-cta]'); // free preview only
+    const quizCta = root.querySelector('[data-quiz-cta]'); // Mod Anak, books with a quiz
     const watermark = root.dataset.watermark;
     const pageKey = `asuh.reader.${root.dataset.book}`;
     const modeKey = 'asuh.reader.mode';
@@ -185,6 +186,11 @@ if (root) {
             : `Halaman ${first}–${last} / ${doc.numPages}`;
         prev.disabled = first <= 1;
         next.disabled = last >= doc.numPages;
+        if (quizCta && last >= doc.numPages && quizCta.hidden) {
+            quizCta.hidden = false;
+            sendProgress(false); // the quiz opens only after the book is recorded as read
+            window.dispatchEvent(new Event('resize'));
+        }
         if (previewCta) {
             const ended = last >= doc.numPages;
             if (previewCta.hidden === ended) {

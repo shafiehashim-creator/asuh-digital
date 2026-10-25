@@ -33,6 +33,16 @@ class Child extends Model
         return $this->hasMany(ReadingSession::class);
     }
 
+    public function quizAttempts(): HasMany
+    {
+        return $this->hasMany(QuizAttempt::class);
+    }
+
+    public function badges(): HasMany
+    {
+        return $this->hasMany(ChildBadge::class)->orderBy('awarded_at');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

@@ -6,6 +6,7 @@ use App\Http\Controllers\CatalogController;
 use App\Http\Middleware\EnsureCatalogOpen;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ChildModeController;
+use App\Http\Controllers\ChildQuizController;
 use App\Http\Controllers\ChipPaymentController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LegalController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReaderController;
 use App\Http\Controllers\ReadingProgressController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\WeeklyReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', LandingController::class)->name('home');
@@ -115,6 +117,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware(EnsureCatalogOpen::class)->group(function () {
         Route::post('/akaun/anak/{child}/mod-anak', [ChildModeController::class, 'enter'])->name('children.child-mode');
+        Route::put('/akaun/laporan-mingguan', [WeeklyReportController::class, 'update'])->name('weekly-report.update');
         Route::put('/akaun/pin', [ParentPinController::class, 'update'])->middleware('throttle:10,1')->name('parent-pin.update');
         Route::delete('/akaun/pin', [ParentPinController::class, 'destroy'])->middleware('throttle:10,1')->name('parent-pin.destroy');
 
@@ -123,9 +126,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/', 'home')->name('home');
             Route::get('/keluar', 'gate')->name('gate');
             Route::post('/keluar', 'leave')->middleware('throttle:10,1')->name('leave');
+            Route::get('/lencana', 'badges')->name('badges');
+        });
+        Route::prefix('/mod-anak/kuiz/{book:slug}')->name('child-mode.quiz.')->controller(ChildQuizController::class)->group(function () {
+            Route::get('/', 'show')->name('show');
+            Route::post('/', 'submit')->middleware('throttle:20,1')->name('submit');
+            Route::get('/keputusan', 'result')->name('result');
         });
         Route::post('/mod-anak/bacaan/{book:slug}', [ReadingProgressController::class, 'store'])
             ->middleware('throttle:30,1')
             ->name('child-mode.progress');
     });
 });
+
+// Link in the weekly report e-mail; signed so it works without logging in.
+Route::get('/laporan-mingguan/berhenti/{user}', [WeeklyReportController::class, 'unsubscribe'])
+    ->middleware(['signed', 'throttle:10,1'])
+    ->name('weekly-report.unsubscribe');

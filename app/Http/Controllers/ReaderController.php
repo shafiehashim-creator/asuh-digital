@@ -70,6 +70,7 @@ class ReaderController extends Controller
             'progress' => $child ? [
                 'url' => route('child-mode.progress', $book),
                 'startPage' => $log->lastPage($child, $book),
+                'quizUrl' => $book->quiz?->isPlayable() ? route('child-mode.quiz.show', $book) : null,
             ] : null,
         ]);
     }

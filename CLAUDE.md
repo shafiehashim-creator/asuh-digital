@@ -115,6 +115,18 @@ Gateway ialah **CHIP** (chip-in.asia), bukan BCL. Semua kaedah CHIP dibenarkan (
 - Jualan biasa (2026-10-25): `/beli/pas` menjual Pas Tahunan harga biasa sebaik slot early bird habis (sebelum itu ia menghala ke pre-order); pembaharuan bermula selepas Pas semasa tamat. `/beli/buku/{buku}` menjual buku single (entitlement kekal). Kedua-duanya guna aliran CHIP/pindahan bank sedia ada.
 - Penutup Fasa B (2026-10-25): **Rak buku saya** di `/akaun` (Sambung membaca daripada `book_readers` dan Buku yang dibeli; disembunyikan semasa katalog ditutup, buku Pas hilang apabila Pas tamat). Admin baca sahaja: **Pelanggan** (`/admin/pelanggan`, akaun ibu bapa dengan pas, buku dan pesanan) dan **Pas Tahunan** (`/admin/pas`, tapis Aktif / Tamat dalam 30 hari / Menunggu launch / Tamat). Widget **Buku paling banyak dibaca** (staf, termasuk editor). Senarai semak `App\Services\CatalogReadiness` di Tetapan sebelum `catalog_open` dihidupkan (buku tanpa PDF, versi pantas atau kaver).
 
+## Status Fasa C (2026-10-25)
+
+Semua halaman Fasa C dibuka bersama katalog (`catalog_open`), jadi boleh dideploy berperingkat.
+
+- **Profil anak** (`/akaun/anak/...`): maksimum 4, nama panggilan, umur `6-9` / `10-13` dan avatar lukisan (`App\Enums\ChildAvatar`: Anis, Anas dan emoji; tiada foto). Ibu bapa boleh ubah dan padam; data bacaan, kuiz dan lencana dipadam bersama (cascade). Admin: **Profil anak** baca sahaja.
+- **Mod Anak** (`/mod-anak`): `App\Services\ChildMode` menyimpan anak dalam sesi; middleware `LockChildMode` (kumpulan `web`) menghala semua laluan selain `child-mode.*` dan `reader.*` ke rak anak, termasuk log keluar. Rak hanya buku diterbitkan ikut umur anak yang boleh dibuka keluarga, tanpa harga atau butang beli.
+- **Pintu ibu bapa** (`/mod-anak/keluar`, `App\Services\ParentGate`): PIN 4 digit (`users.parent_pin`, di-hash, ditetapkan dengan kata laluan akaun) jika ada, jika tidak soalan darab ditulis dalam perkataan BM. Jawapan sekali guna, 10 cubaan/minit.
+- **Rekod bacaan** (`reading_sessions`, satu baris setiap anak, buku dan hari): pembaca dalam Mod Anak menghantar heartbeat setiap minit semasa halaman diselak (`App\Services\ReadingLog`: maksimum 1 minit setiap 50 saat, 240 minit sehari setiap buku) dan halaman terakhir; buku dibuka semula di halaman itu, dan rak ada "Sambung membaca".
+- **Kuiz** (keputusan pengguna 2026-10-25): satu kuiz setiap buku, 3–5 soalan aneka pilihan (3–4 pilihan), lulus 80%, ditulis admin/editor di `/admin/kuiz`. Dibuka selepas anak membaca buku dalam Mod Anak; pilihan disusun rawak tetap setiap anak; jawapan tidak didedahkan.
+- **Lencana** (keputusan pengguna 2026-10-25), tetap dalam kod `App\Enums\Badge` dan jadual `child_badges` (tiada jadual `badges`): Kuiz Pertama, Pakar Kuiz (5 buku lulus), Bintang Ilmu (10 kuiz semua betul), Pembaca Rajin (3 hari berturut-turut), Seminggu Membaca (7 hari), Pembaca Istiqamah (20 hari dalam sebulan). Hari membaca = sekurang-kurangnya 5 minit (semua buku). `App\Services\BadgeAwarder` dipanggil selepas kuiz dan heartbeat.
+- **Laporan mingguan**: `php artisan asuh:weekly-reports` dijadualkan setiap Isnin 8:00 pagi (MYT) melalui `schedule:run`; hanya ibu bapa yang anaknya membaca minggu lalu (Isnin–Ahad), tidak dihantar dua kali (`users.weekly_report_sent_at`). Boleh dimatikan di Akaun saya atau pautan bertandatangan dalam e-mel (`users.weekly_report`).
+
 ## Perlindungan e-book
 
 - Fail disimpan dalam `storage/app/private`, **tidak** dalam `public/`.

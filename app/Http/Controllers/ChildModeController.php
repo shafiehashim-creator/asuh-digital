@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Child;
+use App\Models\Quiz;
 use App\Services\ChildMode;
 use App\Services\ParentGate;
 use App\Services\ReadingLog;
@@ -35,11 +36,30 @@ class ChildModeController extends Controller
         return view('child-mode.home', [
             'child' => $child,
             'books' => $this->childMode->shelf($child),
+            'badges' => $child->badges()->get(),
+            // Books with a quiz the child has not passed yet.
+            'quizBookIds' => Quiz::query()->where('is_active', true)->has('questions', '>=', Quiz::MIN_QUESTIONS)
+                ->whereDoesntHave('attempts', fn ($q) => $q->where('child_id', $child->id)->where('passed', true))
+                ->pluck('book_id')->all(),
             // Only books still on the shelf (a lapsed pass or a new age group drops some).
             'recent' => $log->recent($child, 12)
                 ->filter(fn ($session) => $session->book && $this->childMode->allows($child, $session->book))
                 ->take(4)
                 ->values(),
+        ]);
+    }
+
+    public function badges(Request $request): View|RedirectResponse
+    {
+        $child = $this->childMode->child($request->user());
+
+        if (! $child) {
+            return redirect()->route('account');
+        }
+
+        return view('child-mode.badges', [
+            'child' => $child,
+            'earned' => $child->badges()->get()->keyBy(fn ($row) => $row->badge->value),
         ]);
     }
 
