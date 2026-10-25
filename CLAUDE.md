@@ -89,6 +89,7 @@ Gateway ialah **CHIP** (chip-in.asia), bukan BCL. Semua kaedah CHIP dibenarkan (
   - Resit yang dihantar mengekalkan slot sehingga admin membuat keputusan. Resit untuk tempahan yang sudah luput tetap diterima (selaras dengan dasar menghormati bayaran lewat).
   - Admin boleh **Tolak** dengan sebab (dilog); slot dilepaskan dan pembeli boleh menghantar resit baharu. Pesanan dalam panel admin adalah baca sahaja.
 - Tiada caj berulang automatik. Bayaran sekali setahun.
+- **Tambah manual oleh admin** (2026-10-26): di halaman pelanggan (`/admin/pelanggan/{id}`), butang **Tambah langganan** dan **Tambah e-book** (`App\Services\ManualGrants`) mencipta pesanan dengan kaedah `manual` ("Manual (oleh ASUH)"), jumlah (0 untuk percuma), sebab dalam `orders.admin_note`, dan admin yang memberi dalam `confirmed_by`; pengaktifan melalui `PaymentProcessor::markPaid()` (resit e-mel boleh dimatikan). Kaedah `manual` tidak boleh dipilih semasa checkout. Butang **Pelanggan baharu** mencipta akaun ibu bapa dan menghantar e-mel untuk menetapkan kata laluan.
 - Hantar resit melalui e-mel selepas status pesanan bertukar kepada `paid`. Maklumat syarikat pada resit (nama, SSM, alamat, SST) ialah tetapan admin.
 
 ## Skop Fasa A (dipersetujui 2026-10-24)
