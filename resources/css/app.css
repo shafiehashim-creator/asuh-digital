@@ -41,3 +41,8 @@
         @apply font-bold text-biru underline underline-offset-2 hover:text-plum;
     }
 }
+
+/* Quick repeated taps (children, mostly) must not zoom the page; pinch zoom still works. */
+html {
+    touch-action: manipulation;
+}
