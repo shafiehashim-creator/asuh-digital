@@ -33,6 +33,8 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'parent_pin' => 'hashed',
+            'weekly_report' => 'boolean',
+            'weekly_report_sent_at' => 'datetime',
             'role' => Role::class,
         ];
     }

@@ -19,6 +19,7 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReaderController;
 use App\Http\Controllers\ReadingProgressController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\WeeklyReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', LandingController::class)->name('home');
@@ -116,6 +117,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware(EnsureCatalogOpen::class)->group(function () {
         Route::post('/akaun/anak/{child}/mod-anak', [ChildModeController::class, 'enter'])->name('children.child-mode');
+        Route::put('/akaun/laporan-mingguan', [WeeklyReportController::class, 'update'])->name('weekly-report.update');
         Route::put('/akaun/pin', [ParentPinController::class, 'update'])->middleware('throttle:10,1')->name('parent-pin.update');
         Route::delete('/akaun/pin', [ParentPinController::class, 'destroy'])->middleware('throttle:10,1')->name('parent-pin.destroy');
 
@@ -136,3 +138,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('child-mode.progress');
     });
 });
+
+// Link in the weekly report e-mail; signed so it works without logging in.
+Route::get('/laporan-mingguan/berhenti/{user}', [WeeklyReportController::class, 'unsubscribe'])
+    ->middleware(['signed', 'throttle:10,1'])
+    ->name('weekly-report.unsubscribe');
