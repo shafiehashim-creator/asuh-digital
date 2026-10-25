@@ -10,6 +10,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -68,6 +69,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function entitlements(): HasMany
     {
         return $this->hasMany(Entitlement::class);
+    }
+
+    /** Books this family has opened in the reader (see Book::recordReader()). */
+    public function readBooks(): BelongsToMany
+    {
+        return $this->belongsToMany(Book::class, 'book_readers')->withPivot('first_read_at', 'last_read_at');
     }
 
     public function isStaff(): bool

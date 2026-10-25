@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Enums\PassStartRule;
 use App\Models\Plan;
 use App\Models\Setting;
+use App\Services\CatalogReadiness;
 use App\Services\Chip\ChipClient;
 use App\Services\PaymentProcessor;
 use BackedEnum;
@@ -27,6 +28,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 
 /**
  * Everything the business said it may "change later": prices, slot limit,
@@ -88,6 +90,7 @@ class Settings extends Page
 
             Section::make('Katalog dan pembaca e-book (Fasa B)')
                 ->schema([
+                    $this->catalogReadiness(),
                     Toggle::make('catalog_open')->label('Buka katalog kepada orang ramai')
                         ->helperText('Semasa ditutup, /buku dan pembaca memberi 404 kepada pelawat; staf masih boleh pratonton. Buka hanya apabila buku sudah diterbitkan dan diuji.'),
                     TextInput::make('preview_pages')->label('Halaman pratonton percuma')
@@ -235,6 +238,21 @@ class Settings extends Page
             : Callout::make('CHIP: disambungkan (live)')
                 ->description('Bayaran sebenar diterima. '.$howTo)
                 ->success();
+    }
+
+    private function catalogReadiness(): Callout
+    {
+        $problems = app(CatalogReadiness::class)->problems();
+
+        if ($problems === []) {
+            return Callout::make('Senarai semak katalog: sedia')
+                ->description('Semua buku yang diterbitkan ada fail PDF, versi pantas dan kaver.')
+                ->success();
+        }
+
+        return Callout::make('Senarai semak katalog: perlu perhatian')
+            ->description(new HtmlString(implode('<br>', array_map(fn (string $problem) => '• '.e($problem), $problems))))
+            ->warning();
     }
 
     private function priceInRinggit(string $code): ?string

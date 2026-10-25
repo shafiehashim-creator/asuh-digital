@@ -113,6 +113,7 @@ Gateway ialah **CHIP** (chip-in.asia), bukan BCL. Semua kaedah CHIP dibenarkan (
 - **Katalog dan pembaca disembunyikan (404) daripada orang ramai** sehingga suis "Buka katalog" (`catalog_open`) dihidupkan di Tetapan; staf sentiasa boleh pratonton. Deploy adalah automatik, jadi kerja Fasa B boleh dihantar berperingkat dengan selamat.
 - `php artisan asuh:demo-books` menjana buku contoh untuk pembangunan lokal sahaja (disekat di production).
 - Jualan biasa (2026-10-25): `/beli/pas` menjual Pas Tahunan harga biasa sebaik slot early bird habis (sebelum itu ia menghala ke pre-order); pembaharuan bermula selepas Pas semasa tamat. `/beli/buku/{buku}` menjual buku single (entitlement kekal). Kedua-duanya guna aliran CHIP/pindahan bank sedia ada.
+- Penutup Fasa B (2026-10-25): **Rak buku saya** di `/akaun` (Sambung membaca daripada `book_readers` dan Buku yang dibeli; disembunyikan semasa katalog ditutup, buku Pas hilang apabila Pas tamat). Admin baca sahaja: **Pelanggan** (`/admin/pelanggan`, akaun ibu bapa dengan pas, buku dan pesanan) dan **Pas Tahunan** (`/admin/pas`, tapis Aktif / Tamat dalam 30 hari / Menunggu launch / Tamat). Widget **Buku paling banyak dibaca** (staf, termasuk editor). Senarai semak `App\Services\CatalogReadiness` di Tetapan sebelum `catalog_open` dihidupkan (buku tanpa PDF, versi pantas atau kaver).
 
 ## Perlindungan e-book
 
