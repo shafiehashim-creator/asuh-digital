@@ -96,8 +96,11 @@ class BookResource extends Resource
                     ->schema([
                         FileUpload::make('cover_path')->label('Gambar kaver')
                             ->image()->disk('public')->directory('covers')->visibility('public')
-                            ->imageAspectRatio('3:4')->maxSize(2048)
-                            ->helperText('JPG, PNG atau WEBP, nisbah 3:4, maksimum 2 MB.'),
+                            // Any ratio is accepted; large images are shrunk in the browser before upload.
+                            ->maxSize(20480)
+                            ->imageResizeMode('contain')->imageResizeTargetWidth('1200')->imageResizeTargetHeight('1600')->imageResizeUpscale(false)
+                            ->imageEditor()->imageEditorAspectRatioOptions([null, '3:4'])
+                            ->helperText('JPG, PNG atau WEBP, maksimum 20 MB. Apa-apa saiz boleh; gambar besar dikecilkan secara automatik. Nisbah 3:4 (potret) paling cantik. Klik ikon pensel untuk memotong gambar jika perlu.'),
                     ]),
 
                 Section::make('Fail e-book (PDF)')
@@ -112,7 +115,8 @@ class BookResource extends Resource
                                     ->distinct()->disableOptionsWhenSelectedInSiblingRepeaterItems(),
                                 FileUpload::make('path')->label('Fail PDF')
                                     ->disk(BookFile::DISK)->directory('books')->visibility('private')
-                                    ->acceptedFileTypes(['application/pdf'])->maxSize(51200)
+                                    ->acceptedFileTypes(['application/pdf'])->maxSize(204800)
+                                    ->helperText('Maksimum 200 MB. Fail besar mengambil masa beberapa minit untuk dimuat naik; jangan tutup halaman.')
                                     ->required()->downloadable(false)->openable(false)->previewable(false),
                                 TextInput::make('page_count')->label('Bilangan halaman')->integer()->minValue(1)->maxValue(2000),
                             ])
