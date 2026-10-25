@@ -95,7 +95,7 @@ Gateway ialah **CHIP** (chip-in.asia), bukan BCL. Semua kaedah CHIP dibenarkan (
 
 - Pre-order **Pas Tahunan harga early bird RM79**, bayar penuh, terhad **100 slot**. Slot ditempah sementara (~30 minit) semasa bayaran dan dilepaskan jika tidak dibayar.
 - Pas 12 bulan bermula **selepas bayaran disahkan**. Peraturan tarikh mula boleh ditukar di admin (contohnya kepada tarikh launch).
-- Pembeli **cipta akaun semasa checkout** (e-mel dan kata laluan, pengesahan e-mel, lupa kata laluan). Halaman "Akaun saya" memaparkan status pesanan dan pas, dan muat naik resit pindahan bank.
+- Pembeli **cipta akaun semasa checkout** (e-mel dan kata laluan, pengesahan e-mel, lupa kata laluan). Sejak 2026-10-26 ibu bapa juga boleh mendaftar sendiri di `/daftar` (Fortify registration, nama, e-mel, telefon, kata laluan dan persetujuan PDPA; dihadkan 5 pendaftaran/minit setiap IP oleh `ThrottleRegistrations`). Halaman "Akaun saya" memaparkan status pesanan dan pas, dan muat naik resit pindahan bank.
 - Maklumat pembeli: nama, e-mel, telefon, negeri, bilangan anak, kumpulan umur anak, dan persetujuan PDPA.
 - Landing page memaparkan kaunter baki slot dan tempoh pilot institusi. Headline, subheadline, FAQ, polisi bayaran balik dan tempoh pilot boleh disunting di admin.
 - Polisi bayaran balik: dibenarkan (teks muktamad disunting di admin).

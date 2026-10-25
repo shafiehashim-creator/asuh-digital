@@ -42,9 +42,9 @@ it('locks out login after five failed attempts', function () {
     $this->assertGuest();
 });
 
-it('does not offer a standalone registration page', function () {
+it('offers registration at the Malay address only', function () {
     $this->get('/register')->assertNotFound();
-    $this->post('/register', [])->assertNotFound();
+    $this->get('/daftar')->assertOk();
 });
 
 it('logs out', function () {
