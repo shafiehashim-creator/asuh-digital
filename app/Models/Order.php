@@ -55,6 +55,28 @@ class Order extends Model
         return $this->status === OrderStatus::Paid;
     }
 
+    /**
+     * A bank transfer whose receipt is in, waiting for an admin to confirm.
+     */
+    public function isAwaitingConfirmation(): bool
+    {
+        return $this->status === OrderStatus::Pending
+            && $this->payment_method === PaymentMethod::BankTransfer
+            && filled($this->bank_receipt_path);
+    }
+
+    /**
+     * What was bought, for pay pages, receipts and CHIP.
+     */
+    public function itemName(): string
+    {
+        if ($this->book_id) {
+            return 'E-book: '.($this->book?->title ?? 'ASUH Digital');
+        }
+
+        return $this->plan?->name ?? 'ASUH Digital';
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -63,6 +85,11 @@ class Order extends Model
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
+    }
+
+    public function book(): BelongsTo
+    {
+        return $this->belongsTo(Book::class);
     }
 
     public function confirmedBy(): BelongsTo

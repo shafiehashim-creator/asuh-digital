@@ -52,7 +52,7 @@
         {{-- Summary --}}
         <section class="{{ $cardClass }}" aria-label="Ringkasan pesanan">
             <dl class="space-y-2">
-                <div class="flex justify-between gap-4"><dt class="text-ink/80">Item</dt><dd class="font-bold">{{ $order->plan?->name }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="text-ink/80">Item</dt><dd class="font-bold">{{ $order->itemName() }}</dd></div>
                 <div class="flex justify-between gap-4"><dt class="text-ink/80">Kaedah</dt><dd class="font-bold">{{ $order->payment_method->getLabel() }}</dd></div>
                 <div class="flex justify-between gap-4 border-t-2 border-ink/10 pt-2"><dt class="font-bold">Jumlah</dt><dd class="font-display text-2xl font-extrabold">{{ Money::format($order->amount_sen) }}</dd></div>
             </dl>
@@ -60,7 +60,11 @@
 
         @if ($order->isPaid())
             <section class="{{ $cardClass }}">
-                <p>Resit telah dihantar ke e-mel anda. Status Pas Tahunan boleh dilihat di halaman Akaun saya.</p>
+                @if ($order->book)
+                    <p>Resit telah dihantar ke e-mel anda. <strong>{{ $order->book->title }}</strong> kini terbuka dalam akaun anda.</p>
+                @else
+                    <p>Resit telah dihantar ke e-mel anda. Status Pas Tahunan boleh dilihat di halaman Akaun saya.</p>
+                @endif
                 <a href="{{ route('account') }}" class="btn-utama mt-4">Ke Akaun saya</a>
             </section>
         @elseif ($awaitingConfirmation)
@@ -68,7 +72,7 @@
                 @if (session('receipt_uploaded'))
                     <p role="status" class="mb-3 font-semibold text-biru">Terima kasih, resit anda telah dihantar.</p>
                 @endif
-                <p>Kami akan menyemak pindahan anda dan mengesahkan bayaran secepat mungkin. Anda akan menerima resit melalui e-mel sebaik sahaja Pas Tahunan diaktifkan. Slot anda kekal ditempah sepanjang semakan.</p>
+                <p>Kami akan menyemak pindahan anda dan mengesahkan bayaran secepat mungkin. Anda akan menerima resit melalui e-mel sebaik sahaja {{ $order->book ? 'buku ini dibuka' : 'Pas Tahunan diaktifkan' }}.@if ($preorder) Slot anda kekal ditempah sepanjang semakan.@endif</p>
                 @if ($canUploadReceipt && $receiptUrl)
                     <a href="{{ $receiptUrl }}" class="pautan mt-4 inline-block">Tersalah resit? Hantar semula</a>
                 @endif
@@ -80,11 +84,13 @@
                     <p>Jika anda <strong>sudah membuat pindahan</strong>, muat naik resit dan kami akan menyemaknya.</p>
                     <a href="{{ $receiptUrl }}" class="btn-utama">Muat naik resit</a>
                 @endif
-                <a href="{{ route('preorder.create') }}" @class(['btn-gelap' => $canUploadReceipt, 'btn-utama' => ! $canUploadReceipt])>Tempah semula</a>
+                <a href="{{ $retryUrl }}" @class(['btn-gelap' => $canUploadReceipt, 'btn-utama' => ! $canUploadReceipt])>Tempah semula</a>
             </section>
         @elseif ($order->payment_method === PaymentMethod::Chip)
             <section class="{{ $cardClass }}">
-                <p>Slot anda ditempah sehingga <strong>{{ $preorder->reserved_until->translatedFormat('g:i A, j F Y') }}</strong>. Selesaikan bayaran sebelum masa itu.</p>
+                @if ($preorder)
+                    <p>Slot anda ditempah sehingga <strong>{{ $preorder->reserved_until->translatedFormat('g:i A, j F Y') }}</strong>. Selesaikan bayaran sebelum masa itu.</p>
+                @endif
                 @if ($chipUrl)
                     <form method="POST" action="{{ $chipUrl }}" class="mt-5">
                         @csrf
@@ -97,7 +103,11 @@
             </section>
         @else
             <section class="{{ $cardClass }} space-y-4">
-                <p>Slot anda ditempah sehingga <strong>{{ $preorder->reserved_until->translatedFormat('g:i A, j F Y') }}</strong>. Pindahkan bayaran dan muat naik resit sebelum masa itu.</p>
+                @if ($preorder)
+                    <p>Slot anda ditempah sehingga <strong>{{ $preorder->reserved_until->translatedFormat('g:i A, j F Y') }}</strong>. Pindahkan bayaran dan muat naik resit sebelum masa itu.</p>
+                @else
+                    <p>Pindahkan bayaran ke akaun di bawah, kemudian muat naik resit.</p>
+                @endif
 
                 @if (array_filter($bank))
                     <dl class="space-y-1 rounded-2xl bg-lavender p-4">
