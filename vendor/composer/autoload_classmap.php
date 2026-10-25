@@ -194,6 +194,7 @@ return array(
     'App\\Services\\ClassReport' => $baseDir . '/app/Services/ClassReport.php',
     'App\\Services\\ContentWorkflow' => $baseDir . '/app/Services/ContentWorkflow.php',
     'App\\Services\\DashboardStats' => $baseDir . '/app/Services/DashboardStats.php',
+    'App\\Services\\FamilyProgress' => $baseDir . '/app/Services/FamilyProgress.php',
     'App\\Services\\Invitations' => $baseDir . '/app/Services/Invitations.php',
     'App\\Services\\ManualGrants' => $baseDir . '/app/Services/ManualGrants.php',
     'App\\Services\\ParentGate' => $baseDir . '/app/Services/ParentGate.php',

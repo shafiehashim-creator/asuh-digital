@@ -25,7 +25,7 @@ Langganan Tahunan anda akan **bermula pada tarikh platform ASUH Digital dilancar
 
 Bayaran ini dibuat sekali sahaja. Tiada caj automatik akan dikenakan.
 
-<x-mail::button :url="route('account')">
+<x-mail::button :url="route('account.billing')">
 Lihat akaun saya
 </x-mail::button>
 

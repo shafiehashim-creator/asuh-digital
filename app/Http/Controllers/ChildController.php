@@ -16,7 +16,7 @@ class ChildController extends Controller
     public function create(Request $request): View|RedirectResponse
     {
         if ($this->isFull($request)) {
-            return redirect()->route('account')->with('status', 'children-full');
+            return redirect()->route('account.children')->with('status', 'children-full');
         }
 
         return view('children.form', ['child' => new Child]);
@@ -25,12 +25,12 @@ class ChildController extends Controller
     public function store(ChildRequest $request): RedirectResponse
     {
         if ($this->isFull($request)) {
-            return redirect()->route('account')->with('status', 'children-full');
+            return redirect()->route('account.children')->with('status', 'children-full');
         }
 
         $request->user()->children()->create($request->validated());
 
-        return redirect()->route('account')->with('status', 'child-saved');
+        return redirect()->route('account.children')->with('status', 'child-saved');
     }
 
     public function edit(Request $request, Child $child): View
@@ -46,7 +46,7 @@ class ChildController extends Controller
 
         $child->update($request->validated());
 
-        return redirect()->route('account')->with('status', 'child-saved');
+        return redirect()->route('account.children')->with('status', 'child-saved');
     }
 
     /**
@@ -59,7 +59,7 @@ class ChildController extends Controller
 
         $child->delete();
 
-        return redirect()->route('account')->with('status', 'child-deleted');
+        return redirect()->route('account.children')->with('status', 'child-deleted');
     }
 
     private function isFull(Request $request): bool

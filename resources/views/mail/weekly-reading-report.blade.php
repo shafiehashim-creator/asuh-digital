@@ -28,7 +28,7 @@ Ini ringkasan bacaan anak anda di ASUH Digital untuk minggu **{{ $weekStart->tra
 @endforeach
 Teruskan galakan membaca di rumah. Jom Jadi Baik!
 
-<x-mail::button :url="route('account')">
+<x-mail::button :url="route('account.progress')">
 Buka Akaun saya
 </x-mail::button>
 

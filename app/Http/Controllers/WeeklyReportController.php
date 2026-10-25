@@ -14,7 +14,7 @@ class WeeklyReportController extends Controller
     {
         $request->user()->forceFill(['weekly_report' => $request->boolean('weekly_report')])->save();
 
-        return redirect()->route('account')->with('status', 'weekly-report-saved');
+        return redirect()->route('account.profile')->with('status', 'weekly-report-saved');
     }
 
     /** One-click stop from the e-mail (signed link, no login needed). */

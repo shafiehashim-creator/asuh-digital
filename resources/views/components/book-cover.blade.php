@@ -10,6 +10,9 @@
     @if ($book->cover_path)
         <img src="{{ Storage::disk('public')->url($book->cover_path) }}" alt="Kaver {{ $book->title }}"
             loading="lazy" class="h-full w-full object-cover">
+    @elseif ($size === 'sm')
+        {{-- Too small for the title; it is printed beside the cover. --}}
+        <div class="h-full w-full {{ $placeholder }}"></div>
     @else
         <div class="flex h-full w-full flex-col justify-between p-4 {{ $placeholder }}">
             <span class="font-display text-xs font-bold tracking-wide uppercase opacity-80">ASUH</span>
