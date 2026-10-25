@@ -11,7 +11,9 @@ class EnsureInstitutionStaff
 {
     public function handle(Request $request, Closure $next): Response
     {
-        abort_unless($request->user()?->isInstitutionStaff(), 403);
+        if (! $request->user()?->isInstitutionStaff()) {
+            return redirect()->route('switch-account', ['ke' => 'guru']);
+        }
 
         return $next($request);
     }

@@ -4,8 +4,6 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\PageImageController;
 use App\Http\Controllers\CatalogController;
-use App\Http\Middleware\AuthenticateOrPupil;
-use App\Http\Middleware\EnsureCatalogOpen;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ChildModeController;
 use App\Http\Controllers\ChildQuizController;
@@ -13,8 +11,6 @@ use App\Http\Controllers\ChildVideoController;
 use App\Http\Controllers\ChipPaymentController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LandingController;
-use App\Http\Controllers\Teacher;
-use App\Http\Middleware\EnsureInstitutionStaff;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\ParentPinController;
 use App\Http\Controllers\PassPageController;
@@ -26,7 +22,12 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReaderController;
 use App\Http\Controllers\ReadingProgressController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\SwitchAccountController;
+use App\Http\Controllers\Teacher;
 use App\Http\Controllers\WeeklyReportController;
+use App\Http\Middleware\AuthenticateOrPupil;
+use App\Http\Middleware\EnsureCatalogOpen;
+use App\Http\Middleware\EnsureInstitutionStaff;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', LandingController::class)->name('home');
@@ -92,6 +93,8 @@ Route::post('/pre-order', [PreorderController::class, 'store'])
 
 // Payment does not require a verified e-mail, so new buyers can pay at once.
 Route::middleware('auth')->group(function () {
+    Route::get('/tukar-akaun', [SwitchAccountController::class, 'show'])->name('switch-account');
+    Route::post('/tukar-akaun', [SwitchAccountController::class, 'logout'])->name('switch-account.logout');
     Route::get('/pesanan/{order:reference}', [PreorderController::class, 'pay'])->name('preorder.pay');
     Route::post('/pesanan/{order:reference}/bayar', [ChipPaymentController::class, 'start'])
         ->middleware('throttle:10,1')

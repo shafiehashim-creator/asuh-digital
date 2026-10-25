@@ -95,5 +95,5 @@ it('keeps the provider id out of serialised data', function () {
 });
 
 it('keeps parents out of the video admin', function () {
-    $this->actingAs(User::factory()->create())->get('/admin/video')->assertForbidden();
+    $this->actingAs(User::factory()->create())->get('/admin/video')->assertKeptOut();
 });

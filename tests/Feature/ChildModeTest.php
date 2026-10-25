@@ -97,6 +97,8 @@ it('sends every other page back to the shelf', function (string $method, string 
     ['GET', '/beli/langganan'],
     ['GET', '/'],
     ['POST', '/logout'],
+    ['GET', '/tukar-akaun'],
+    ['POST', '/tukar-akaun'],
 ]);
 
 it('keeps the child signed in when they try to log out', function () {

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 /*
@@ -17,6 +18,15 @@ use Tests\TestCase;
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature');
+
+// An account kept out of an area: a 403 inside an area it may use (an editor on a
+// finance page), or "Tukar akaun" when it may not use the area at all (a parent on /admin).
+TestResponse::macro('assertKeptOut', function (string $area = 'admin') {
+    /** @var TestResponse $this */
+    return $this->isRedirect()
+        ? $this->assertRedirect(route('switch-account', ['ke' => $area]))
+        : $this->assertForbidden();
+});
 
 /*
 |--------------------------------------------------------------------------

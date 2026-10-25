@@ -2,6 +2,8 @@
 
 use App\Enums\Role;
 use App\Models\User;
+use Filament\Auth\Pages\EditProfile;
+use Illuminate\Support\Facades\Hash;
 
 it('renders the admin login page', function () {
     $this->get('/admin/login')->assertOk();
@@ -20,7 +22,7 @@ it('lets a super admin into the admin panel', function () {
 it('blocks parents and institution admins from the admin panel', function (Role $role) {
     $this->actingAs(User::factory()->role($role)->create())
         ->get('/admin')
-        ->assertForbidden();
+        ->assertKeptOut();
 })->with([Role::Parent, Role::InstitutionAdmin]);
 
 it('gives new users the parent role by default', function () {
@@ -50,7 +52,7 @@ it('lets the admin change their own password from the panel profile', function (
 
     $this->get('/admin/profile')->assertOk();
 
-    Livewire\Livewire::test(Filament\Auth\Pages\EditProfile::class)
+    Livewire\Livewire::test(EditProfile::class)
         ->fillForm([
             'name' => $admin->name,
             'email' => $admin->email,
@@ -61,9 +63,9 @@ it('lets the admin change their own password from the panel profile', function (
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect(Illuminate\Support\Facades\Hash::check('BaharuKataLaluan2026', $admin->fresh()->password))->toBeTrue();
+    expect(Hash::check('BaharuKataLaluan2026', $admin->fresh()->password))->toBeTrue();
 });
 
 it('keeps parents out of the admin profile page', function () {
-    $this->actingAs(User::factory()->create())->get('/admin/profile')->assertForbidden();
+    $this->actingAs(User::factory()->create())->get('/admin/profile')->assertKeptOut();
 });

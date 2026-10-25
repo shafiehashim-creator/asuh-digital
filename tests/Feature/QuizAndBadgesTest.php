@@ -316,5 +316,5 @@ it('needs three to five questions in a quiz', function () {
 });
 
 it('keeps parents out of the quiz admin', function () {
-    $this->actingAs(User::factory()->create())->get('/admin/kuiz')->assertForbidden();
+    $this->actingAs(User::factory()->create())->get('/admin/kuiz')->assertKeptOut();
 });

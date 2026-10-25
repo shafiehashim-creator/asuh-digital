@@ -154,5 +154,5 @@ it('lets the admin move a request through its statuses', function () {
 it('keeps editors and parents out of pilot requests', function (Role $role) {
     $this->actingAs(User::factory()->role($role)->create())
         ->get('/admin/permohonan-pilot')
-        ->assertForbidden();
+        ->assertKeptOut();
 })->with([Role::Editor, Role::Parent]);

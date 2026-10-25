@@ -24,7 +24,7 @@ function adminPass(User $user, ?string $startsAt, ?string $endsAt): Pass
 
 it('keeps customers and passes away from editors and parents', function (string $url) {
     $this->actingAs(User::factory()->role(Role::Editor)->create())->get($url)->assertForbidden();
-    $this->actingAs(User::factory()->create())->get($url)->assertForbidden();
+    $this->actingAs(User::factory()->create())->get($url)->assertKeptOut();
 })->with(['/admin/pelanggan', '/admin/langganan']);
 
 it('lists only parent accounts as customers', function () {

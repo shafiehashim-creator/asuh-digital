@@ -162,10 +162,10 @@ it('replaces an earlier unused invitation to the same address', function () {
 });
 
 it('keeps parents and admins out of the teacher portal', function () {
-    $this->actingAs(User::factory()->create())->get('/guru')->assertForbidden();
-    $this->actingAs(User::factory()->admin()->create())->get('/guru')->assertForbidden();
+    $this->actingAs(User::factory()->create())->get('/guru')->assertKeptOut('guru');
+    $this->actingAs(User::factory()->admin()->create())->get('/guru')->assertKeptOut('guru');
     // A teacher role without an institution is not enough either.
-    $this->actingAs(User::factory()->role(Role::Teacher)->create())->get('/guru')->assertForbidden();
+    $this->actingAs(User::factory()->role(Role::Teacher)->create())->get('/guru')->assertKeptOut('guru');
 });
 
 it('tells the teacher when there is no active licence', function () {

@@ -6,6 +6,8 @@ use App\Enums\PreorderStatus;
 use App\Enums\Role;
 use App\Filament\Pages\Settings;
 use App\Filament\Resources\Preorders\Pages\ListPreorders;
+use App\Filament\Widgets\PassesAndPilotsOverview;
+use App\Filament\Widgets\SalesOverview;
 use App\Models\Order;
 use App\Models\Pass;
 use App\Models\PilotRequest;
@@ -146,7 +148,7 @@ it('starts waiting passes from the payment date when switching back to "on payme
 it('keeps the settings page for the Super Admin only', function (Role $role) {
     $this->actingAs(User::factory()->role($role)->create())
         ->get('/admin/tetapan')
-        ->assertForbidden();
+        ->assertKeptOut();
 })->with([Role::Editor, Role::Parent]);
 
 // --- Pre-order list ----------------------------------------------------------
@@ -222,15 +224,15 @@ it('counts active, expiring and waiting passes and pilot conversion', function (
 it('shows the dashboard widgets to the admin', function () {
     $this->actingAs($this->admin);
 
-    Livewire::test(App\Filament\Widgets\SalesOverview::class)->assertSee('Pre-order dibayar')->assertSee('0 / 100');
-    Livewire::test(App\Filament\Widgets\PassesAndPilotsOverview::class)->assertSee('Langganan Tahunan aktif');
+    Livewire::test(SalesOverview::class)->assertSee('Pre-order dibayar')->assertSee('0 / 100');
+    Livewire::test(PassesAndPilotsOverview::class)->assertSee('Langganan Tahunan aktif');
 });
 
 it('hides financial widgets from editors', function () {
     $this->actingAs(User::factory()->role(Role::Editor)->create());
 
-    expect(App\Filament\Widgets\SalesOverview::canView())->toBeFalse()
-        ->and(App\Filament\Widgets\PassesAndPilotsOverview::canView())->toBeFalse();
+    expect(SalesOverview::canView())->toBeFalse()
+        ->and(PassesAndPilotsOverview::canView())->toBeFalse();
 });
 
 it('shows the CHIP connection status without revealing the keys', function (?string $brand, ?string $key, bool $testMode, string $expected) {

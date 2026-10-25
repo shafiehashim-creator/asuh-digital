@@ -71,7 +71,7 @@ it('only lets staff review', function () {
 it('lets editors and admins manage books but keeps parents out', function () {
     $this->actingAs($this->editor)->get('/admin/buku')->assertOk();
     $this->actingAs(User::factory()->admin()->create())->get('/admin/buku')->assertOk();
-    $this->actingAs(User::factory()->create())->get('/admin/buku')->assertForbidden();
+    $this->actingAs(User::factory()->create())->get('/admin/buku')->assertKeptOut();
 });
 
 it('creates a book with a cover and a private PDF', function () {
@@ -103,7 +103,7 @@ it('creates a book with a cover and a private PDF', function () {
         ->and($book->single_price_sen)->toBe(990)
         ->and($file->path)->toStartWith('books/')
         ->and($file->page_count)->toBe(24)
-        ->and($book->categories->pluck("slug")->sort()->values()->all())->toBe(["akhlak", "komik"]);
+        ->and($book->categories->pluck('slug')->sort()->values()->all())->toBe(['akhlak', 'komik']);
 
     Storage::disk('local')->assertExists($file->path);
     Storage::disk('public')->assertExists($book->cover_path);
