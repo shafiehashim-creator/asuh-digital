@@ -36,6 +36,10 @@
                 <h1 class="mt-4 font-display text-3xl font-extrabold text-magenta sm:text-4xl">{{ $book->title }}</h1>
                 <p class="mt-1 text-lg text-ink/80">oleh {{ $book->author }}</p>
 
+                @if ($book->readers_count >= App\Services\CatalogStats::MIN_READERS)
+                    <p class="mt-3 inline-flex items-center gap-1 rounded-full bg-oren/15 px-3 py-1 text-sm font-bold">🔥 {{ number_format($book->readers_count) }} keluarga telah membaca buku ini</p>
+                @endif
+
                 <div class="mt-6 space-y-3 text-ink/90">
                     @foreach (preg_split('/\n\s*\n/', trim($book->synopsis)) as $paragraph)
                         <p>{{ $paragraph }}</p>
@@ -52,17 +56,43 @@
                     @elseif ($canRead)
                         <p class="font-semibold">Fail buku ini sedang disediakan.</p>
                     @else
-                        <p class="font-display text-lg font-bold text-plum">Baca dengan Pas Tahunan</p>
-                        <p class="mt-1 text-ink/80">Satu Pas untuk seisi keluarga: semua e-book ASUH Digital selama 12 bulan.</p>
-                        <div class="mt-4 flex flex-wrap gap-3">
-                            <a href="{{ route('purchase.pass') }}" class="btn-utama">Dapatkan Pas Tahunan</a>
-                            @if ($book->single_price_sen)
-                                <a href="{{ route('purchase.book', $book) }}" class="btn-gelap">Beli buku ini {{ Money::short($book->single_price_sen) }}</a>
-                            @endif
-                            @guest
-                                <a href="{{ route('login') }}" class="btn-gelap">Log masuk</a>
-                            @endguest
-                        </div>
+                        @if ($previewPages > 0)
+                            <a href="{{ route('catalog.preview', $book) }}" class="btn-gelap w-full">📖 Baca pratonton percuma ({{ $previewPages }} halaman)</a>
+                        @endif
+
+                        @if ($offer->available())
+                            <div @class(['rounded-2xl border-2 border-ink bg-kuning p-4', 'mt-4' => $previewPages > 0])>
+                                <p class="text-xs font-extrabold tracking-wide uppercase">★ Paling jimat · Pas Tahunan</p>
+                                <p class="mt-1 font-display text-3xl font-extrabold">
+                                    {{ Money::short($offer->priceSen()) }}
+                                    @if ($offer->compareAtSen())
+                                        <span class="text-lg text-ink/60 line-through">{{ Money::short($offer->compareAtSen()) }}</span>
+                                    @endif
+                                </p>
+                                <p class="text-sm font-semibold">
+                                    Buku ini @if ($bookCount > 1) dan {{ $bookCount - 1 }} buku lain @endif untuk seisi keluarga, selama 12 bulan.
+                                    @if ($bookCount > 1) Kira-kira {{ Money::format(intdiv($offer->priceSen(), $bookCount)) }} sebuku. @endif
+                                </p>
+                                <a href="{{ $offer->checkoutUrl() }}" class="btn-gelap mt-3 w-full">{{ $offer->ctaLabel() }}</a>
+                                <a href="{{ route('pass.show') }}" class="mt-2 block text-center text-sm font-bold underline">Apa yang termasuk?</a>
+                            </div>
+                        @endif
+
+                        @if ($book->single_price_sen)
+                            <a href="{{ route('purchase.book', $book) }}" class="btn-utama mt-3 w-full">Beli buku ini {{ Money::short($book->single_price_sen) }}</a>
+                        @endif
+
+                        @guest
+                            <p class="mt-3 text-center text-sm">Sudah ada Pas? <a href="{{ route('login') }}" class="pautan font-bold">Log masuk</a></p>
+                        @endguest
+
+                        <ul class="mt-4 grid gap-1 text-sm font-semibold text-ink/80 sm:grid-cols-2">
+                            <li>✓ Disemak syariah</li>
+                            <li>✓ Baca di telefon, tablet & komputer</li>
+                            <li>✓ Akses serta-merta selepas bayar</li>
+                            <li>✓ Tiada caj automatik</li>
+                        </ul>
+                        <p class="mt-3 text-center text-xs font-bold text-ink/60">FPX · Kad debit/kredit · e-Wallet · Pindahan bank</p>
                     @endif
                 </div>
             </div>
@@ -78,7 +108,7 @@
                 @unless ($hasPass)
                     <div class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-ink bg-kuning px-5 py-4">
                         <p class="font-bold">Semua buku ini termasuk dalam Pas Tahunan. Satu bayaran, seisi keluarga baca sepanjang tahun.</p>
-                        <a href="{{ route('purchase.pass') }}" class="btn-gelap">Dapatkan Pas Tahunan</a>
+                        <a href="{{ route('pass.show') }}" class="btn-gelap">Dapatkan Pas Tahunan</a>
                     </div>
                 @endunless
 

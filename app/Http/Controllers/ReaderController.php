@@ -39,6 +39,8 @@ class ReaderController extends Controller
         $file = $book->load('files')->readableFile();
         abort_unless($file, 404);
 
+        $book->recordReader($user);
+
         $expires = now()->addMinutes(self::LINK_MINUTES);
         $link = ['book' => $book->slug, 'file' => $file->id, 'u' => $user->id];
 

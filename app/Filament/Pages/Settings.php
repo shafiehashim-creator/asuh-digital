@@ -55,7 +55,7 @@ class Settings extends Page
         'bank_name', 'bank_account_name', 'bank_account_number',
         'contact_email', 'company_name', 'company_ssm_no', 'company_address', 'company_sst_no',
         'admin_notification_emails',
-        'catalog_open',
+        'catalog_open', 'preview_pages', 'whatsapp_number',
     ];
 
     /** @var array<string, mixed> */
@@ -90,6 +90,16 @@ class Settings extends Page
                 ->schema([
                     Toggle::make('catalog_open')->label('Buka katalog kepada orang ramai')
                         ->helperText('Semasa ditutup, /buku dan pembaca memberi 404 kepada pelawat; staf masih boleh pratonton. Buka hanya apabila buku sudah diterbitkan dan diuji.'),
+                    TextInput::make('preview_pages')->label('Halaman pratonton percuma')
+                        ->helperText('Bilangan halaman awal yang boleh dibaca sesiapa sahaja tanpa Pas. Hanya untuk buku yang ada versi pantas. 0 untuk menutup pratonton.')
+                        ->integer()->minValue(0)->maxValue(20)->required(),
+                ]),
+
+            Section::make('WhatsApp')
+                ->schema([
+                    TextInput::make('whatsapp_number')->label('Nombor WhatsApp pertanyaan')
+                        ->helperText('Nombor penuh dengan kod negara, tanpa + atau sengkang, contohnya 60123456789. Butang WhatsApp terapung dipaparkan di laman awam apabila diisi.')
+                        ->regex('/^\d{9,15}$/')->maxLength(15),
                 ]),
 
             Section::make('Harga dan slot pre-order')
