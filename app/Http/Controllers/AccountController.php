@@ -6,14 +6,20 @@ use App\Http\Middleware\EnsureCatalogOpen;
 use App\Models\Book;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AccountController extends Controller
 {
-    public function show(Request $request): View
+    public function show(Request $request): View|RedirectResponse
     {
         $user = $request->user();
+
+        // Teachers land here after logging in; their home is the teacher portal.
+        if ($user->isInstitutionStaff()) {
+            return redirect()->route('teacher.home');
+        }
         $activePass = $user->activePass();
         $shelfOpen = EnsureCatalogOpen::isOpenFor($user);
 

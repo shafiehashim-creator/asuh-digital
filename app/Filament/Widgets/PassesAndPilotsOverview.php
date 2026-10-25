@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\Institutions\InstitutionResource;
 use App\Filament\Resources\PilotRequests\PilotRequestResource;
 use App\Services\DashboardStats;
 use Filament\Support\Icons\Heroicon;
@@ -24,6 +25,7 @@ class PassesAndPilotsOverview extends StatsOverviewWidget
         $stats = app(DashboardStats::class);
         $passes = $stats->passes();
         $pilots = $stats->pilots();
+        $licenses = $stats->licenses();
 
         return [
             Stat::make('Pas Tahunan aktif', (string) $passes['active'])
@@ -38,6 +40,11 @@ class PassesAndPilotsOverview extends StatsOverviewWidget
                 ->descriptionIcon(Heroicon::OutlinedBuildingLibrary)
                 ->color('primary')
                 ->url(PilotRequestResource::getUrl()),
+            Stat::make('Institusi berlesen', (string) $licenses['active'])
+                ->description("{$licenses['paid']} berbayar · {$licenses['expiring']} tamat dalam 30 hari")
+                ->descriptionIcon(Heroicon::OutlinedAcademicCap)
+                ->color($licenses['expiring'] > 0 ? 'warning' : 'primary')
+                ->url(InstitutionResource::getUrl()),
         ];
     }
 }

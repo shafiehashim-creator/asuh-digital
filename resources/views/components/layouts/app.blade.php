@@ -4,6 +4,8 @@
     use App\Http\Middleware\EnsureCatalogOpen;
 
     $catalogOpen = EnsureCatalogOpen::isOpenFor(auth()->user());
+    // Teachers (Phase D) have the teacher portal instead of a parent's account page.
+    $isTeacher = auth()->user()?->isInstitutionStaff() ?? false;
 
     // Bottom tab bar on phones, like an app. Each tab: label, URL, active check, icon path.
     $tabs = array_values(array_filter([
@@ -12,7 +14,7 @@
             ? ['Katalog', route('catalog.index'), request()->routeIs('catalog.*', 'purchase.book*'), 'M4 4h5a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zm16 0h-5a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h6z']
             : null,
         auth()->check()
-            ? ['Akaun', route('account'), request()->routeIs('account', 'preorder.pay', 'preorder.receipt'), 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8m-7 9a7 7 0 0 1 14 0']
+            ? [$isTeacher ? 'Guru' : 'Akaun', $isTeacher ? route('teacher.home') : route('account'), request()->routeIs('account', 'preorder.pay', 'preorder.receipt', 'teacher.*'), 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8m-7 9a7 7 0 0 1 14 0']
             : ['Log masuk', route('login'), request()->routeIs('login', 'password.*'), 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8m-7 9a7 7 0 0 1 14 0'],
     ]));
 @endphp
@@ -39,7 +41,7 @@
                         <a href="{{ route('catalog.index') }}" class="inline-flex min-h-11 items-center rounded-full px-3 hover:bg-white/10">Katalog</a>
                     @endif
                     @auth
-                        <a href="{{ route('account') }}" class="inline-flex min-h-11 items-center rounded-full px-3 hover:bg-white/10">Akaun saya</a>
+                        <a href="{{ $isTeacher ? route('teacher.home') : route('account') }}" class="inline-flex min-h-11 items-center rounded-full px-3 hover:bg-white/10">{{ $isTeacher ? 'Portal guru' : 'Akaun saya' }}</a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="min-h-11 rounded-full px-3 py-2 hover:bg-white/10">Log keluar</button>

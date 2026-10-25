@@ -39,7 +39,10 @@ class ReaderController extends Controller
             return redirect()->route('child-mode.home');
         }
 
-        if (! $user->canReadBook($book)) {
+        // Pupils (Phase D) read under their institution's licence, with no account.
+        $pupil = $child?->isPupil() ? $child : null;
+
+        if (! $pupil && ! $user->canReadBook($book)) {
             return redirect()->route('catalog.show', $book)
                 ->with('reader_denied', true);
         }
@@ -47,10 +50,12 @@ class ReaderController extends Controller
         $file = $book->load('files')->readableFile();
         abort_unless($file, 404);
 
-        $book->recordReader($user);
+        if (! $pupil) {
+            $book->recordReader($user);
+        }
 
         $expires = now()->addMinutes(self::LINK_MINUTES);
-        $link = ['book' => $book->slug, 'file' => $file->id, 'u' => $user->id];
+        $link = ['book' => $book->slug, 'file' => $file->id] + ($pupil ? ['p' => $pupil->id] : ['u' => $user->id]);
 
         return view('reader.show', [
             'book' => $book,
@@ -64,7 +69,8 @@ class ReaderController extends Controller
                     range(1, $file->page_images),
                 ),
             ] : null,
-            'watermark' => $user->email.' · '.now()->translatedFormat('j M Y'),
+            'watermark' => ($pupil ? $pupil->classroom->institution->name.' · '.$pupil->classroom->name : $user->email)
+                .' · '.now()->translatedFormat('j M Y'),
             'closeUrl' => $child ? route('child-mode.home') : route('catalog.show', $book),
             // Mod Anak: reading time and the page reached are kept for the child.
             'progress' => $child ? [
@@ -115,8 +121,17 @@ class ReaderController extends Controller
      */
     private function authorizeLink(Request $request, Book $book, BookFile $file): void
     {
-        abort_unless((int) $request->query('u') === $request->user()->id, 403);
         abort_unless($file->book_id === $book->id, 404);
+
+        if ($request->has('p')) {
+            $childMode = app(ChildMode::class);
+            $pupil = $childMode->child(null);
+            abort_unless($pupil?->isPupil() && $pupil->id === (int) $request->query('p') && $childMode->allows($pupil, $book), 403);
+
+            return;
+        }
+
+        abort_unless($request->user() && (int) $request->query('u') === $request->user()->id, 403);
         abort_unless($request->user()->canReadBook($book), 403);
     }
 }

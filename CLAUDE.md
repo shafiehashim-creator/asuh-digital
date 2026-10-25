@@ -127,6 +127,17 @@ Semua halaman Fasa C dibuka bersama katalog (`catalog_open`), jadi boleh dideplo
 - **Lencana** (keputusan pengguna 2026-10-25), tetap dalam kod `App\Enums\Badge` dan jadual `child_badges` (tiada jadual `badges`): Kuiz Pertama, Pakar Kuiz (5 buku lulus), Bintang Ilmu (10 kuiz semua betul), Pembaca Rajin (3 hari berturut-turut), Seminggu Membaca (7 hari), Pembaca Istiqamah (20 hari dalam sebulan). Hari membaca = sekurang-kurangnya 5 minit (semua buku). `App\Services\BadgeAwarder` dipanggil selepas kuiz dan heartbeat.
 - **Laporan mingguan**: `php artisan asuh:weekly-reports` dijadualkan setiap Isnin 8:00 pagi (MYT) melalui `schedule:run`; hanya ibu bapa yang anaknya membaca minggu lalu (Isnin–Ahad), tidak dihantar dua kali (`users.weekly_report_sent_at`). Boleh dimatikan di Akaun saya atau pautan bertandatangan dalam e-mel (`users.weekly_report`).
 
+## Status Fasa D (2026-10-26)
+
+Keputusan pengguna (2026-10-26): murid masuk dengan kod kelas dan pilih nama; pentadbir institusi menjemput guru; lesen diaktifkan secara manual oleh admin; lesen membuka semua buku diterbitkan ikut umur kelas.
+
+- **Institusi dan lesen** (`/admin/institusi`, admin sahaja): jadual `institutions`, `licenses` (`kind` pilot/paid, `max_students`, `starts_on`, `ends_on`). Butang **Mulakan pilot** pada permohonan pilot mencipta institusi dengan lesen pilot (`pilot_duration_days`) dan menukar status kepada Pilot aktif.
+- **Jemputan** (`invitations`, hanya hash token disimpan, sah 7 hari, sekali guna): admin ASUH jemput pentadbir institusi (role `institution_admin`); pentadbir jemput guru (role `teacher`) dari `/guru`. `users.institution_id`. Menerima jemputan di `/jemputan/{token}` mencipta akaun yang e-melnya sudah disahkan. Guru log masuk di `/login` dan `/akaun` menghala ke `/guru`.
+- **Portal guru** (`/guru`, middleware `EnsureInstitutionStaff`): pentadbir nampak semua kelas dan urus guru; guru nampak kelas sendiri. Kelas (`classrooms`): nama, umur, kod 6 aksara tanpa huruf mengelirukan (boleh dijana semula). Murid ditambah ikut nama panggilan, satu setiap baris, unik dalam kelas, dan jumlah seluruh institusi dihadkan oleh `max_students` lesen aktif. Murid ialah baris `children` dengan `classroom_id` (tiada `user_id`), jadi rekod bacaan, kuiz dan lencana sama seperti Mod Anak. Laporan **Kemajuan bacaan** setiap murid (`App\Services\ClassReport`).
+- **Akses murid** (`/kelas`, `App\Http\Controllers\PupilAccessController`): kod kelas → tekan nama → Mod Anak (`ChildMode::enterAsPupil`). Tiada akaun murid. Pembaca guna pautan bertandatangan terikat pada sesi murid (`p=`) dengan watermark institusi dan kelas. "Tukar murid" kembali ke senarai nama. Lesen tamat → murid dihantar ke `/kelas`. `LockChildMode` berjalan sebelum semakan login.
+- **Peringatan lesen**: `php artisan asuh:license-reminders` setiap hari 9:00 pagi menghantar e-mel kepada pentadbir institusi 30 dan 7 hari sebelum lesen tamat (kecuali sudah diperbaharui). Portal guru memaparkan amaran 30 hari. Widget papan pemuka: Institusi berlesen.
+- Belum dibina: institusi membeli lesen dalam talian, dan admin melihat kemajuan murid (guru sahaja buat masa ini).
+
 ## Perlindungan e-book
 
 - Fail disimpan dalam `storage/app/private`, **tidak** dalam `public/`.

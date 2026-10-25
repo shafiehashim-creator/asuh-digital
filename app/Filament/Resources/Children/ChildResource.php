@@ -40,13 +40,15 @@ class ChildResource extends Resource
     {
         return $table
             ->defaultSort('created_at', 'desc')
-            ->modifyQueryUsing(fn ($query) => $query->with('user'))
+            ->modifyQueryUsing(fn ($query) => $query->with(['user', 'classroom.institution']))
             ->columns([
                 TextColumn::make('nickname')->label('Nama panggilan')->searchable(),
                 TextColumn::make('age_group')->label('Umur')->badge(),
-                TextColumn::make('user.name')->label('Ibu bapa')->searchable()
-                    ->description(fn (Child $record) => $record->user?->email)
-                    ->url(fn (Child $record) => CustomerResource::getUrl('view', ['record' => $record->user_id])),
+                TextColumn::make('user.name')->label('Ibu bapa / kelas')->searchable()
+                    // Pupils (Phase D) belong to a class instead of a parent.
+                    ->state(fn (Child $record) => $record->user?->name ?? $record->classroom?->name)
+                    ->description(fn (Child $record) => $record->user?->email ?? $record->classroom?->institution?->name)
+                    ->url(fn (Child $record) => $record->user_id ? CustomerResource::getUrl('view', ['record' => $record->user_id]) : null),
                 TextColumn::make('created_at')->label('Dicipta')->date('j M Y')->sortable(),
             ])
             ->filters([
