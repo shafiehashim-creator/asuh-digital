@@ -5,9 +5,11 @@ use App\Http\Controllers\Admin\PageImageController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Middleware\EnsureCatalogOpen;
 use App\Http\Controllers\ChildController;
+use App\Http\Controllers\ChildModeController;
 use App\Http\Controllers\ChipPaymentController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LegalController;
+use App\Http\Controllers\ParentPinController;
 use App\Http\Controllers\PassPageController;
 use App\Http\Controllers\PilotRequestController;
 use App\Http\Controllers\PreorderController;
@@ -108,5 +110,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{child}/ubah', 'edit')->name('edit');
         Route::put('/{child}', 'update')->name('update');
         Route::delete('/{child}', 'destroy')->name('destroy');
+    });
+
+    Route::middleware(EnsureCatalogOpen::class)->group(function () {
+        Route::post('/akaun/anak/{child}/mod-anak', [ChildModeController::class, 'enter'])->name('children.child-mode');
+        Route::put('/akaun/pin', [ParentPinController::class, 'update'])->middleware('throttle:10,1')->name('parent-pin.update');
+        Route::delete('/akaun/pin', [ParentPinController::class, 'destroy'])->middleware('throttle:10,1')->name('parent-pin.destroy');
+
+        // Mod Anak (LockChildMode keeps the child here until the parent gate is passed).
+        Route::prefix('/mod-anak')->name('child-mode.')->controller(ChildModeController::class)->group(function () {
+            Route::get('/', 'home')->name('home');
+            Route::get('/keluar', 'gate')->name('gate');
+            Route::post('/keluar', 'leave')->middleware('throttle:10,1')->name('leave');
+        });
     });
 });

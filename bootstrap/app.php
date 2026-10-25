@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\LockChildMode;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // CHIP posts here server-to-server; requests are verified by RSA signature instead.
         $middleware->validateCsrfTokens(except: ['webhooks/chip']);
+
+        // Mod Anak keeps a child on their shelf until the parent gate is passed.
+        $middleware->web(append: [LockChildMode::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

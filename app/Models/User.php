@@ -16,7 +16,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['name', 'email', 'phone', 'password'])]
-#[Hidden(['password', 'remember_token'])]
+#[Hidden(['password', 'remember_token', 'parent_pin'])]
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
@@ -32,6 +32,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'parent_pin' => 'hashed',
             'role' => Role::class,
         ];
     }
@@ -39,6 +40,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->role?->canAccessAdminPanel() ?? false;
+    }
+
+    public function hasParentPin(): bool
+    {
+        return filled($this->parent_pin);
     }
 
     public function isAdmin(): bool

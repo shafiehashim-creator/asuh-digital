@@ -67,6 +67,10 @@
                                     <p class="text-sm text-ink/70">{{ $child->age_group->getLabel() }}</p>
                                 </div>
                                 <a href="{{ route('children.edit', $child) }}" class="pautan inline-flex min-h-11 items-center text-sm">Ubah</a>
+                                <form method="POST" action="{{ route('children.child-mode', $child) }}">
+                                    @csrf
+                                    <button type="submit" class="btn-utama px-4 text-sm">Mod Anak</button>
+                                </form>
                             </li>
                         @endforeach
                     </ul>
@@ -75,6 +79,46 @@
                 @if ($children->count() < App\Models\Child::MAX_PER_ACCOUNT)
                     <a href="{{ route('children.create') }}" class="btn-gelap mt-4">Tambah anak</a>
                 @endif
+
+                {{-- Parent PIN for leaving Mod Anak --}}
+                <div class="mt-6 border-t-2 border-ink/10 pt-5">
+                    <h3 class="font-display font-bold">PIN ibu bapa</h3>
+                    @if (session('status') === 'pin-saved')
+                        <p role="status" class="mt-2 text-sm font-semibold text-biru">PIN disimpan.</p>
+                    @elseif (session('status') === 'pin-removed')
+                        <p role="status" class="mt-2 text-sm font-semibold text-biru">PIN dibuang. Soalan matematik akan digunakan.</p>
+                    @endif
+                    <p class="mt-1 text-sm text-ink/80">
+                        {{ $user->hasParentPin()
+                            ? 'Mod Anak meminta PIN 4 digit anda sebelum keluar.'
+                            : 'Tanpa PIN, Mod Anak bertanya soalan matematik sebelum keluar. Tetapkan PIN jika anak anda sudah pandai mengira.' }}
+                    </p>
+
+                    <form method="POST" action="{{ route('parent-pin.update') }}" class="mt-3 grid gap-3 sm:grid-cols-3">
+                        @csrf
+                        @method('PUT')
+                        <x-field name="pin" label="{{ $user->hasParentPin() ? 'PIN baharu' : 'PIN (4 digit)' }}" type="password" bag="parentPin"
+                            inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" required />
+                        <x-field name="pin_confirmation" label="Taip semula PIN" type="password" bag="parentPin"
+                            inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" required />
+                        <x-field name="current_password" label="Kata laluan akaun" type="password" bag="parentPin" autocomplete="current-password" required />
+                        <div class="flex flex-wrap items-center gap-3 sm:col-span-3">
+                            <button type="submit" class="btn-gelap">{{ $user->hasParentPin() ? 'Tukar PIN' : 'Tetapkan PIN' }}</button>
+                        </div>
+                    </form>
+
+                    @if ($user->hasParentPin())
+                        <form method="POST" action="{{ route('parent-pin.destroy') }}" class="mt-3 flex flex-wrap items-end gap-3">
+                            @csrf
+                            @method('DELETE')
+                            <div class="min-w-48 flex-1 sm:max-w-xs">
+                                <label for="remove_pin_password" class="label">Kata laluan akaun (untuk buang PIN)</label>
+                                <input id="remove_pin_password" name="current_password" type="password" class="input" autocomplete="current-password" required>
+                            </div>
+                            <button type="submit" class="pautan inline-flex min-h-11 items-center text-sm">Buang PIN</button>
+                        </form>
+                    @endif
+                </div>
             </section>
         @endif
 
