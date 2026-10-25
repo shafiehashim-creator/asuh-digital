@@ -32,12 +32,16 @@
                 @if ($preview)
                     <span class="hidden shrink-0 rounded-full bg-kuning px-3 py-1 text-xs font-extrabold text-ink sm:inline">Pratonton {{ $preview['pages'] }} halaman</span>
                 @endif
+                {{-- Hides the browser's address and bookmark bars; shown only where the browser allows it. --}}
+                <button type="button" data-fullscreen hidden class="min-h-11 min-w-11 rounded-full border-2 border-white/40 px-3 text-sm font-bold hover:bg-white/10" aria-label="Skrin penuh">
+                    <span aria-hidden="true">⛶</span><span class="ml-1 hidden sm:inline" data-fullscreen-label>Skrin penuh</span>
+                </button>
                 <button type="button" data-mode-toggle hidden class="min-h-11 rounded-full border-2 border-white/40 px-3 text-sm font-bold hover:bg-white/10">Mod biasa</button>
                 <button type="button" data-zoom-out class="min-h-11 min-w-11 rounded-full font-display text-xl font-bold hover:bg-white/10" aria-label="Kecilkan">−</button>
                 <button type="button" data-zoom-in class="min-h-11 min-w-11 rounded-full font-display text-xl font-bold hover:bg-white/10" aria-label="Besarkan">+</button>
             </header>
 
-            <main data-stage class="flex-1 overflow-auto px-2 py-4">
+            <main data-stage class="flex-1 overflow-auto px-2 py-4 [@media(max-height:800px)]:py-1">
                 <div data-status role="status" class="mx-auto mt-8 w-40 text-center font-semibold sm:mt-16 sm:w-52">
                     <x-book-cover :book="$book" class="animate-pulse" />
                     <p class="mt-4">Membuka buku…</p>
