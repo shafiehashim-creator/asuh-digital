@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 #[Fillable([
@@ -115,6 +116,41 @@ class Book extends Model
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Pages anyone may read free: the first few "versi pantas" images (a PDF
+     * cannot be cut short safely), so 0 until those exist or when turned off.
+     */
+    public function previewPageCount(): int
+    {
+        $file = $this->readableFile();
+
+        if (! $this->isPublished() || ! $file?->hasPageImages()) {
+            return 0;
+        }
+
+        return min((int) Setting::get('preview_pages'), $file->page_images);
+    }
+
+    /** Families who have opened this book in the reader (staff previews excluded). */
+    public function readers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'book_readers')->withPivot('first_read_at', 'last_read_at');
+    }
+
+    public function recordReader(User $user): void
+    {
+        if ($user->isStaff()) {
+            return;
+        }
+
+        $now = now();
+        DB::table('book_readers')->upsert(
+            [['book_id' => $this->id, 'user_id' => $user->id, 'first_read_at' => $now, 'last_read_at' => $now]],
+            ['book_id', 'user_id'],
+            ['last_read_at'],
+        );
     }
 
     public function files(): HasMany

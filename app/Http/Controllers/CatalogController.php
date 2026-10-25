@@ -6,6 +6,8 @@ use App\Enums\AgeGroup;
 use App\Models\Book;
 use App\Models\Category;
 use App\Services\BookRecommendations;
+use App\Services\CatalogStats;
+use App\Services\PassOffer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -41,20 +43,23 @@ class CatalogController extends Controller
         ]);
     }
 
-    public function show(Request $request, Book $book, BookRecommendations $recommendations): View
+    public function show(Request $request, Book $book, BookRecommendations $recommendations, PassOffer $offer, CatalogStats $stats): View
     {
         $user = $request->user();
 
         // Unpublished books exist only for staff previews.
         abort_unless($book->isPublished() || $user?->isStaff(), 404);
 
-        $book->load(['categories', 'files']);
+        $book->load(['categories', 'files'])->loadCount('readers');
 
         return view('catalog.show', [
             'book' => $book,
             'canRead' => $user?->canReadBook($book) ?? false,
             'recommended' => $recommendations->for($book, $user),
             'hasPass' => $user && ($user->isStaff() || $user->passes()->active()->exists()),
+            'offer' => $offer,
+            'bookCount' => $stats->summary()['books'],
+            'previewPages' => $book->previewPageCount(),
         ]);
     }
 }

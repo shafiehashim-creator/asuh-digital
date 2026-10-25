@@ -92,7 +92,7 @@ it('shows a book page, and 404 for unpublished books outside staff', function ()
     $published = Book::factory()->published()->create(['synopsis' => 'Kisah tentang kejujuran.']);
     $draft = Book::factory()->create();
 
-    $this->get(route('catalog.show', $published))->assertOk()->assertSee('Kisah tentang kejujuran.')->assertSee('Dapatkan Pas Tahunan');
+    $this->get(route('catalog.show', $published))->assertOk()->assertSee('Kisah tentang kejujuran.')->assertSee('Akses serta-merta selepas bayar');
     $this->get(route('catalog.show', $draft))->assertNotFound();
     $this->actingAs(User::factory()->admin()->create())->get(route('catalog.show', $draft))->assertOk()->assertSee('belum diterbitkan');
 });

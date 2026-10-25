@@ -28,6 +28,7 @@ if (root) {
     const zoomIn = root.querySelector('[data-zoom-in]');
     const zoomOut = root.querySelector('[data-zoom-out]');
     const modeToggle = root.querySelector('[data-mode-toggle]');
+    const previewCta = root.querySelector('[data-preview-cta]'); // free preview only
     const watermark = root.dataset.watermark;
     const pageKey = `asuh.reader.${root.dataset.book}`;
     const modeKey = 'asuh.reader.mode';
@@ -157,6 +158,14 @@ if (root) {
             : `Halaman ${first}–${last} / ${doc.numPages}`;
         prev.disabled = first <= 1;
         next.disabled = last >= doc.numPages;
+        if (previewCta) {
+            const ended = last >= doc.numPages;
+            if (previewCta.hidden === ended) {
+                previewCta.hidden = !ended;
+                window.dispatchEvent(new Event('resize')); // the bar takes room from the book
+            }
+            return; // a preview does not move the bookmark of the full book
+        }
         store(pageKey, String(first));
     };
 
@@ -417,7 +426,7 @@ if (root) {
 
     const open = (source) => {
         doc = source;
-        page = Math.min(parseInt(load(pageKey), 10) || 1, doc.numPages);
+        page = previewCta ? 1 : Math.min(parseInt(load(pageKey), 10) || 1, doc.numPages);
         status.remove();
         modeToggle.hidden = false;
         canvas.hidden = true;

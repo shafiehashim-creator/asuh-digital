@@ -25,6 +25,10 @@ return [
         // Phase B catalogue and reader stay hidden from the public until the
         // admin opens them (deploys are automatic, so unfinished work can ship).
         'catalog_open' => false,
+        // Pages anyone may read free from a book's "versi pantas" (0 turns previews off).
+        'preview_pages' => 5,
+        // Floating WhatsApp button (digits with country code, e.g. 60123456789); hidden when empty.
+        'whatsapp_number' => null,
 
         // Landing page copy
         'landing_headline' => 'Rak buku Islamik digital untuk anak 6–13 tahun',

@@ -1,14 +1,23 @@
 @php
     use App\Enums\PassStartRule;
+    use App\Services\CatalogStats;
     use App\Support\Money;
 
     // Early bird first; once its slots are gone the regular pass is sold instead.
-    $regularSale = $soldOut && $regularPlan?->is_active;
-    $checkoutUrl = $regularSale ? route('purchase.pass') : (Route::has('preorder.create') ? route('preorder.create') : '#harga');
-    $ctaLabel = $regularSale ? 'Beli Pas Tahunan' : 'Tempah slot saya';
-    $offerPlan = $regularSale ? $regularPlan : $plan;
+    $earlyBird = $offer->earlyBird();
+    $onSale = $offer->available();
+    $checkoutUrl = $offer->checkoutUrl();
+    $ctaLabel = $offer->ctaLabel();
     $pilotUrl = Route::has('pilot.create') ? route('pilot.create') : null;
-    $categories = ['Komik', 'Kisah nabi', 'Akhlak', 'Doa harian', 'Cerita bergambar', 'Novel kanak-kanak', 'Sirah'];
+
+    // Only numbers worth showing (a "0 buku" strip would discourage).
+    $statItems = array_filter([
+        $stats['families'] >= CatalogStats::MIN_FAMILIES ? [number_format($stats['families']).'+', 'Keluarga melanggan'] : null,
+        $catalogOpen && $stats['books'] > 0 ? [number_format($stats['books']), 'E-book Islamik'] : null,
+        $catalogOpen && $stats['pages'] > 0 ? [number_format($stats['pages']).'+', 'Halaman bacaan'] : null,
+        $catalogOpen && $stats['categories'] > 0 ? [$stats['categories'], 'Kategori'] : null,
+    ]);
+    $shelfRow = '-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2';
 @endphp
 
 <x-layouts.app>
@@ -17,34 +26,38 @@
         <div class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 md:grid-cols-[1.1fr_1fr] md:py-16">
             <div>
                 <p class="inline-block rounded-full border-2 border-ink bg-oren px-3 py-1 text-sm font-extrabold text-ink">
-                    {{ $regularSale ? 'Pas Tahunan · Seisi keluarga' : 'Pre-order · Harga early bird' }}
+                    {{ $earlyBird ? 'Pre-order · Harga early bird' : 'Pas Tahunan · Seisi keluarga' }}
                 </p>
                 <h1 class="mt-4 font-display text-4xl leading-tight font-extrabold text-magenta sm:text-5xl">{{ $headline }}</h1>
                 <p class="mt-4 text-lg text-ink/80">{{ $subheadline }}</p>
 
-                @if ($offerPlan)
+                @if ($onSale)
                     <div class="mt-6 flex flex-wrap items-end gap-x-4 gap-y-1">
-                        <p class="font-display text-5xl font-extrabold text-plum">{{ Money::short($offerPlan->price_sen) }}</p>
-                        @if (! $regularSale && $regularPlan && $regularPlan->price_sen > $plan->price_sen)
-                            <p class="pb-2 text-xl font-bold text-ink/70 line-through" aria-label="Harga biasa {{ Money::short($regularPlan->price_sen) }}">
-                                {{ Money::short($regularPlan->price_sen) }}
+                        <p class="font-display text-5xl font-extrabold text-plum">{{ Money::short($offer->priceSen()) }}</p>
+                        @if ($offer->compareAtSen())
+                            <p class="pb-2 text-xl font-bold text-ink/70 line-through" aria-label="Harga biasa {{ Money::short($offer->compareAtSen()) }}">
+                                {{ Money::short($offer->compareAtSen()) }}
                             </p>
                         @endif
                         <p class="w-full text-sm font-semibold text-ink/70">Pas Tahunan · 12 bulan · sekali bayar, tiada caj automatik</p>
                     </div>
                 @endif
 
-                @unless ($regularSale)
-                    <x-slot-counter :limit="$slotLimit" :remaining="$slotsRemaining" class="mt-6 max-w-md" />
-                @endunless
+                @if ($earlyBird || ! $onSale)
+                    <x-slot-counter :limit="$offer->slotLimit()" :remaining="$offer->slotsRemaining()" class="mt-6 max-w-md" />
+                @endif
 
                 <div class="mt-6 flex flex-wrap gap-3">
-                    @if ($soldOut && ! $regularSale)
-                        <span class="btn-utama" aria-disabled="true">Slot early bird telah habis</span>
-                    @else
+                    @if ($onSale)
                         <a href="{{ $checkoutUrl }}" class="btn-utama text-lg">{{ $ctaLabel }}</a>
+                    @else
+                        <span class="btn-utama" aria-disabled="true">Slot early bird telah habis</span>
                     @endif
-                    <a href="#soalan" class="btn-gelap">Soalan lazim</a>
+                    @if ($catalogOpen)
+                        <a href="{{ route('catalog.index') }}" class="btn-gelap">Lihat semua buku</a>
+                    @else
+                        <a href="#soalan" class="btn-gelap">Soalan lazim</a>
+                    @endif
                 </div>
             </div>
 
@@ -57,27 +70,95 @@
         </div>
     </section>
 
+    {{-- Numbers --}}
+    @if ($statItems)
+        <section aria-label="ASUH Digital dalam angka" class="border-y-2 border-ink bg-plum text-white">
+            <dl class="mx-auto grid max-w-6xl gap-6 px-4 py-8 text-center {{ [1 => 'grid-cols-1', 2 => 'grid-cols-2', 3 => 'grid-cols-3', 4 => 'grid-cols-2 sm:grid-cols-4'][count($statItems)] }}">
+                @foreach ($statItems as [$number, $label])
+                    <div>
+                        <dt class="sr-only">{{ $label }}</dt>
+                        <dd class="font-display text-4xl font-extrabold text-kuning">{{ $number }}</dd>
+                        <dd class="text-sm font-bold text-white/90">{{ $label }}</dd>
+                    </div>
+                @endforeach
+            </dl>
+        </section>
+    @endif
+
+    {{-- Most read (or picks, before anyone has read) --}}
+    @if ($popular && $popular['books']->isNotEmpty())
+        <section class="mx-auto max-w-6xl px-4 pt-14" aria-labelledby="popular-heading">
+            <div class="flex flex-wrap items-end justify-between gap-2">
+                <div>
+                    <p class="text-sm font-extrabold tracking-wide text-oren uppercase">{{ $popular['ranked'] ? '🔥 Paling popular' : '⭐ Pilihan kami' }}</p>
+                    <h2 id="popular-heading" class="font-display text-3xl font-extrabold text-plum">{{ $popular['ranked'] ? 'Buku kegemaran keluarga' : 'Mula dengan buku-buku ini' }}</h2>
+                </div>
+                <a href="{{ route('catalog.index') }}" class="pautan text-sm font-bold">Semua buku &rarr;</a>
+            </div>
+            <ul class="{{ $shelfRow }} mt-6">
+                @foreach ($popular['books'] as $i => $book)
+                    <li class="w-40 shrink-0 snap-start sm:w-48">
+                        <x-book-card :book="$book" :rank="$popular['ranked'] && $book->readers_count > 0 ? $i + 1 : null" />
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
+
     {{-- Categories --}}
-    <section aria-label="Kategori buku" class="border-y-2 border-ink bg-plum">
-        <ul class="mx-auto flex max-w-6xl flex-wrap justify-center gap-2 px-4 py-5">
-            @foreach ($categories as $category)
-                <li class="rounded-full bg-white/10 px-4 py-1.5 text-sm font-bold text-white">{{ $category }}</li>
-            @endforeach
-        </ul>
+    <section aria-label="Kategori buku" @class(['mx-auto max-w-6xl px-4 pt-14' => $catalogOpen, 'border-b-2 border-ink bg-plum' => ! $catalogOpen, 'border-t-2' => ! $catalogOpen && ! $statItems])>
+        @if ($catalogOpen)
+            <h2 class="font-display text-2xl font-extrabold text-plum">Pilih ikut kategori</h2>
+            <ul class="mt-4 flex flex-wrap gap-2">
+                @foreach ($categories as $category)
+                    <li>
+                        <a href="{{ route('catalog.index', ['kategori' => $category->slug]) }}" class="inline-flex min-h-11 items-center rounded-full border-2 border-ink bg-white px-4 text-sm font-bold hover:bg-lavender">{{ $category->name }}</a>
+                    </li>
+                @endforeach
+            </ul>
+        @else
+            <ul class="mx-auto flex max-w-6xl flex-wrap justify-center gap-2 px-4 py-5">
+                @foreach ($categories as $category)
+                    <li class="rounded-full bg-white/10 px-4 py-1.5 text-sm font-bold text-white">{{ $category->name }}</li>
+                @endforeach
+            </ul>
+        @endif
     </section>
+
+    {{-- Newest --}}
+    @if ($newest->isNotEmpty())
+        <section class="mx-auto max-w-6xl px-4 pt-14" aria-labelledby="newest-heading">
+            <div class="flex flex-wrap items-end justify-between gap-2">
+                <div>
+                    <p class="text-sm font-extrabold tracking-wide text-biru uppercase">Baru diterbitkan</p>
+                    <h2 id="newest-heading" class="font-display text-3xl font-extrabold text-plum">Buku terkini</h2>
+                </div>
+                <a href="{{ route('catalog.index') }}" class="pautan text-sm font-bold">Semua buku &rarr;</a>
+            </div>
+            <ul class="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-4">
+                @foreach ($newest as $book)
+                    <li><x-book-card :book="$book" /></li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
 
     {{-- Why ASUH --}}
     <section class="mx-auto max-w-6xl px-4 py-16">
-        <h2 class="text-center font-display text-3xl font-extrabold text-plum sm:text-4xl">Kenapa ibu bapa pilih ASUH Digital</h2>
-        <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <p class="text-center text-sm font-extrabold tracking-wide text-oren uppercase">Kenapa ASUH Digital</p>
+        <h2 class="mt-1 text-center font-display text-3xl font-extrabold text-plum sm:text-4xl">Kenapa ibu bapa pilih ASUH Digital</h2>
+        <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             @foreach ([
-                ['Disemak syariah', 'Setiap buku mesti lulus semakan syariah sebelum diterbitkan.'],
-                ['Ikut umur anak', 'Rak buku disusun untuk 6–9 tahun dan 10–13 tahun, jadi anak jumpa bacaan yang sesuai.'],
-                ['Mod Anak yang selamat', 'Tiada harga, butang beli atau tetapan. Keluar hanya melalui pintu ibu bapa.'],
-                ['Seisi keluarga', 'Satu Pas untuk sehingga 4 profil anak, di telefon, tablet atau komputer.'],
-            ] as [$title, $body])
+                ['🛡️', 'Disemak syariah', 'Setiap buku mesti lulus semakan syariah sebelum diterbitkan.'],
+                ['🎯', 'Ikut umur anak', 'Rak buku disusun untuk 6–9 tahun dan 10–13 tahun, jadi anak jumpa bacaan yang sesuai.'],
+                ['📖', 'Selak macam buku sebenar', 'Mod flip dua muka di tablet dan komputer, satu muka di telefon. Tanpa perlu muat turun aplikasi.'],
+                ['⚡', 'Akses serta-merta', 'Bayar melalui FPX, kad atau e-wallet dan buku terus terbuka dalam akaun anda.'],
+                ['👨‍👩‍👧', 'Seisi keluarga', 'Satu Pas untuk sehingga 4 profil anak, di telefon, tablet atau komputer.'],
+                ['🧒', 'Mod Anak yang selamat', 'Tiada harga, butang beli atau tetapan. Keluar hanya melalui pintu ibu bapa.'],
+            ] as [$icon, $title, $body])
                 <div class="rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)]">
-                    <h3 class="font-display text-xl font-bold text-plum">{{ $title }}</h3>
+                    <p class="text-3xl" aria-hidden="true">{{ $icon }}</p>
+                    <h3 class="mt-2 font-display text-xl font-bold text-plum">{{ $title }}</h3>
                     <p class="mt-2 text-ink/80">{{ $body }}</p>
                 </div>
             @endforeach
@@ -115,14 +196,14 @@
     {{-- Pricing --}}
     <section id="harga" class="mx-auto max-w-6xl scroll-mt-4 px-4 py-16">
         <div class="mx-auto max-w-xl rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_6px_0_var(--color-ink)] sm:p-8">
-            <p class="inline-block rounded-full border-2 border-ink bg-oren px-3 py-0.5 text-sm font-extrabold text-ink">{{ $regularSale ? 'Harga Pas Tahunan' : 'Harga early bird' }}</p>
+            <p class="inline-block rounded-full border-2 border-ink bg-oren px-3 py-0.5 text-sm font-extrabold text-ink">{{ $earlyBird ? 'Harga early bird' : 'Harga Pas Tahunan' }}</p>
             <h2 class="mt-2 font-display text-3xl font-extrabold text-plum">Pas Tahunan ASUH Digital</h2>
 
-            @if ($offerPlan)
+            @if ($onSale)
                 <p class="mt-4 font-display text-5xl font-extrabold text-magenta">
-                    {{ Money::short($offerPlan->price_sen) }}
-                    @if (! $regularSale && $regularPlan && $regularPlan->price_sen > $plan->price_sen)
-                        <span class="text-2xl text-ink/70 line-through">{{ Money::short($regularPlan->price_sen) }}</span>
+                    {{ Money::short($offer->priceSen()) }}
+                    @if ($offer->compareAtSen())
+                        <span class="text-2xl text-ink/70 line-through">{{ Money::short($offer->compareAtSen()) }}</span>
                     @endif
                 </p>
             @endif
@@ -141,16 +222,17 @@
                 @endforeach
             </ul>
 
-            @unless ($regularSale)
-                <x-slot-counter :limit="$slotLimit" :remaining="$slotsRemaining" class="mt-6" />
-            @endunless
+            @if ($earlyBird || ! $onSale)
+                <x-slot-counter :limit="$offer->slotLimit()" :remaining="$offer->slotsRemaining()" class="mt-6" />
+            @endif
 
-            @if ($soldOut && ! $regularSale)
+            @if ($onSale)
+                <a href="{{ $checkoutUrl }}" class="btn-utama mt-6 w-full text-lg">{{ $ctaLabel }}</a>
+                <a href="{{ route('pass.show') }}" class="pautan mt-4 block text-center text-sm font-bold">Kenapa Pas Tahunan lebih jimat? &rarr;</a>
+            @else
                 <p class="mt-6 rounded-xl bg-ink/5 p-4 font-semibold">
                     Slot early bird telah habis. Terima kasih atas sokongan anda! Pas Tahunan akan dijual pada harga biasa apabila platform dilancarkan.
                 </p>
-            @else
-                <a href="{{ $checkoutUrl }}" class="btn-utama mt-6 w-full text-lg">{{ $ctaLabel }}</a>
             @endif
         </div>
     </section>
@@ -193,13 +275,13 @@
     </section>
 
     {{-- Final call to action --}}
-    @unless ($soldOut && ! $regularSale)
+    @if ($onSale)
         <section class="mx-auto max-w-6xl px-4 pb-4">
             <div class="rounded-3xl border-2 border-ink bg-kuning p-8 text-center shadow-[0_6px_0_var(--color-ink)]">
                 <h2 class="font-display text-3xl font-extrabold text-ink">Jom Jadi Baik bersama ASUH!</h2>
-                <p class="mt-2 font-semibold text-ink/80">{{ $regularSale ? 'Satu Pas untuk seisi keluarga, semua e-book selama 12 bulan.' : 'Tempah slot early bird sebelum habis.' }}</p>
+                <p class="mt-2 font-semibold text-ink/80">{{ $earlyBird ? 'Tempah slot early bird sebelum habis.' : 'Satu Pas untuk seisi keluarga, semua e-book selama 12 bulan.' }}</p>
                 <a href="{{ $checkoutUrl }}" class="btn-gelap mt-6 text-lg">{{ $ctaLabel }}</a>
             </div>
         </section>
-    @endunless
+    @endif
 </x-layouts.app>

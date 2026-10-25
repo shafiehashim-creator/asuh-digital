@@ -7,8 +7,10 @@ use App\Http\Middleware\EnsureCatalogOpen;
 use App\Http\Controllers\ChipPaymentController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LegalController;
+use App\Http\Controllers\PassPageController;
 use App\Http\Controllers\PilotRequestController;
 use App\Http\Controllers\PreorderController;
+use App\Http\Controllers\PreviewController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReaderController;
 use App\Http\Controllers\ReceiptController;
@@ -17,6 +19,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', LandingController::class)->name('home');
 Route::get('/privasi', [LegalController::class, 'privacy'])->name('privacy');
 Route::get('/terma', [LegalController::class, 'terms'])->name('terms');
+
+Route::get('/pas', PassPageController::class)->name('pass.show');
 
 // Regular yearly pass once the early bird slots are gone (redirects to the pre-order before that).
 Route::get('/beli/pas', [PurchaseController::class, 'pass'])->name('purchase.pass');
@@ -28,6 +32,12 @@ Route::post('/beli/pas', [PurchaseController::class, 'storePass'])
 Route::middleware(EnsureCatalogOpen::class)->group(function () {
     Route::get('/buku', [CatalogController::class, 'index'])->name('catalog.index');
     Route::get('/buku/{book:slug}', [CatalogController::class, 'show'])->name('catalog.show');
+    // Free preview of the first pages, no login needed.
+    Route::get('/buku/{book:slug}/pratonton', [PreviewController::class, 'show'])->name('catalog.preview');
+    Route::get('/buku/{book:slug}/pratonton/{page}', [PreviewController::class, 'page'])
+        ->whereNumber('page')
+        ->middleware(['signed', 'throttle:120,1'])
+        ->name('catalog.preview.page');
 
     Route::get('/beli/buku/{book:slug}', [PurchaseController::class, 'book'])->name('purchase.book');
     Route::post('/beli/buku/{book:slug}', [PurchaseController::class, 'storeBook'])
