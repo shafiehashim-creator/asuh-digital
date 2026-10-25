@@ -16,6 +16,7 @@ use App\Http\Controllers\PreorderController;
 use App\Http\Controllers\PreviewController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReaderController;
+use App\Http\Controllers\ReadingProgressController;
 use App\Http\Controllers\ReceiptController;
 use Illuminate\Support\Facades\Route;
 
@@ -123,5 +124,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/keluar', 'gate')->name('gate');
             Route::post('/keluar', 'leave')->middleware('throttle:10,1')->name('leave');
         });
+        Route::post('/mod-anak/bacaan/{book:slug}', [ReadingProgressController::class, 'store'])
+            ->middleware('throttle:30,1')
+            ->name('child-mode.progress');
     });
 });

@@ -60,17 +60,21 @@
                 @else
                     <ul class="mt-4 grid gap-3 sm:grid-cols-2">
                         @foreach ($children as $child)
-                            <li class="flex items-center gap-3 rounded-2xl border-2 border-ink/15 p-3">
-                                <x-child-avatar :avatar="$child->avatar" />
-                                <div class="min-w-0 flex-1">
-                                    <p class="truncate font-display text-lg font-bold">{{ $child->nickname }}</p>
-                                    <p class="text-sm text-ink/70">{{ $child->age_group->getLabel() }}</p>
+                            <li class="rounded-2xl border-2 border-ink/15 p-3">
+                                <div class="flex items-center gap-3">
+                                    <x-child-avatar :avatar="$child->avatar" />
+                                    <div class="min-w-0 flex-1">
+                                        <p class="truncate font-display text-lg font-bold">{{ $child->nickname }}</p>
+                                        <p class="text-sm text-ink/70">{{ $child->age_group->getLabel() }}</p>
+                                    </div>
                                 </div>
-                                <a href="{{ route('children.edit', $child) }}" class="pautan inline-flex min-h-11 items-center text-sm">Ubah</a>
-                                <form method="POST" action="{{ route('children.child-mode', $child) }}">
-                                    @csrf
-                                    <button type="submit" class="btn-utama px-4 text-sm">Mod Anak</button>
-                                </form>
+                                <div class="mt-3 flex items-center justify-between gap-3">
+                                    <a href="{{ route('children.edit', $child) }}" class="pautan inline-flex min-h-11 items-center text-sm">Ubah profil</a>
+                                    <form method="POST" action="{{ route('children.child-mode', $child) }}">
+                                        @csrf
+                                        <button type="submit" class="btn-utama px-4 text-sm">Mula Mod Anak</button>
+                                    </form>
+                                </div>
                             </li>
                         @endforeach
                     </ul>
@@ -94,6 +98,8 @@
                             : 'Tanpa PIN, Mod Anak bertanya soalan matematik sebelum keluar. Tetapkan PIN jika anak anda sudah pandai mengira.' }}
                     </p>
 
+                    <details class="mt-3" @if ($errors->parentPin->any()) open @endif>
+                        <summary class="inline-flex min-h-11 cursor-pointer items-center font-bold text-plum underline">{{ $user->hasParentPin() ? 'Tukar atau buang PIN' : 'Tetapkan PIN' }}</summary>
                     <form method="POST" action="{{ route('parent-pin.update') }}" class="mt-3 grid gap-3 sm:grid-cols-3">
                         @csrf
                         @method('PUT')
@@ -118,6 +124,7 @@
                             <button type="submit" class="pautan inline-flex min-h-11 items-center text-sm">Buang PIN</button>
                         </form>
                     @endif
+                    </details>
                 </div>
             </section>
         @endif

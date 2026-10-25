@@ -18,12 +18,12 @@
                 @if ($child)
                     <x-child-avatar :avatar="$child->avatar" />
                     <p class="min-w-0 flex-1 truncate font-display text-xl font-extrabold">Hai, {{ $child->nickname }}!</p>
+                    <a href="{{ route('child-mode.gate') }}" class="inline-flex min-h-11 items-center rounded-full border-2 border-white/40 px-4 text-sm font-bold hover:bg-white/10">
+                        Ibu bapa
+                    </a>
                 @else
                     <p class="flex-1 font-display text-xl font-extrabold">Mod Anak</p>
                 @endif
-                <a href="{{ route('child-mode.gate') }}" class="inline-flex min-h-11 items-center rounded-full border-2 border-white/40 px-4 text-sm font-bold hover:bg-white/10">
-                    Ibu bapa
-                </a>
             </div>
         </header>
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Child;
 use App\Services\ChildMode;
 use App\Services\ParentGate;
+use App\Services\ReadingLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -23,7 +24,7 @@ class ChildModeController extends Controller
         return redirect()->route('child-mode.home');
     }
 
-    public function home(Request $request): View|RedirectResponse
+    public function home(Request $request, ReadingLog $log): View|RedirectResponse
     {
         $child = $this->childMode->child($request->user());
 
@@ -34,6 +35,11 @@ class ChildModeController extends Controller
         return view('child-mode.home', [
             'child' => $child,
             'books' => $this->childMode->shelf($child),
+            // Only books still on the shelf (a lapsed pass or a new age group drops some).
+            'recent' => $log->recent($child, 12)
+                ->filter(fn ($session) => $session->book && $this->childMode->allows($child, $session->book))
+                ->take(4)
+                ->values(),
         ]);
     }
 

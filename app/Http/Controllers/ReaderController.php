@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\BookFile;
 use App\Services\ChildMode;
+use App\Services\ReadingLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -28,7 +29,7 @@ class ReaderController extends Controller
      */
     public const LINK_MINUTES = 180;
 
-    public function show(Request $request, Book $book, ChildMode $childMode): View|RedirectResponse
+    public function show(Request $request, Book $book, ChildMode $childMode, ReadingLog $log): View|RedirectResponse
     {
         $user = $request->user();
         $child = $childMode->child($user);
@@ -65,6 +66,11 @@ class ReaderController extends Controller
             ] : null,
             'watermark' => $user->email.' · '.now()->translatedFormat('j M Y'),
             'closeUrl' => $child ? route('child-mode.home') : route('catalog.show', $book),
+            // Mod Anak: reading time and the page reached are kept for the child.
+            'progress' => $child ? [
+                'url' => route('child-mode.progress', $book),
+                'startPage' => $log->lastPage($child, $book),
+            ] : null,
         ]);
     }
 
