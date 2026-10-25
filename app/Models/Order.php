@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Services\VisitTracker;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +15,7 @@ use Illuminate\Support\Str;
 #[Fillable([
     'reference', 'user_id', 'plan_id', 'book_id', 'amount_sen', 'currency',
     'payment_method', 'status', 'chip_purchase_id', 'bank_receipt_path',
-    'confirmed_by', 'confirmed_at', 'paid_at', 'upgrades_pass_id', 'admin_note', 'referral_institution_id', 'discount_sen',
+    'confirmed_by', 'confirmed_at', 'paid_at', 'upgrades_pass_id', 'admin_note', 'referral_institution_id', 'discount_sen', 'source', 'medium', 'campaign',
 ])]
 class Order extends Model
 {
@@ -35,6 +36,11 @@ class Order extends Model
     {
         static::creating(function (Order $order) {
             $order->reference ??= static::generateReference();
+
+            // Sales channel report: where the buyer's visit first came from.
+            if ($order->source === null && $order->payment_method !== PaymentMethod::Manual) {
+                $order->fill(app(VisitTracker::class)->attribution());
+            }
         });
     }
 

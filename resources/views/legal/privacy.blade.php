@@ -35,6 +35,11 @@
             memadam murid atau kelas tersebut.
         </p>
         <p>
+            Untuk memahami cara laman ini digunakan, kami merekod halaman yang dilawati, jenis peranti (telefon,
+            tablet atau komputer) dan laman atau kempen yang membawa anda ke sini. Rekod ini menggunakan nombor rawak
+            dalam sesi pelayar anda, <strong>tanpa</strong> alamat IP dan tanpa cookie pihak ketiga, dan dipadam selepas lebih kurang setahun.
+        </p>
+        <p>
             Butiran kad atau perbankan dalam talian anda dimasukkan terus di halaman bayaran CHIP dan
             <strong>tidak</strong> disimpan oleh kami.
         </p>
