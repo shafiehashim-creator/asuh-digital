@@ -1,6 +1,6 @@
-// E-book reader (CLAUDE.md: PDF.js in the browser). The PDF comes from a
-// short-lived signed URL; every rendered page gets the account e-mail drawn
-// into the canvas as a light watermark.
+// E-book reader (CLAUDE.md: PDF.js in the browser). Pages come from short-lived
+// signed URLs, either light page images ("versi pantas", made in the admin) or
+// the PDF itself; every drawn page gets the account e-mail as a light watermark.
 //
 // Two modes: "flip" (default) turns pages like a real book, two pages side by
 // side on large screens and one on phones; "single" is the plain one-page view
@@ -32,7 +32,7 @@ if (root) {
     const pageKey = `asuh.reader.${root.dataset.book}`;
     const modeKey = 'asuh.reader.mode';
 
-    let pdf = null;
+    let doc = null; // page source: light images or the PDF (see the sources below)
     let page = 1; // 1-based, shared by both modes
     let mode = 'flip';
 
@@ -56,38 +56,107 @@ if (root) {
         ctx.restore();
     };
 
-    // Draws one PDF page into a canvas at the given CSS width.
-    const paint = async (target, number, cssWidth, task) => {
-        const pdfPage = await pdf.getPage(number);
-        const base = pdfPage.getViewport({ scale: 1 });
-        const scale = cssWidth / base.width;
-        const viewport = pdfPage.getViewport({ scale });
-        const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    // --- Page sources: numPages, size(n), draw(canvas, n, cssWidth, task), prefetch(n)
 
-        target.width = Math.floor(viewport.width * ratio);
-        target.height = Math.floor(viewport.height * ratio);
+    const pixelRatio = () => Math.min(window.devicePixelRatio || 1, 2);
 
-        const ctx = target.getContext('2d');
-        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    const pdfSource = (pdf) => ({
+        numPages: doc.numPages,
 
-        const rendering = pdfPage.render({ canvasContext: ctx, viewport });
-        task?.(rendering);
-        try {
-            await rendering.promise;
-        } catch (error) {
-            if (error?.name === 'RenderingCancelledException') return false;
-            throw error;
-        }
-        drawWatermark(ctx, viewport.width, viewport.height, scale);
-        return true;
+        async size(n) {
+            const viewport = (await pdf.getPage(n)).getViewport({ scale: 1 });
+            return { width: viewport.width, height: viewport.height };
+        },
+
+        async draw(target, n, cssWidth, task) {
+            const pdfPage = await pdf.getPage(n);
+            const base = pdfPage.getViewport({ scale: 1 });
+            const scale = cssWidth / base.width;
+            const viewport = pdfPage.getViewport({ scale });
+            const ratio = pixelRatio();
+
+            target.width = Math.floor(viewport.width * ratio);
+            target.height = Math.floor(viewport.height * ratio);
+
+            const ctx = target.getContext('2d');
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+            const rendering = pdfPage.render({ canvasContext: ctx, viewport });
+            task?.(rendering);
+            try {
+                await rendering.promise;
+            } catch (error) {
+                if (error?.name === 'RenderingCancelledException') return false;
+                throw error;
+            }
+            drawWatermark(ctx, viewport.width, viewport.height, scale);
+            return true;
+        },
+
+        prefetch(n) {
+            pdf.getPage(n).then((p) => p.getOperatorList()).catch(() => {});
+        },
+    });
+
+    // "Versi pantas": small images the browser decodes natively, much quicker
+    // on phones than print-resolution PDF pages.
+    const imageSource = ({ width, height, urls }) => {
+        const images = new Map(); // page -> Promise<HTMLImageElement>, most recent last
+
+        const fetchImage = (n) => {
+            if (images.has(n)) {
+                const cached = images.get(n);
+                images.delete(n);
+                images.set(n, cached);
+                return cached;
+            }
+            const img = new Image();
+            img.decoding = 'async';
+            img.src = urls[n - 1];
+            const loaded = img.decode().then(() => img);
+            loaded.catch(() => images.delete(n)); // try again next time
+            images.set(n, loaded);
+            if (images.size > 12) images.delete(images.keys().next().value);
+            return loaded;
+        };
+
+        return {
+            numPages: urls.length,
+
+            async size() {
+                return { width, height };
+            },
+
+            async draw(target, n, cssWidth, task) {
+                let cancelled = false;
+                task?.({ cancel: () => { cancelled = true; } });
+                const img = await fetchImage(n);
+                if (cancelled) return false;
+
+                const cssHeight = cssWidth * img.naturalHeight / img.naturalWidth;
+                const ratio = pixelRatio();
+                target.width = Math.floor(cssWidth * ratio);
+                target.height = Math.floor(cssHeight * ratio);
+
+                const ctx = target.getContext('2d');
+                ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+                ctx.drawImage(img, 0, 0, cssWidth, cssHeight);
+                drawWatermark(ctx, cssWidth, cssHeight, cssWidth / 600);
+                return true;
+            },
+
+            prefetch(n) {
+                fetchImage(n).catch(() => {});
+            },
+        };
     };
 
     const updateNav = (first, last) => {
         pageLabel.textContent = first === last
-            ? `Halaman ${first} / ${pdf.numPages}`
-            : `Halaman ${first}–${last} / ${pdf.numPages}`;
+            ? `Halaman ${first} / ${doc.numPages}`
+            : `Halaman ${first}–${last} / ${doc.numPages}`;
         prev.disabled = first <= 1;
-        next.disabled = last >= pdf.numPages;
+        next.disabled = last >= doc.numPages;
         store(pageKey, String(first));
     };
 
@@ -99,20 +168,19 @@ if (root) {
 
         async render() {
             single.rendering?.cancel();
-            const pdfPage = await pdf.getPage(page);
-            const base = pdfPage.getViewport({ scale: 1 });
+            const base = await doc.size(page);
             const cssWidth = Math.min(stage.clientWidth - 16, 900) * single.zoom;
             canvas.style.width = `${Math.floor(cssWidth)}px`;
             canvas.style.height = `${Math.floor(cssWidth * base.height / base.width)}px`;
-            const done = await paint(canvas, page, cssWidth, (task) => { single.rendering = task; });
+            const done = await doc.draw(canvas, page, cssWidth, (task) => { single.rendering = task; });
             if (!done) return;
             updateNav(page, page);
-            // Fetch the next page's pieces in the background so turning is quick.
-            if (page < pdf.numPages) pdf.getPage(page + 1).then((p) => p.getOperatorList()).catch(() => {});
+            // Fetch the next page in the background so turning is quick.
+            if (page < doc.numPages) doc.prefetch(page + 1);
         },
 
         go(n) {
-            const target = Math.min(Math.max(n, 1), pdf.numPages);
+            const target = Math.min(Math.max(n, 1), doc.numPages);
             if (target === page) return;
             page = target;
             single.render();
@@ -140,7 +208,7 @@ if (root) {
         book: null,
         sizer: null,
         spread: false,
-        pageRatio: 1.414, // height / width, read from the first PDF page
+        pageRatio: 1.414, // height / width, read from the first page
         pageWidth: 0,
         sheets: [], // { canvas, width (drawn CSS width, 0 = empty) }
 
@@ -158,7 +226,7 @@ if (root) {
             const index = flip.book.getCurrentPageIndex();
             const landscape = flip.book.getOrientation() === 'landscape';
             // With a cover, spreads are [1], [2,3], [4,5]...; the index is the left page.
-            const last = landscape && index > 0 && index + 1 < pdf.numPages ? index + 2 : index + 1;
+            const last = landscape && index > 0 && index + 1 < doc.numPages ? index + 2 : index + 1;
             return [index + 1, last];
         },
 
@@ -175,8 +243,8 @@ if (root) {
             });
 
             // The pages on screen first, then the next ones, then the ones behind.
-            // One page at a time: PDF.js downloads a page's pieces when it is
-            // drawn, so drawing several at once splits a slow phone connection.
+            // One page at a time: a page is downloaded when it is drawn, so
+            // drawing several at once splits a slow phone connection.
             const ahead = flip.spread ? RENDER_AHEAD.after : 2;
             const behind = flip.spread ? RENDER_AHEAD.before : 1;
             const order = [];
@@ -184,7 +252,7 @@ if (root) {
             for (let n = last + 1; n <= last + ahead; n++) order.push(n);
             for (let n = first - 1; n >= first - behind; n--) order.push(n);
 
-            flip.queue = order.filter((n) => n >= 1 && n <= pdf.numPages);
+            flip.queue = order.filter((n) => n >= 1 && n <= doc.numPages);
             flip.pump();
         },
 
@@ -200,7 +268,7 @@ if (root) {
 
             flip.busy = true;
             const width = flip.pageWidth;
-            paint(sheet.canvas, number, width)
+            doc.draw(sheet.canvas, number, width)
                 .then((done) => { if (done) sheet.width = width; })
                 .catch(() => {})
                 .finally(() => {
@@ -217,8 +285,7 @@ if (root) {
         },
 
         async build() {
-            const firstPage = await pdf.getPage(1);
-            const base = firstPage.getViewport({ scale: 1 });
+            const base = await doc.size(1);
             flip.pageRatio = base.height / base.width;
             flip.spread = stage.clientWidth >= SPREAD_MIN_WIDTH;
 
@@ -231,10 +298,10 @@ if (root) {
 
             flip.sheets = [];
             const pages = [];
-            for (let i = 0; i < pdf.numPages; i++) {
+            for (let i = 0; i < doc.numPages; i++) {
                 const el = document.createElement('div');
                 el.className = 'bg-white';
-                if (i === 0 || i === pdf.numPages - 1) el.dataset.density = 'hard';
+                if (i === 0 || i === doc.numPages - 1) el.dataset.density = 'hard';
                 const sheetCanvas = document.createElement('canvas');
                 el.append(sheetCanvas);
                 pages.push(el);
@@ -278,7 +345,7 @@ if (root) {
         },
 
         go(n) {
-            const target = Math.min(Math.max(n, 1), pdf.numPages);
+            const target = Math.min(Math.max(n, 1), doc.numPages);
             flip.book.turnToPage(target - 1);
             flip.onFlip();
         },
@@ -318,10 +385,10 @@ if (root) {
     next.addEventListener('click', () => (mode === 'flip' ? flip.book?.flipNext() : single.go(page + 1)));
     zoomIn.addEventListener('click', () => { single.zoom = Math.min(single.zoom + 0.25, 3); single.render(); });
     zoomOut.addEventListener('click', () => { single.zoom = Math.max(single.zoom - 0.25, 0.5); single.render(); });
-    modeToggle.addEventListener('click', () => { if (pdf) setMode(mode === 'flip' ? 'single' : 'flip'); });
+    modeToggle.addEventListener('click', () => { if (doc) setMode(mode === 'flip' ? 'single' : 'flip'); });
 
     document.addEventListener('keydown', (event) => {
-        if (!pdf) return;
+        if (!doc) return;
         if (event.key === 'ArrowRight') next.click();
         if (event.key === 'ArrowLeft') prev.click();
     });
@@ -343,31 +410,37 @@ if (root) {
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => {
-            if (!pdf) return;
+            if (!doc) return;
             mode === 'flip' ? flip.resize() : single.render();
         }, 200);
     });
 
-    // The server answers Range requests, so PDF.js fetches only the pieces it
-    // needs (2 MB at a time) instead of waiting for the whole book.
-    getDocument({
-        url: root.dataset.src,
-        withCredentials: true,
-        disableAutoFetch: true,
-        disableStream: true,
-        rangeChunkSize: 2 * 1024 * 1024,
-    })
-        .promise.then((doc) => {
-            pdf = doc;
-            page = Math.min(parseInt(load(pageKey), 10) || 1, doc.numPages);
-            status.remove();
-            modeToggle.hidden = false;
-            canvas.hidden = true;
-            flipHost.hidden = true;
-            setMode(load(modeKey) === 'single' ? 'single' : 'flip');
+    const open = (source) => {
+        doc = source;
+        page = Math.min(parseInt(load(pageKey), 10) || 1, doc.numPages);
+        status.remove();
+        modeToggle.hidden = false;
+        canvas.hidden = true;
+        flipHost.hidden = true;
+        setMode(load(modeKey) === 'single' ? 'single' : 'flip');
+    };
+
+    if (root.dataset.pages) {
+        open(imageSource(JSON.parse(root.dataset.pages)));
+    } else {
+        // The server answers Range requests, so PDF.js fetches only the pieces
+        // it needs (2 MB at a time) instead of waiting for the whole book.
+        getDocument({
+            url: root.dataset.src,
+            withCredentials: true,
+            disableAutoFetch: true,
+            disableStream: true,
+            rangeChunkSize: 2 * 1024 * 1024,
         })
-        .catch(() => {
-            status.textContent = 'Buku tidak dapat dibuka. Muat semula halaman ini untuk mencuba sekali lagi.';
-            status.classList.add('text-magenta');
-        });
+            .promise.then((pdf) => open(pdfSource(pdf)))
+            .catch(() => {
+                status.textContent = 'Buku tidak dapat dibuka. Muat semula halaman ini untuk mencuba sekali lagi.';
+                status.classList.add('text-magenta');
+            });
+    }
 }
