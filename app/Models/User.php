@@ -10,6 +10,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -89,6 +90,17 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function readBooks(): BelongsToMany
     {
         return $this->belongsToMany(Book::class, 'book_readers')->withPivot('first_read_at', 'last_read_at');
+    }
+
+    public function institution(): BelongsTo
+    {
+        return $this->belongsTo(Institution::class);
+    }
+
+    /** Institution administrators and teachers (the /guru portal). */
+    public function isInstitutionStaff(): bool
+    {
+        return ($this->role?->isInstitutionStaff() ?? false) && $this->institution_id !== null;
     }
 
     public function isStaff(): bool

@@ -8,7 +8,10 @@ use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ChildModeController;
 use App\Http\Controllers\ChildQuizController;
 use App\Http\Controllers\ChipPaymentController;
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LandingController;
+use App\Http\Controllers\Teacher;
+use App\Http\Middleware\EnsureInstitutionStaff;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\ParentPinController;
 use App\Http\Controllers\PassPageController;
@@ -143,3 +146,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/laporan-mingguan/berhenti/{user}', [WeeklyReportController::class, 'unsubscribe'])
     ->middleware(['signed', 'throttle:10,1'])
     ->name('weekly-report.unsubscribe');
+
+// Phase D: institution invitations and the teacher portal.
+Route::get('/jemputan/{token}', [InvitationController::class, 'show'])->middleware('throttle:30,1')->name('invitation.show');
+Route::post('/jemputan/{token}', [InvitationController::class, 'accept'])->middleware('throttle:10,1')->name('invitation.accept');
+
+Route::middleware(['auth', 'verified', EnsureInstitutionStaff::class])->prefix('/guru')->name('teacher.')->group(function () {
+    Route::get('/', Teacher\HomeController::class)->name('home');
+});

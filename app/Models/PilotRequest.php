@@ -8,6 +8,7 @@ use App\Enums\PilotStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'institution_name', 'institution_type', 'state', 'district', 'contact_name',
@@ -16,6 +17,11 @@ use Illuminate\Database\Eloquent\Model;
 class PilotRequest extends Model
 {
     use HasFactory;
+
+    public function institution(): HasOne
+    {
+        return $this->hasOne(Institution::class);
+    }
 
     protected function casts(): array
     {
