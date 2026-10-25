@@ -45,7 +45,7 @@
         <ul>
             <li>Mencipta dan menguruskan akaun anda.</li>
             <li>Memproses pesanan dan bayaran, dan menghantar resit.</li>
-            <li>Menghantar e-mel penting tentang akaun, Pas Tahunan dan pelancaran platform.</li>
+            <li>Menghantar e-mel penting tentang akaun, Langganan Tahunan dan pelancaran platform.</li>
             <li>Memahami kumpulan umur pembaca supaya kami menyediakan buku yang sesuai.</li>
             <li>Mematuhi keperluan undang-undang, termasuk rekod perakaunan.</li>
         </ul>

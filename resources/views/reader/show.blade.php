@@ -50,16 +50,16 @@
                 {{-- Shown once the last preview page is on screen. --}}
                 <div data-preview-cta hidden class="border-t-2 border-ink bg-kuning px-4 py-4 text-center">
                     <p class="font-display text-lg font-extrabold">Pratonton tamat. Suka buku ini?</p>
-                    <p class="text-sm font-semibold text-ink/80">Baca kesemua {{ $preview['total'] }} halaman, dan semua buku ASUH Digital, dengan Pas Tahunan.</p>
+                    <p class="text-sm font-semibold text-ink/80">Baca kesemua {{ $preview['total'] }} halaman, dan semua buku ASUH Digital, dengan Langganan Tahunan.</p>
                     <div class="mt-3 flex flex-wrap justify-center gap-2">
                         @if ($preview['offer']->available())
-                            <a href="{{ route('pass.show') }}" class="btn-gelap">Dapatkan Pas Tahunan</a>
+                            <a href="{{ route('pass.show') }}" class="btn-gelap">Dapatkan Langganan Tahunan</a>
                         @endif
                         @if ($book->single_price_sen)
                             <a href="{{ route('purchase.book', $book) }}" class="btn-utama">Beli buku ini {{ App\Support\Money::short($book->single_price_sen) }}</a>
                         @endif
                         @guest
-                            <a href="{{ route('login') }}" class="inline-flex min-h-11 items-center px-3 font-bold underline">Sudah ada Pas? Log masuk</a>
+                            <a href="{{ route('login') }}" class="inline-flex min-h-11 items-center px-3 font-bold underline">Sudah ada langganan? Log masuk</a>
                         @endguest
                     </div>
                 </div>

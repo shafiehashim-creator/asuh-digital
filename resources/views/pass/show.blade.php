@@ -13,7 +13,7 @@
     $card = 'rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)]';
 @endphp
 
-<x-layouts.app title="Pas Tahunan">
+<x-layouts.app title="Langganan Tahunan">
     {{-- Hero --}}
     <section class="bg-plum text-white">
         <div class="mx-auto max-w-3xl px-4 py-14 text-center">
@@ -22,7 +22,7 @@
                     🔥 Harga early bird · jimat {{ Money::short($compareAt - $price) }}
                 </p>
             @endif
-            <h1 class="mt-4 font-display text-4xl leading-tight font-extrabold text-kuning sm:text-5xl">Pas Tahunan ASUH Digital</h1>
+            <h1 class="mt-4 font-display text-4xl leading-tight font-extrabold text-kuning sm:text-5xl">Langganan Tahunan ASUH Digital</h1>
             <p class="mt-3 text-lg text-white/90">
                 @if ($bookCount > 0)
                     Semua {{ $bookCount }} e-book Islamik untuk anak, ditambah setiap buku baharu, untuk seisi keluarga selama 12 bulan.
@@ -56,18 +56,18 @@
             @if ($onSale)
                 <a href="{{ $offer->checkoutUrl() }}" class="btn-utama mt-8 text-lg">{{ $offer->ctaLabel() }} &rarr;</a>
             @else
-                <p class="mt-8 rounded-xl bg-white/10 p-4 font-semibold">Pas Tahunan belum dijual buat masa ini. Sila kembali tidak lama lagi.</p>
+                <p class="mt-8 rounded-xl bg-white/10 p-4 font-semibold">Langganan Tahunan belum dijual buat masa ini. Sila kembali tidak lama lagi.</p>
             @endif
         </div>
     </section>
 
     {{-- Why a pass --}}
     <section class="mx-auto max-w-3xl px-4 py-14">
-        <p class="text-sm font-extrabold tracking-wide text-oren uppercase">Kenapa Pas Tahunan?</p>
+        <p class="text-sm font-extrabold tracking-wide text-oren uppercase">Kenapa Langganan Tahunan?</p>
         <h2 class="mt-1 font-display text-3xl font-extrabold text-plum">Biar kami berterus terang…</h2>
         <div class="mt-4 space-y-4 text-lg text-ink/85">
             <p>Kami boleh sahaja jual buku satu-satu. Tetapi anak-anak tidak membaca satu buku sahaja. Hari ini kisah nabi, esok komik akhlak, lusa doa harian. Minat membaca tumbuh apabila ada banyak pilihan di depan mata.</p>
-            <p>Sebab itulah wujudnya Pas Tahunan: satu bayaran, dan seisi keluarga boleh membaca semua buku ASUH Digital sepanjang tahun, termasuk buku baharu yang kami terbitkan selepas ini.</p>
+            <p>Sebab itulah wujudnya Langganan Tahunan: satu bayaran, dan seisi keluarga boleh membaca semua buku ASUH Digital sepanjang tahun, termasuk buku baharu yang kami terbitkan selepas ini.</p>
         </div>
     </section>
 
@@ -76,7 +76,7 @@
         <section class="bg-lavender">
             <div class="mx-auto max-w-4xl px-4 py-14">
                 <p class="text-center text-sm font-extrabold tracking-wide text-oren uppercase">Matematik mudah</p>
-                <h2 class="mt-1 text-center font-display text-3xl font-extrabold text-plum">Beli satu-satu atau Pas Tahunan?</h2>
+                <h2 class="mt-1 text-center font-display text-3xl font-extrabold text-plum">Beli satu-satu atau Langganan Tahunan?</h2>
                 <div class="mt-8 grid items-center gap-4 md:grid-cols-[1fr_auto_1fr]">
                     <div class="{{ $card }}">
                         <p class="font-display text-lg font-bold">💸 Beli cara biasa</p>
@@ -88,7 +88,7 @@
                     </div>
                     <p class="text-center font-display text-3xl font-extrabold text-plum" aria-hidden="true">&rarr;</p>
                     <div class="rounded-3xl border-2 border-ink bg-kuning p-6 shadow-[0_4px_0_var(--color-ink)]">
-                        <p class="font-display text-lg font-bold">✓ Pas Tahunan · 12 bulan</p>
+                        <p class="font-display text-lg font-bold">✓ Langganan Tahunan · 12 bulan</p>
                         <p class="mt-3 font-display text-4xl font-extrabold">
                             {{ Money::short($price) }}
                             @if ($compareAt) <span class="text-xl text-ink/60 line-through">{{ Money::short($compareAt) }}</span> @endif
@@ -108,8 +108,8 @@
         <ol class="mt-8 space-y-4">
             @foreach ([
                 ['🔓', $bookCount > 0 ? "Akses semua {$bookCount} e-book sedia ada" : 'Akses semua e-book ASUH Digital', 'Komik, kisah nabi, akhlak, doa harian dan sirah. Selak macam buku sebenar di telefon, tablet atau komputer.', $singleTotal > 0 ? 'Bernilai '.Money::short($singleTotal) : 'TERMASUK'],
-                ['🔄', 'Buku baharu automatik termasuk', 'Setiap buku baharu yang kami terbitkan sepanjang tempoh Pas terus terbuka untuk anda.', 'PERCUMA'],
-                ['👨‍👩‍👧', 'Seisi keluarga', 'Satu Pas untuk sehingga 4 profil anak dalam satu akaun ibu bapa.', 'TERMASUK'],
+                ['🔄', 'Buku baharu automatik termasuk', 'Setiap buku baharu yang kami terbitkan sepanjang tempoh langganan terus terbuka untuk anda.', 'PERCUMA'],
+                ['👨‍👩‍👧', 'Seisi keluarga', 'Satu langganan untuk sehingga 4 profil anak dalam satu akaun ibu bapa.', 'TERMASUK'],
                 ['🛡️', 'Disemak syariah', 'Setiap buku mesti lulus semakan syariah sebelum diterbitkan.', 'TERMASUK'],
                 ['⚡', 'Akses serta-merta', 'Bayar dengan FPX, kad atau e-wallet dan buku terus terbuka. Pindahan bank juga diterima.', 'TERMASUK'],
                 ['🤝', 'Tiada caj automatik', 'Bayar sekali untuk 12 bulan. Kami ingatkan anda sebelum tamat, dan anda yang tentukan sama ada mahu sambung.', 'TERMASUK'],
@@ -168,7 +168,7 @@
             @foreach ($faq as $item)
                 <x-faq-item :question="$item['question']">{{ $item['answer'] }}</x-faq-item>
             @endforeach
-            <x-faq-item question="Bila Pas Tahunan saya bermula?">
+            <x-faq-item question="Bila Langganan Tahunan saya bermula?">
                 @if ($passStartRule === PassStartRule::OnLaunch)
                     Tempoh 12 bulan bermula pada tarikh platform ASUH Digital dilancarkan, jadi anda tidak kehilangan sebarang bulan.
                 @else

@@ -13,7 +13,7 @@ class PassesAndPilotsOverview extends StatsOverviewWidget
 {
     protected static ?int $sort = 2;
 
-    protected ?string $heading = 'Pas dan institusi';
+    protected ?string $heading = 'Langganan dan institusi';
 
     public static function canView(): bool
     {
@@ -28,11 +28,11 @@ class PassesAndPilotsOverview extends StatsOverviewWidget
         $licenses = $stats->licenses();
 
         return [
-            Stat::make('Pas Tahunan aktif', (string) $passes['active'])
+            Stat::make('Langganan Tahunan aktif', (string) $passes['active'])
                 ->description("{$passes['expiring']} tamat dalam 30 hari")
                 ->descriptionIcon(Heroicon::OutlinedIdentification)
                 ->color($passes['expiring'] > 0 ? 'warning' : 'primary'),
-            Stat::make('Pas menunggu tarikh launch', (string) $passes['waiting'])
+            Stat::make('Langganan menunggu tarikh launch', (string) $passes['waiting'])
                 ->description($passes['waiting'] ? 'Tetapkan tarikh launch di halaman Tetapan' : 'Tiada')
                 ->color($passes['waiting'] ? 'warning' : 'gray'),
             Stat::make('Pilot: membayar / permohonan', "{$pilots['paying']} / {$pilots['total']}")

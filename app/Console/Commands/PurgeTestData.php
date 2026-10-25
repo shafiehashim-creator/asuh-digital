@@ -44,7 +44,7 @@ class PurgeTestData extends Command
 
         $counts = [
             ['Pesanan', Order::query()->count()],
-            ['Pas Tahunan', Pass::query()->count()],
+            ['Langganan Tahunan', Pass::query()->count()],
             ['Pre-order', Preorder::query()->count()],
             ['Log bayaran', PaymentLog::query()->count()],
             ['Akaun ibu bapa', (clone $parents)->count()],

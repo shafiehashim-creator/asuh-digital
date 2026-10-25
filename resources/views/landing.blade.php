@@ -26,7 +26,7 @@
         <div class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 md:grid-cols-[1.1fr_1fr] md:py-16">
             <div>
                 <p class="inline-block rounded-full border-2 border-ink bg-oren px-3 py-1 text-sm font-extrabold text-ink">
-                    {{ $earlyBird ? 'Pre-order · Harga early bird' : 'Pas Tahunan · Seisi keluarga' }}
+                    {{ $earlyBird ? 'Pre-order · Harga early bird' : 'Langganan Tahunan · Seisi keluarga' }}
                 </p>
                 <h1 class="mt-4 font-display text-4xl leading-tight font-extrabold text-magenta sm:text-5xl">{{ $headline }}</h1>
                 <p class="mt-4 text-lg text-ink/80">{{ $subheadline }}</p>
@@ -39,7 +39,7 @@
                                 {{ Money::short($offer->compareAtSen()) }}
                             </p>
                         @endif
-                        <p class="w-full text-sm font-semibold text-ink/70">Pas Tahunan · 12 bulan · sekali bayar, tiada caj automatik</p>
+                        <p class="w-full text-sm font-semibold text-ink/70">Langganan Tahunan · 12 bulan · sekali bayar, tiada caj automatik</p>
                     </div>
                 @endif
 
@@ -153,7 +153,7 @@
                 ['🎯', 'Ikut umur anak', 'Rak buku disusun untuk 6–9 tahun dan 10–13 tahun, jadi anak jumpa bacaan yang sesuai.'],
                 ['📖', 'Selak macam buku sebenar', 'Mod flip dua muka di tablet dan komputer, satu muka di telefon. Tanpa perlu muat turun aplikasi.'],
                 ['⚡', 'Akses serta-merta', 'Bayar melalui FPX, kad atau e-wallet dan buku terus terbuka dalam akaun anda.'],
-                ['👨‍👩‍👧', 'Seisi keluarga', 'Satu Pas untuk sehingga 4 profil anak, di telefon, tablet atau komputer.'],
+                ['👨‍👩‍👧', 'Seisi keluarga', 'Satu langganan untuk sehingga 4 profil anak, di telefon, tablet atau komputer.'],
                 ['🧒', 'Mod Anak yang selamat', 'Tiada harga, butang beli atau tetapan. Keluar hanya melalui pintu ibu bapa.'],
             ] as [$icon, $title, $body])
                 <div class="rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)]">
@@ -196,8 +196,8 @@
     {{-- Pricing --}}
     <section id="harga" class="mx-auto max-w-6xl scroll-mt-4 px-4 py-16">
         <div class="mx-auto max-w-xl rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_6px_0_var(--color-ink)] sm:p-8">
-            <p class="inline-block rounded-full border-2 border-ink bg-oren px-3 py-0.5 text-sm font-extrabold text-ink">{{ $earlyBird ? 'Harga early bird' : 'Harga Pas Tahunan' }}</p>
-            <h2 class="mt-2 font-display text-3xl font-extrabold text-plum">Pas Tahunan ASUH Digital</h2>
+            <p class="inline-block rounded-full border-2 border-ink bg-oren px-3 py-0.5 text-sm font-extrabold text-ink">{{ $earlyBird ? 'Harga early bird' : 'Harga Langganan Tahunan' }}</p>
+            <h2 class="mt-2 font-display text-3xl font-extrabold text-plum">Langganan Tahunan ASUH Digital</h2>
 
             @if ($onSale)
                 <p class="mt-4 font-display text-5xl font-extrabold text-magenta">
@@ -228,10 +228,10 @@
 
             @if ($onSale)
                 <a href="{{ $checkoutUrl }}" class="btn-utama mt-6 w-full text-lg">{{ $ctaLabel }}</a>
-                <a href="{{ route('pass.show') }}" class="pautan mt-4 block text-center text-sm font-bold">Kenapa Pas Tahunan lebih jimat? &rarr;</a>
+                <a href="{{ route('pass.show') }}" class="pautan mt-4 block text-center text-sm font-bold">Kenapa Langganan Tahunan lebih jimat? &rarr;</a>
             @else
                 <p class="mt-6 rounded-xl bg-ink/5 p-4 font-semibold">
-                    Slot early bird telah habis. Terima kasih atas sokongan anda! Pas Tahunan akan dijual pada harga biasa apabila platform dilancarkan.
+                    Slot early bird telah habis. Terima kasih atas sokongan anda! Langganan Tahunan akan dijual pada harga biasa apabila platform dilancarkan.
                 </p>
             @endif
         </div>
@@ -262,7 +262,7 @@
                 <x-faq-item :question="$item['question']">{{ $item['answer'] }}</x-faq-item>
             @endforeach
 
-            <x-faq-item question="Bila Pas Tahunan saya bermula?">
+            <x-faq-item question="Bila Langganan Tahunan saya bermula?">
                 @if ($passStartRule === PassStartRule::OnLaunch)
                     Tempoh 12 bulan bermula pada tarikh platform ASUH Digital dilancarkan, jadi anda tidak kehilangan sebarang bulan. Kami akan maklumkan tarikhnya melalui e-mel.
                 @else
@@ -279,7 +279,7 @@
         <section class="mx-auto max-w-6xl px-4 pb-4">
             <div class="rounded-3xl border-2 border-ink bg-kuning p-8 text-center shadow-[0_6px_0_var(--color-ink)]">
                 <h2 class="font-display text-3xl font-extrabold text-ink">Jom Jadi Baik bersama ASUH!</h2>
-                <p class="mt-2 font-semibold text-ink/80">{{ $earlyBird ? 'Tempah slot early bird sebelum habis.' : 'Satu Pas untuk seisi keluarga, semua e-book selama 12 bulan.' }}</p>
+                <p class="mt-2 font-semibold text-ink/80">{{ $earlyBird ? 'Tempah slot early bird sebelum habis.' : 'Satu langganan untuk seisi keluarga, semua e-book selama 12 bulan.' }}</p>
                 <a href="{{ $checkoutUrl }}" class="btn-gelap mt-6 text-lg">{{ $ctaLabel }}</a>
             </div>
         </section>

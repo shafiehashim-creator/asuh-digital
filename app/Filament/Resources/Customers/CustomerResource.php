@@ -70,11 +70,11 @@ class CustomerResource extends Resource
                         TextEntry::make('paid_total')->label('Jumlah dibayar')
                             ->state(fn (User $record) => Money::format((int) $record->orders()->where('status', OrderStatus::Paid)->sum('amount_sen'))),
                     ]),
-                Section::make('Pas Tahunan')
+                Section::make('Langganan Tahunan')
                     ->schema([
                         RepeatableEntry::make('passes')
                             ->hiddenLabel()
-                            ->placeholder('Tiada Pas Tahunan.')
+                            ->placeholder('Tiada Langganan Tahunan.')
                             ->columns(4)
                             ->schema([
                                 TextEntry::make('plan.name')->label('Pelan'),
@@ -134,14 +134,14 @@ class CustomerResource extends Resource
                 TextColumn::make('name')->label('Nama')->searchable(['name', 'email'])
                     ->description(fn (User $record) => $record->email),
                 TextColumn::make('phone')->label('Telefon')->searchable()->copyable()->placeholder('-'),
-                IconColumn::make('has_active_pass')->label('Pas aktif')->boolean(),
+                IconColumn::make('has_active_pass')->label('Langganan aktif')->boolean(),
                 TextColumn::make('paid_orders_count')->label('Pesanan dibayar')->numeric()->alignEnd(),
                 IconColumn::make('email_verified_at')->label('E-mel disahkan')->boolean()
                     ->state(fn (User $record) => $record->email_verified_at !== null)->toggleable(),
                 TextColumn::make('created_at')->label('Mendaftar')->dateTime('j M Y')->sortable(),
             ])
             ->filters([
-                Filter::make('active_pass')->label('Ada Pas aktif')
+                Filter::make('active_pass')->label('Ada langganan aktif')
                     ->query(fn (Builder $query) => $query->whereHas('passes', fn (Builder $q) => $q->active())),
                 Filter::make('no_purchase')->label('Belum membeli')
                     ->query(fn (Builder $query) => $query->whereDoesntHave('orders', fn (Builder $q) => $q->where('status', OrderStatus::Paid))),

@@ -15,9 +15,9 @@
     <p class="mt-1 text-xs font-bold">
         @if ($book->single_price_sen)
             <span class="text-magenta">{{ App\Support\Money::short($book->single_price_sen) }}</span>
-            <span class="text-ink/60">atau dalam Pas</span>
+            <span class="text-ink/60">atau dalam langganan</span>
         @else
-            <span class="text-biru">Dalam Pas Tahunan</span>
+            <span class="text-biru">Dalam Langganan Tahunan</span>
         @endif
     </p>
 </a>

@@ -41,8 +41,8 @@ return [
                 'answer' => 'Rak buku Islamik digital daripada ASUH, jenama Galeri Ilmu Media Group, untuk kanak-kanak berumur 6 hingga 13 tahun. Anak boleh membaca komik, kisah nabi, buku akhlak, doa harian dan sirah di telefon, tablet atau komputer.',
             ],
             [
-                'question' => 'Berapa orang anak boleh guna satu Pas?',
-                'answer' => 'Satu Pas Tahunan untuk seisi keluarga. Anda boleh mencipta sehingga 4 profil anak, dan setiap anak melihat buku yang sesuai dengan kumpulan umurnya.',
+                'question' => 'Berapa orang anak boleh guna satu langganan?',
+                'answer' => 'Satu Langganan Tahunan untuk seisi keluarga. Anda boleh mencipta sehingga 4 profil anak, dan setiap anak melihat buku yang sesuai dengan kumpulan umurnya.',
             ],
             [
                 'question' => 'Adakah kandungannya disemak syariah?',
@@ -58,7 +58,7 @@ return [
             ],
             [
                 'question' => 'Kenapa slot terhad?',
-                'answer' => 'Harga early bird hanya untuk keluarga yang terawal menyokong ASUH Digital. Selepas slot habis, Pas Tahunan dijual pada harga biasa.',
+                'answer' => 'Harga early bird hanya untuk keluarga yang terawal menyokong ASUH Digital. Selepas slot habis, Langganan Tahunan dijual pada harga biasa.',
             ],
         ],
         'refund_policy' => 'Bayaran balik penuh boleh dimohon sebelum platform ASUH Digital dilancarkan.',

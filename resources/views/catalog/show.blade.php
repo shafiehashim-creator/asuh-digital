@@ -16,7 +16,7 @@
 
         @if (session('reader_denied'))
             <div role="alert" class="mb-6 rounded-xl border-2 border-magenta bg-magenta/5 px-4 py-3 font-semibold text-magenta">
-                Anda perlukan Pas Tahunan yang aktif untuk membaca buku ini.
+                Anda perlukan Langganan Tahunan yang aktif untuk membaca buku ini.
             </div>
         @endif
 
@@ -62,7 +62,7 @@
 
                         @if ($offer->available())
                             <div @class(['rounded-2xl border-2 border-ink bg-kuning p-4', 'mt-4' => $previewPages > 0])>
-                                <p class="text-xs font-extrabold tracking-wide uppercase">★ Paling jimat · Pas Tahunan</p>
+                                <p class="text-xs font-extrabold tracking-wide uppercase">★ Paling jimat · Langganan Tahunan</p>
                                 <p class="mt-1 font-display text-3xl font-extrabold">
                                     {{ Money::short($offer->priceSen()) }}
                                     @if ($offer->compareAtSen())
@@ -83,7 +83,7 @@
                         @endif
 
                         @guest
-                            <p class="mt-3 text-center text-sm">Sudah ada Pas? <a href="{{ route('login') }}" class="pautan font-bold">Log masuk</a></p>
+                            <p class="mt-3 text-center text-sm">Sudah ada langganan? <a href="{{ route('login') }}" class="pautan font-bold">Log masuk</a></p>
                         @endguest
 
                         <ul class="mt-4 grid gap-1 text-sm font-semibold text-ink/80 sm:grid-cols-2">
@@ -107,8 +107,8 @@
 
                 @unless ($hasPass)
                     <div class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-ink bg-kuning px-5 py-4">
-                        <p class="font-bold">Semua buku ini termasuk dalam Pas Tahunan. Satu bayaran, seisi keluarga baca sepanjang tahun.</p>
-                        <a href="{{ route('pass.show') }}" class="btn-gelap">Dapatkan Pas Tahunan</a>
+                        <p class="font-bold">Semua buku ini termasuk dalam Langganan Tahunan. Satu bayaran, seisi keluarga baca sepanjang tahun.</p>
+                        <a href="{{ route('pass.show') }}" class="btn-gelap">Dapatkan Langganan Tahunan</a>
                     </div>
                 @endunless
 
@@ -123,9 +123,9 @@
                                     @if ($other->readable)
                                         <span class="text-biru">✓ Boleh dibaca</span>
                                     @elseif ($other->single_price_sen)
-                                        <span class="text-magenta">{{ Money::short($other->single_price_sen) }}</span> <span class="text-ink/60">atau dengan Pas</span>
+                                        <span class="text-magenta">{{ Money::short($other->single_price_sen) }}</span> <span class="text-ink/60">atau dengan langganan</span>
                                     @else
-                                        <span class="text-ink/60">Dengan Pas Tahunan</span>
+                                        <span class="text-ink/60">Dengan Langganan Tahunan</span>
                                     @endif
                                 </p>
                             </a>

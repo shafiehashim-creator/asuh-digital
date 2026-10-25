@@ -15,12 +15,12 @@
     <div class="mx-auto max-w-4xl space-y-8 px-4 py-10">
         <div>
             <h1 class="font-display text-3xl font-extrabold text-magenta sm:text-4xl">Assalamualaikum, {{ $user->name }}</h1>
-            <p class="mt-1 text-ink/80">Ini ruang akaun anda: status Pas Tahunan, pesanan dan maklumat peribadi.</p>
+            <p class="mt-1 text-ink/80">Ini ruang akaun anda: status Langganan Tahunan, pesanan dan maklumat peribadi.</p>
         </div>
 
         {{-- Pass status --}}
         <section aria-labelledby="pass-heading" class="rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)]">
-            <h2 id="pass-heading" class="font-display text-xl font-bold text-plum">Pas Tahunan</h2>
+            <h2 id="pass-heading" class="font-display text-xl font-bold text-plum">Langganan Tahunan</h2>
 
             @if ($activePass)
                 <p class="mt-2 text-lg">
@@ -28,17 +28,17 @@
                     <strong>{{ $activePass->ends_at->translatedFormat('j F Y') }}</strong>.
                 </p>
                 @if ($activePass->ends_at->lessThan(now()->addDays(60)))
-                    <a href="{{ route('purchase.pass') }}" class="btn-utama mt-4">Perbaharui Pas Tahunan</a>
-                    <p class="mt-2 text-sm text-ink/70">Pas baharu bermula sebaik Pas semasa tamat.</p>
+                    <a href="{{ route('purchase.pass') }}" class="btn-utama mt-4">Perbaharui Langganan Tahunan</a>
+                    <p class="mt-2 text-sm text-ink/70">Langganan baharu bermula sebaik langganan semasa tamat.</p>
                 @endif
             @elseif ($pendingPass)
                 <p class="mt-2 text-lg">
-                    Bayaran diterima. Pas anda akan <strong>bermula pada tarikh platform ASUH Digital dilancarkan</strong>.
+                    Bayaran diterima. Langganan anda akan <strong>bermula pada tarikh platform ASUH Digital dilancarkan</strong>.
                     Kami akan maklumkan melalui e-mel.
                 </p>
             @else
-                <p class="mt-2 text-ink/80">Anda belum mempunyai Pas Tahunan yang aktif.</p>
-                <a href="{{ route('purchase.pass') }}" class="btn-utama mt-4">Dapatkan Pas Tahunan</a>
+                <p class="mt-2 text-ink/80">Anda belum mempunyai Langganan Tahunan yang aktif.</p>
+                <a href="{{ route('purchase.pass') }}" class="btn-utama mt-4">Dapatkan Langganan Tahunan</a>
             @endif
         </section>
 
@@ -154,7 +154,7 @@
                 </div>
 
                 @if ($canReadAll)
-                    <p class="mt-2 text-ink/80">Pas Tahunan anda membuka <strong>semua buku</strong> dalam katalog.</p>
+                    <p class="mt-2 text-ink/80">Langganan Tahunan anda membuka <strong>semua buku</strong> dalam katalog.</p>
                 @endif
 
                 @if ($recentBooks->isNotEmpty())

@@ -39,14 +39,14 @@ class ViewOrder extends ViewRecord
                 ->modalHeading('Sahkan pindahan bank?')
                 ->modalDescription(fn () => 'Pastikan '.Money::format($this->record->amount_sen)
                     .' dengan rujukan '.$this->record->reference.' telah masuk ke akaun bank. '
-                    .'Pas Tahunan akan diaktifkan dan resit dihantar kepada pembeli.')
+                    .'Langganan Tahunan akan diaktifkan dan resit dihantar kepada pembeli.')
                 ->modalSubmitActionLabel('Ya, sahkan')
                 ->visible(fn () => $this->isUnpaidBankTransfer())
                 ->action(function (BankTransfers $bankTransfers) {
                     $bankTransfers->confirm($this->record, auth()->user());
                     $this->record->refresh();
 
-                    Notification::make()->title('Bayaran disahkan. Pas Tahunan telah diaktifkan.')->success()->send();
+                    Notification::make()->title('Bayaran disahkan. Langganan Tahunan telah diaktifkan.')->success()->send();
                 }),
 
             Action::make('rejectPayment')

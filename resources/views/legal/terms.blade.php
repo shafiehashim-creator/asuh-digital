@@ -19,7 +19,7 @@
     </section>
 
     <section>
-        <h2>3. Pre-order Pas Tahunan</h2>
+        <h2>3. Pre-order Langganan Tahunan</h2>
         <ul>
             <li>Harga early bird terhad kepada {{ $slotLimit }} slot, dan satu slot bagi setiap akaun.</li>
             <li>Slot ditempah untuk tempoh terhad semasa anda membuat bayaran. Jika bayaran tidak diterima dalam tempoh itu, slot dilepaskan kepada pembeli lain.</li>
@@ -31,13 +31,13 @@
         <h2>4. Bayaran</h2>
         <ul>
             <li>Bayaran dibuat melalui CHIP (FPX, kad atau e-wallet) atau pindahan bank.</li>
-            <li>Pas Tahunan diaktifkan selepas bayaran disahkan: secara automatik untuk CHIP, atau selepas kami menyemak resit untuk pindahan bank.</li>
+            <li>Langganan Tahunan diaktifkan selepas bayaran disahkan: secara automatik untuk CHIP, atau selepas kami menyemak resit untuk pindahan bank.</li>
             <li>Bayaran dibuat sekali bagi tempoh 12 bulan. <strong>Tiada caj berulang automatik.</strong></li>
         </ul>
     </section>
 
     <section>
-        <h2>5. Tempoh Pas Tahunan</h2>
+        <h2>5. Tempoh Langganan Tahunan</h2>
         <p>
             @if ($passStartRule === PassStartRule::OnLaunch)
                 Tempoh 12 bulan bermula pada tarikh platform ASUH Digital dilancarkan. Kami akan memaklumkan tarikhnya melalui e-mel.

@@ -24,11 +24,11 @@ class PassResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedIdentification;
 
-    protected static ?string $modelLabel = 'pas';
+    protected static ?string $modelLabel = 'langganan';
 
-    protected static ?string $pluralModelLabel = 'Pas Tahunan';
+    protected static ?string $pluralModelLabel = 'Langganan Tahunan';
 
-    protected static ?string $slug = 'pas';
+    protected static ?string $slug = 'langganan';
 
     protected static ?int $navigationSort = 12;
 

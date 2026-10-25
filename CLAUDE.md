@@ -41,6 +41,7 @@ Rujukan skrin: prototaip ASUH Digital di claude.ai (7 skrin: utama, katalog, hal
 - Aset jenama mula-mula berada dalam folder `_brand/` di akar projek: `logo-asuh.png`, `anis.png`, `anas.png`, `syaitan-gemuk.png`, `syaitan-kurus.png` (semuanya versi yang telah dibaiki). Selepas Laravel dipasang, pindahkan ke `resources/images/brand/` dan padam folder `_brand/`.
 - Laravel dipasang ke dalam folder ini yang sudah ada `README.md`, `CLAUDE.md` dan `_brand/`. Pasang ke folder sementara, kemudian pindahkan fail ke sini tanpa menimpa `CLAUDE.md`.
 - Sasaran kontras teks 4.5:1 dan saiz butang sentuh sekurang-kurangnya 44px.
+- **Istilah (keputusan pengguna 2026-10-25):** produk tahunan dipanggil **Langganan Tahunan** (dan **Langganan Plus** untuk Fasa 2), bukan "Pas", kerana "Pas" berbunyi seperti nama parti politik. Hanya teks yang dilihat pengguna ditukar; nama dalam kod kekal (`Pass`, `passes`, `pas_tahunan`). URL kini `/langganan` dan `/beli/langganan`, dan `/pas` serta `/beli/pas` dialihkan (301).
 
 ## Model data (jadual utama)
 

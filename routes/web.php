@@ -31,11 +31,14 @@ Route::get('/', LandingController::class)->name('home');
 Route::get('/privasi', [LegalController::class, 'privacy'])->name('privacy');
 Route::get('/terma', [LegalController::class, 'terms'])->name('terms');
 
-Route::get('/pas', PassPageController::class)->name('pass.show');
+Route::get('/langganan', PassPageController::class)->name('pass.show');
+// The yearly plan was called "Pas Tahunan" until 2026-10-25; old links keep working.
+Route::permanentRedirect('/pas', '/langganan');
 
 // Regular yearly pass once the early bird slots are gone (redirects to the pre-order before that).
-Route::get('/beli/pas', [PurchaseController::class, 'pass'])->name('purchase.pass');
-Route::post('/beli/pas', [PurchaseController::class, 'storePass'])
+Route::get('/beli/langganan', [PurchaseController::class, 'pass'])->name('purchase.pass');
+Route::permanentRedirect('/beli/pas', '/beli/langganan');
+Route::post('/beli/langganan', [PurchaseController::class, 'storePass'])
     ->middleware('throttle:10,1')
     ->name('purchase.pass.store');
 
