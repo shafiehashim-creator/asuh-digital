@@ -47,6 +47,9 @@
                                 <th scope="col" class="py-2 pr-3 text-right font-semibold">Buku</th>
                                 <th scope="col" class="py-2 pr-3 text-right font-semibold">Kuiz lulus</th>
                                 <th scope="col" class="py-2 pr-3 text-right font-semibold">Lencana</th>
+                                @if ($classroom->institution->canWatchVideos())
+                                    <th scope="col" class="py-2 pr-3 text-right font-semibold">Minit video</th>
+                                @endif
                                 <th scope="col" class="py-2 font-semibold">Kali terakhir</th>
                             </tr>
                         </thead>
@@ -59,6 +62,9 @@
                                     <td class="py-2 pr-3 text-right">{{ $row['books'] }}</td>
                                     <td class="py-2 pr-3 text-right">{{ $row['quizzes'] }}</td>
                                     <td class="py-2 pr-3 text-right">{{ $row['badges'] }}</td>
+                                    @if ($classroom->institution->canWatchVideos())
+                                        <td class="py-2 pr-3 text-right">{{ $row['video_minutes'] }}</td>
+                                    @endif
                                     <td class="py-2 text-sm">{{ $row['last_read']?->translatedFormat('j M') ?? 'Belum membaca' }}</td>
                                 </tr>
                             @endforeach

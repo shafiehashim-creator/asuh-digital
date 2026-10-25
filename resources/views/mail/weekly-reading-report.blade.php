@@ -8,9 +8,14 @@ Ini ringkasan bacaan anak anda di ASUH Digital untuk minggu **{{ $weekStart->tra
 
 <x-mail::panel>
 **{{ $report['minutes'] }} minit** membaca, pada **{{ $report['days'] }} hari** minggu ini.
+@if ($report['video_minutes'])
+<br>**{{ $report['video_minutes'] }} minit** menonton video animasi.
+@endif
 </x-mail::panel>
 
+@if ($report['books'])
 **Buku yang dibaca:** {{ implode(', ', $report['books']) }}
+@endif
 
 @if ($report['quizzes'])
 **Kuiz lulus:** {{ implode(', ', $report['quizzes']) }}

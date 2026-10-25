@@ -37,9 +37,13 @@ class SendWeeklyReports extends Command
             ->where('weekly_report', true)
             ->whereNotNull('email_verified_at')
             ->where(fn ($q) => $q->whereNull('weekly_report_sent_at')->orWhere('weekly_report_sent_at', '<', $to))
-            ->whereHas('children.readingSessions', fn ($q) => $q
-                ->whereBetween('read_on', [$from->toDateString(), $to->toDateString()])
-                ->where('minutes', '>', 0))
+            ->where(fn ($q) => $q
+                ->whereHas('children.readingSessions', fn ($q) => $q
+                    ->whereBetween('read_on', [$from->toDateString(), $to->toDateString()])
+                    ->where('minutes', '>', 0))
+                ->orWhereHas('children.videoViews', fn ($q) => $q
+                    ->whereBetween('watched_on', [$from->toDateString(), $to->toDateString()])
+                    ->where('seconds', '>', 0)))
             ->chunkById(100, function ($parents) use ($reports, $from, $to, &$sent) {
                 foreach ($parents as $parent) {
                     $children = $reports->forParent($parent, $from, $to);

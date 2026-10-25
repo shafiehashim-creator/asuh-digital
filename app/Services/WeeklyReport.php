@@ -8,6 +8,7 @@ use App\Models\ChildBadge;
 use App\Models\QuizAttempt;
 use App\Models\ReadingSession;
 use App\Models\User;
+use App\Models\VideoView;
 use Illuminate\Support\Carbon;
 
 /**
@@ -26,7 +27,7 @@ class WeeklyReport
     /**
      * One entry per child who read in the week; children who did not read are left out.
      *
-     * @return list<array{child: Child, minutes: int, days: int, books: list<string>, quizzes: list<string>, badges: list<Badge>}>
+     * @return list<array{child: Child, minutes: int, video_minutes: int, days: int, books: list<string>, quizzes: list<string>, badges: list<Badge>}>
      */
     public function forParent(User $parent, Carbon $from, Carbon $to): array
     {
@@ -39,13 +40,20 @@ class WeeklyReport
                 ->with('book')
                 ->get();
 
-            if ($sessions->sum('minutes') === 0) {
+            // Phase 2: animated videos watched, shown apart from reading.
+            $watchedSeconds = (int) VideoView::query()
+                ->where('child_id', $child->id)
+                ->whereBetween('watched_on', [$from->toDateString(), $to->toDateString()])
+                ->sum('seconds');
+
+            if ($sessions->sum('minutes') === 0 && $watchedSeconds === 0) {
                 continue;
             }
 
             $report[] = [
                 'child' => $child,
                 'minutes' => (int) $sessions->sum('minutes'),
+                'video_minutes' => intdiv($watchedSeconds + 59, 60),
                 'days' => $sessions->where('minutes', '>', 0)->map(fn ($s) => $s->read_on->toDateString())->unique()->count(),
                 'books' => $sessions->pluck('book.title')->filter()->unique()->values()->all(),
                 'quizzes' => QuizAttempt::query()

@@ -14,6 +14,8 @@ use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\ReadingSession;
 use App\Models\User;
+use App\Models\Video;
+use App\Models\VideoView;
 use App\Services\ClassReport;
 use App\Services\DashboardStats;
 use Illuminate\Support\Facades\Mail;
@@ -126,4 +128,19 @@ it('links teachers to the teacher portal from the menu', function () {
 
     $this->actingAs($teacher)->get('/guru')->assertSee('Portal guru')->assertDontSee('Akaun saya');
     $this->actingAs(User::factory()->create())->get('/akaun')->assertSee('Akaun saya');
+});
+
+it('shows video minutes to teachers when the licence includes videos', function () {
+    $institution = Institution::factory()->create();
+    $license = License::factory()->for($institution)->create();
+    $teacher = staffOf($institution, Role::Teacher);
+    $classroom = Classroom::factory()->for($institution)->create(['teacher_id' => $teacher->id]);
+    $hana = pupilIn($classroom, 'Hana');
+    VideoView::query()->create(['child_id' => $hana->id, 'video_id' => Video::factory()->create()->id, 'watched_on' => today(), 'seconds' => 125]);
+
+    $this->actingAs($teacher)->get("/guru/kelas/{$classroom->id}")->assertDontSee('Minit video');
+
+    $license->update(['includes_videos' => true]);
+    expect(app(ClassReport::class)->forClassroom($classroom)->first()['video_minutes'])->toBe(3);
+    $this->actingAs($teacher)->get("/guru/kelas/{$classroom->id}")->assertSee('Minit video');
 });

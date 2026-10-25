@@ -24,7 +24,7 @@
         </p>
         <p>
             Semasa anak membaca dalam Mod Anak, kami merekod minit membaca, halaman terakhir, buku yang dibaca,
-            keputusan kuiz dan lencana yang diperoleh. Rekod ini digunakan untuk menyambung bacaan, memberi lencana
+            keputusan kuiz dan lencana yang diperoleh, serta minit menonton video animasi (bagi Langganan Plus). Rekod ini digunakan untuk menyambung bacaan, memberi lencana
             dan menghantar laporan bacaan mingguan kepada ibu bapa (boleh dihentikan pada bila-bila masa).
             Ibu bapa boleh memadam profil anak di halaman Akaun saya, dan semua rekod bacaan anak itu dipadam bersama.
         </p>

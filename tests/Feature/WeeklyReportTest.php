@@ -10,6 +10,8 @@ use App\Models\QuizAttempt;
 use App\Models\ReadingSession;
 use App\Models\Setting;
 use App\Models\User;
+use App\Models\Video;
+use App\Models\VideoView;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
@@ -113,4 +115,29 @@ it('is scheduled for Monday morning', function () {
         ->first(fn ($event) => str_contains($event->command, 'asuh:weekly-reports'));
 
     expect($event?->expression)->toBe('0 8 * * 1');
+});
+
+it('adds animated video minutes to the report, apart from reading', function () {
+    $child = Child::factory()->create(['nickname' => 'Aisyah']);
+    readOn($child, '2026-10-27', 10);
+    $video = Video::factory()->create();
+    VideoView::query()->create(['child_id' => $child->id, 'video_id' => $video->id, 'watched_on' => '2026-10-28', 'seconds' => 125]);
+
+    $this->artisan('asuh:weekly-reports');
+
+    Mail::assertQueued(WeeklyReadingReport::class, function ($mail) {
+        $text = strip_tags($mail->render());
+
+        return str_contains($text, '10 minit membaca') && str_contains($text, '3 minit menonton video animasi');
+    });
+});
+
+it('sends a report to a family who only watched videos', function () {
+    $child = Child::factory()->create();
+    $video = Video::factory()->create();
+    VideoView::query()->create(['child_id' => $child->id, 'video_id' => $video->id, 'watched_on' => '2026-10-28', 'seconds' => 300]);
+
+    $this->artisan('asuh:weekly-reports');
+
+    Mail::assertQueuedCount(1);
 });
