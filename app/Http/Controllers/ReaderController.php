@@ -9,7 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 /**
  * CLAUDE.md "Perlindungan e-book": files live in storage/app/private and are
@@ -19,8 +20,12 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class ReaderController extends Controller
 {
-    /** How long a file link works; the reader asks for a new one on reload. */
-    public const LINK_MINUTES = 5;
+    /**
+     * How long a file link works. The reader fetches the PDF in pieces while the
+     * child reads (HTTP range requests), so the link must outlive a reading
+     * session; every piece is still checked against the signed-in user.
+     */
+    public const LINK_MINUTES = 180;
 
     public function show(Request $request, Book $book): View|RedirectResponse
     {
@@ -45,7 +50,7 @@ class ReaderController extends Controller
         ]);
     }
 
-    public function file(Request $request, Book $book, BookFile $file): StreamedResponse
+    public function file(Request $request, Book $book, BookFile $file): BinaryFileResponse
     {
         $user = $request->user();
 
@@ -56,11 +61,15 @@ class ReaderController extends Controller
         abort_unless($user->canReadBook($book), 403);
         abort_unless(Storage::disk(BookFile::DISK)->exists($file->path), 404);
 
-        return Storage::disk(BookFile::DISK)->response($file->path, $book->slug.'.pdf', [
+        // A file response (not a stream) answers Range requests, so PDF.js can
+        // show the first pages without downloading the whole book.
+        $response = response()->file(Storage::disk(BookFile::DISK)->path($file->path), [
             'Content-Type' => 'application/pdf',
             'Cache-Control' => 'private, no-store, max-age=0',
             'X-Content-Type-Options' => 'nosniff',
             'X-Robots-Tag' => 'noindex, nofollow',
-        ], 'inline');
+        ]);
+
+        return $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $book->slug.'.pdf');
     }
 }

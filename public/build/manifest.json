@@ -64,7 +64,7 @@
     "src": "node_modules/pdfjs-dist/build/pdf.worker.min.mjs"
   },
   "resources/css/app.css": {
-    "file": "assets/app-BXjKE8GC.css",
+    "file": "assets/app-D5FeLYBc.css",
     "name": "app",
     "names": [
       "app.css"
@@ -99,7 +99,7 @@
     "isEntry": true
   },
   "resources/js/reader.js": {
-    "file": "assets/reader-B9N5DN1O.js",
+    "file": "assets/reader-kmruC9f4.js",
     "name": "reader",
     "src": "resources/js/reader.js",
     "isEntry": true,

@@ -160,18 +160,26 @@ if (root) {
         },
 
         draw() {
-            const [first] = flip.visible();
-            const from = Math.max(first - RENDER_AHEAD.before, 1);
-            const to = Math.min(first + 1 + RENDER_AHEAD.after, pdf.numPages);
+            const [first, last] = flip.visible();
 
             flip.sheets.forEach((sheet, i) => {
                 const number = i + 1;
-                if (number < first - KEEP.before || number > first + 1 + KEEP.after) {
-                    if (sheet.width) { sheet.canvas.width = 0; sheet.canvas.height = 0; sheet.width = 0; }
-                    return;
+                if ((number < first - KEEP.before || number > last + KEEP.after) && sheet.width) {
+                    sheet.canvas.width = 0;
+                    sheet.canvas.height = 0;
+                    sheet.width = 0;
                 }
-                const sharp = sheet.width >= flip.pageWidth * 0.9;
-                if (number < from || number > to || sharp || sheet.pending) return;
+            });
+
+            // The pages on screen first, then the next ones, then the ones behind.
+            const order = [];
+            for (let n = first; n <= last; n++) order.push(n);
+            for (let n = last + 1; n <= last + RENDER_AHEAD.after; n++) order.push(n);
+            for (let n = first - 1; n >= first - RENDER_AHEAD.before; n--) order.push(n);
+
+            order.filter((n) => n >= 1 && n <= pdf.numPages).forEach((number) => {
+                const sheet = flip.sheets[number - 1];
+                if (sheet.pending || sheet.width >= flip.pageWidth * 0.9) return;
                 sheet.pending = true;
                 const width = flip.pageWidth;
                 paint(sheet.canvas, number, width)
@@ -319,7 +327,15 @@ if (root) {
         }, 200);
     });
 
-    getDocument({ url: root.dataset.src, withCredentials: true, disableAutoFetch: true })
+    // The server answers Range requests, so PDF.js fetches only the pieces it
+    // needs (1 MB at a time) instead of waiting for the whole book.
+    getDocument({
+        url: root.dataset.src,
+        withCredentials: true,
+        disableAutoFetch: true,
+        disableStream: true,
+        rangeChunkSize: 1024 * 1024,
+    })
         .promise.then((doc) => {
             pdf = doc;
             page = Math.min(parseInt(load(pageKey), 10) || 1, doc.numPages);
