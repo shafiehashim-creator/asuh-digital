@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Enums\AgeGroup;
 use App\Enums\ChildAvatar;
+use App\Services\VideoWatching;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -22,7 +23,23 @@ class ChildRequest extends FormRequest
             // A child is in one group; "both" is for books only.
             'age_group' => ['required', Rule::in([AgeGroup::SixToNine->value, AgeGroup::TenToThirteen->value])],
             'avatar' => ['required', Rule::enum(ChildAvatar::class)],
+            // Phase 2 parent controls for videos.
+            'daily_video_minutes' => ['nullable', Rule::in(VideoWatching::LIMIT_CHOICES)],
+            'read_before_watch' => ['sometimes', 'boolean'],
         ];
+    }
+
+    /** @return array<string, mixed> */
+    public function validated($key = null, $default = null)
+    {
+        $data = parent::validated($key, $default);
+
+        if ($key === null && $this->has('video_settings')) {
+            $data['daily_video_minutes'] = $data['daily_video_minutes'] ?? null;
+            $data['read_before_watch'] = $this->boolean('read_before_watch');
+        }
+
+        return $data;
     }
 
     /** @return array<string, string> */
@@ -32,6 +49,7 @@ class ChildRequest extends FormRequest
             'nickname' => 'nama panggilan',
             'age_group' => 'kumpulan umur',
             'avatar' => 'avatar',
+            'daily_video_minutes' => 'had masa menonton',
         ];
     }
 }

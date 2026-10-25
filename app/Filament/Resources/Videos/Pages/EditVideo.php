@@ -32,6 +32,12 @@ class EditVideo extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('preview')
+                ->label('Tonton')
+                ->icon(Heroicon::OutlinedPlay)
+                ->color('gray')
+                ->url(fn () => route('admin.video.preview', $this->record), shouldOpenInNewTab: true),
+
             Action::make('submitForReview')
                 ->label('Hantar untuk semakan syariah')
                 ->icon(Heroicon::OutlinedPaperAirplane)

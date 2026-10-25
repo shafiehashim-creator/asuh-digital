@@ -49,6 +49,28 @@
                 @error('avatar') <p class="mt-1 text-sm font-semibold text-magenta">{{ $message }}</p> @enderror
             </fieldset>
 
+            @if (app(App\Services\VideoWatching::class)->isOpen())
+                {{-- Phase 2: parent controls for the animated videos. --}}
+                <fieldset class="rounded-2xl bg-lavender p-4">
+                    <legend class="sr-only">Video animasi</legend>
+                    <input type="hidden" name="video_settings" value="1">
+                    <p class="font-display font-bold text-plum">Video animasi</p>
+                    <label for="daily_video_minutes" class="label mt-3">Had menonton sehari</label>
+                    <select id="daily_video_minutes" name="daily_video_minutes" class="input">
+                        <option value="">Tiada had</option>
+                        @foreach (App\Services\VideoWatching::LIMIT_CHOICES as $minutes)
+                            <option value="{{ $minutes }}" @selected((string) old('daily_video_minutes', $child->daily_video_minutes) === (string) $minutes)>{{ $minutes }} minit</option>
+                        @endforeach
+                    </select>
+                    @error('daily_video_minutes') <p class="mt-1 text-sm font-semibold text-magenta">{{ $message }}</p> @enderror
+                    <label class="mt-4 flex min-h-11 cursor-pointer items-start gap-3">
+                        <input type="hidden" name="read_before_watch" value="0">
+                        <input type="checkbox" name="read_before_watch" value="1" class="mt-1 size-5 rounded text-biru" @checked(old('read_before_watch', $child->read_before_watch))>
+                        <span><strong>Baca dulu, tonton kemudian.</strong> Animasi sesuatu buku hanya terbuka selepas {{ $editing ? $child->nickname : 'anak' }} membaca buku itu.</span>
+                    </label>
+                </fieldset>
+            @endif
+
             <button type="submit" class="btn-utama">{{ $editing ? 'Simpan' : 'Tambah anak' }}</button>
         </form>
 
