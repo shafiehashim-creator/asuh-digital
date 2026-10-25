@@ -105,7 +105,10 @@ if (root) {
             canvas.style.width = `${Math.floor(cssWidth)}px`;
             canvas.style.height = `${Math.floor(cssWidth * base.height / base.width)}px`;
             const done = await paint(canvas, page, cssWidth, (task) => { single.rendering = task; });
-            if (done) updateNav(page, page);
+            if (!done) return;
+            updateNav(page, page);
+            // Fetch the next page's pieces in the background so turning is quick.
+            if (page < pdf.numPages) pdf.getPage(page + 1).then((p) => p.getOperatorList()).catch(() => {});
         },
 
         go(n) {
@@ -139,7 +142,7 @@ if (root) {
         spread: false,
         pageRatio: 1.414, // height / width, read from the first PDF page
         pageWidth: 0,
-        sheets: [], // { canvas, width (drawn CSS width, 0 = empty), pending }
+        sheets: [], // { canvas, width (drawn CSS width, 0 = empty) }
 
         // Largest book that fits the stage, keeping the PDF page shape.
         fit() {
@@ -172,21 +175,38 @@ if (root) {
             });
 
             // The pages on screen first, then the next ones, then the ones behind.
+            // One page at a time: PDF.js downloads a page's pieces when it is
+            // drawn, so drawing several at once splits a slow phone connection.
+            const ahead = flip.spread ? RENDER_AHEAD.after : 2;
+            const behind = flip.spread ? RENDER_AHEAD.before : 1;
             const order = [];
             for (let n = first; n <= last; n++) order.push(n);
-            for (let n = last + 1; n <= last + RENDER_AHEAD.after; n++) order.push(n);
-            for (let n = first - 1; n >= first - RENDER_AHEAD.before; n--) order.push(n);
+            for (let n = last + 1; n <= last + ahead; n++) order.push(n);
+            for (let n = first - 1; n >= first - behind; n--) order.push(n);
 
-            order.filter((n) => n >= 1 && n <= pdf.numPages).forEach((number) => {
-                const sheet = flip.sheets[number - 1];
-                if (sheet.pending || sheet.width >= flip.pageWidth * 0.9) return;
-                sheet.pending = true;
-                const width = flip.pageWidth;
-                paint(sheet.canvas, number, width)
-                    .then((done) => { if (done) sheet.width = width; })
-                    .catch(() => {})
-                    .finally(() => { sheet.pending = false; });
-            });
+            flip.queue = order.filter((n) => n >= 1 && n <= pdf.numPages);
+            flip.pump();
+        },
+
+        queue: [],
+        busy: false,
+
+        pump() {
+            if (flip.busy || !flip.book) return;
+            const number = flip.queue.shift();
+            if (number === undefined) return;
+            const sheet = flip.sheets[number - 1];
+            if (sheet.width >= flip.pageWidth * 0.9) { flip.pump(); return; }
+
+            flip.busy = true;
+            const width = flip.pageWidth;
+            paint(sheet.canvas, number, width)
+                .then((done) => { if (done) sheet.width = width; })
+                .catch(() => {})
+                .finally(() => {
+                    flip.busy = false;
+                    flip.pump(); // the queue may belong to a rebuilt book by now
+                });
         },
 
         onFlip() {
@@ -218,7 +238,7 @@ if (root) {
                 const sheetCanvas = document.createElement('canvas');
                 el.append(sheetCanvas);
                 pages.push(el);
-                flip.sheets.push({ canvas: sheetCanvas, width: 0, pending: false });
+                flip.sheets.push({ canvas: sheetCanvas, width: 0 });
             }
 
             flip.book = new PageFlip(bookEl, {
@@ -277,6 +297,7 @@ if (root) {
             flip.sizer?.remove();
             flip.sizer = null;
             flip.sheets = [];
+            flip.queue = [];
             flipHost.hidden = true;
             stage.classList.remove('overflow-hidden');
         },
@@ -328,13 +349,13 @@ if (root) {
     });
 
     // The server answers Range requests, so PDF.js fetches only the pieces it
-    // needs (1 MB at a time) instead of waiting for the whole book.
+    // needs (2 MB at a time) instead of waiting for the whole book.
     getDocument({
         url: root.dataset.src,
         withCredentials: true,
         disableAutoFetch: true,
         disableStream: true,
-        rangeChunkSize: 1024 * 1024,
+        rangeChunkSize: 2 * 1024 * 1024,
     })
         .promise.then((doc) => {
             pdf = doc;
