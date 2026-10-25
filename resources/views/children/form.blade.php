@@ -1,0 +1,69 @@
+@php
+    use App\Enums\AgeGroup;
+    use App\Enums\ChildAvatar;
+
+    $editing = $child->exists;
+    $selectedAge = old('age_group', $child->age_group?->value);
+    $selectedAvatar = old('avatar', $child->avatar?->value ?? ChildAvatar::Anis->value);
+@endphp
+
+<x-layouts.app :title="$editing ? 'Ubah profil anak' : 'Tambah profil anak'">
+    <div class="mx-auto max-w-2xl px-4 py-10">
+        <a href="{{ route('account') }}" class="pautan text-sm">← Kembali ke Akaun saya</a>
+        <h1 class="mt-3 font-display text-3xl font-extrabold text-magenta">{{ $editing ? 'Ubah profil '.$child->nickname : 'Tambah profil anak' }}</h1>
+        <p class="mt-1 text-ink/80">Kami hanya menyimpan nama panggilan dan kumpulan umur. Tiada foto, tarikh lahir atau sekolah.</p>
+
+        <form method="POST" action="{{ $editing ? route('children.update', $child) : route('children.store') }}"
+            class="mt-6 space-y-6 rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)]">
+            @csrf
+            @if ($editing) @method('PUT') @endif
+
+            <x-field name="nickname" label="Nama panggilan" :value="$child->nickname" maxlength="30" required autocomplete="off"
+                hint="Contoh: Adik, Along, Aisyah. Nama ini dipaparkan dalam Mod Anak." />
+
+            <fieldset>
+                <legend class="label">Kumpulan umur</legend>
+                <div class="mt-2 flex flex-wrap gap-3">
+                    @foreach ([AgeGroup::SixToNine, AgeGroup::TenToThirteen] as $group)
+                        <label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-2 border-ink px-4 has-checked:bg-kuning">
+                            <input type="radio" name="age_group" value="{{ $group->value }}" @checked($selectedAge === $group->value) class="size-5 text-biru" required>
+                            {{ $group->getLabel() }}
+                        </label>
+                    @endforeach
+                </div>
+                <p class="mt-1 text-sm text-ink/70">Rak buku dalam Mod Anak memaparkan buku yang sesuai dengan umur ini.</p>
+                @error('age_group') <p class="mt-1 text-sm font-semibold text-magenta">{{ $message }}</p> @enderror
+            </fieldset>
+
+            <fieldset>
+                <legend class="label">Pilih avatar</legend>
+                <div class="mt-2 grid grid-cols-4 gap-3">
+                    @foreach (ChildAvatar::cases() as $avatar)
+                        <label class="flex cursor-pointer flex-col items-center gap-1 rounded-2xl border-2 border-transparent p-2 has-checked:border-ink has-checked:bg-kuning/40">
+                            <input type="radio" name="avatar" value="{{ $avatar->value }}" @checked($selectedAvatar === $avatar->value) class="sr-only" required>
+                            <x-child-avatar :avatar="$avatar" />
+                            <span class="text-sm font-semibold">{{ $avatar->label() }}</span>
+                        </label>
+                    @endforeach
+                </div>
+                @error('avatar') <p class="mt-1 text-sm font-semibold text-magenta">{{ $message }}</p> @enderror
+            </fieldset>
+
+            <button type="submit" class="btn-utama">{{ $editing ? 'Simpan' : 'Tambah anak' }}</button>
+        </form>
+
+        @if ($editing)
+            <form method="POST" action="{{ route('children.destroy', $child) }}" class="mt-6 rounded-3xl border-2 border-magenta/40 bg-white p-6"
+                data-confirm="Padam profil {{ $child->nickname }} dan semua rekod bacaannya? Tindakan ini tidak boleh dibatalkan."
+                onsubmit="return confirm(this.dataset.confirm)">
+                @csrf
+                @method('DELETE')
+                <h2 class="font-display text-lg font-bold text-plum">Padam profil</h2>
+                <p class="mt-1 text-sm text-ink/80">Profil ini dan semua data bacaan, kuiz serta lencananya akan dipadam sepenuhnya.</p>
+                <button type="submit" class="mt-3 inline-flex min-h-11 items-center rounded-full border-2 border-magenta px-5 font-bold text-magenta hover:bg-magenta hover:text-white">
+                    Padam profil {{ $child->nickname }}
+                </button>
+            </form>
+        @endif
+    </div>
+</x-layouts.app>

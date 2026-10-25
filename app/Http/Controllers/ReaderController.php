@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\BookFile;
+use App\Services\ChildMode;
+use App\Services\ReadingLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -27,9 +29,15 @@ class ReaderController extends Controller
      */
     public const LINK_MINUTES = 180;
 
-    public function show(Request $request, Book $book): View|RedirectResponse
+    public function show(Request $request, Book $book, ChildMode $childMode, ReadingLog $log): View|RedirectResponse
     {
         $user = $request->user();
+        $child = $childMode->child($user);
+
+        // Mod Anak: only books on the child's own shelf, and back to it on close.
+        if ($child && ! $childMode->allows($child, $book)) {
+            return redirect()->route('child-mode.home');
+        }
 
         if (! $user->canReadBook($book)) {
             return redirect()->route('catalog.show', $book)
@@ -57,6 +65,12 @@ class ReaderController extends Controller
                 ),
             ] : null,
             'watermark' => $user->email.' · '.now()->translatedFormat('j M Y'),
+            'closeUrl' => $child ? route('child-mode.home') : route('catalog.show', $book),
+            // Mod Anak: reading time and the page reached are kept for the child.
+            'progress' => $child ? [
+                'url' => route('child-mode.progress', $book),
+                'startPage' => $log->lastPage($child, $book),
+            ] : null,
         ]);
     }
 

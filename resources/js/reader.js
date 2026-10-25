@@ -33,6 +33,33 @@ if (root) {
     const pageKey = `asuh.reader.${root.dataset.book}`;
     const modeKey = 'asuh.reader.mode';
 
+    const progressUrl = root.dataset.progressUrl; // Mod Anak only: reading time for the child
+    let lastActivity = Date.now();
+    let seenPage = 0;
+    let progressTimer = null;
+
+    const sendProgress = (tick) => {
+        if (!progressUrl || !doc) return;
+        fetch(progressUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': root.dataset.csrf },
+            credentials: 'same-origin',
+            keepalive: true,
+            body: JSON.stringify({ page, tick }),
+        }).catch(() => { /* offline: the next heartbeat tries again */ });
+    };
+
+    // A minute counts only while the book is on screen and pages are being turned.
+    const ACTIVE_WINDOW_MS = 3 * 60 * 1000;
+    const startHeartbeat = () => {
+        if (!progressUrl || progressTimer) return;
+        progressTimer = setInterval(() => {
+            if (document.visibilityState === 'visible' && Date.now() - lastActivity < ACTIVE_WINDOW_MS) {
+                sendProgress(true);
+            }
+        }, 60 * 1000);
+    };
+
     let doc = null; // page source: light images or the PDF (see the sources below)
     let page = 1; // 1-based, shared by both modes
     let mode = 'flip';
@@ -167,6 +194,10 @@ if (root) {
             return; // a preview does not move the bookmark of the full book
         }
         store(pageKey, String(first));
+        if (first !== seenPage) {
+            seenPage = first;
+            lastActivity = Date.now();
+        }
     };
 
     // --- Single page mode -----------------------------------------------------
@@ -426,13 +457,20 @@ if (root) {
 
     const open = (source) => {
         doc = source;
-        page = previewCta ? 1 : Math.min(parseInt(load(pageKey), 10) || 1, doc.numPages);
+        const saved = root.dataset.startPage || load(pageKey);
+        page = previewCta ? 1 : Math.min(parseInt(saved, 10) || 1, doc.numPages);
         status.remove();
         modeToggle.hidden = false;
         canvas.hidden = true;
         flipHost.hidden = true;
         setMode(load(modeKey) === 'single' ? 'single' : 'flip');
+        sendProgress(false);
+        startHeartbeat();
     };
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') sendProgress(false); // keep the page reached
+    });
 
     if (root.dataset.pages) {
         open(imageSource(JSON.parse(root.dataset.pages)));

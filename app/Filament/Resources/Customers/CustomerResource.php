@@ -84,6 +84,17 @@ class CustomerResource extends Resource
                                 TextEntry::make('ends_at')->label('Tamat')->date('j M Y')->placeholder('-'),
                             ]),
                     ]),
+                Section::make('Profil anak')
+                    ->schema([
+                        RepeatableEntry::make('children')
+                            ->hiddenLabel()
+                            ->placeholder('Tiada profil anak.')
+                            ->columns(2)
+                            ->schema([
+                                TextEntry::make('nickname')->label('Nama panggilan'),
+                                TextEntry::make('age_group')->label('Umur')->badge(),
+                            ]),
+                    ]),
                 Section::make('Buku dibeli')
                     ->schema([
                         RepeatableEntry::make('entitlements')
