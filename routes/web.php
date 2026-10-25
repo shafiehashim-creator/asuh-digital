@@ -6,6 +6,7 @@ use App\Http\Controllers\CatalogController;
 use App\Http\Middleware\EnsureCatalogOpen;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ChildModeController;
+use App\Http\Controllers\ChildQuizController;
 use App\Http\Controllers\ChipPaymentController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LegalController;
@@ -123,6 +124,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/', 'home')->name('home');
             Route::get('/keluar', 'gate')->name('gate');
             Route::post('/keluar', 'leave')->middleware('throttle:10,1')->name('leave');
+            Route::get('/lencana', 'badges')->name('badges');
+        });
+        Route::prefix('/mod-anak/kuiz/{book:slug}')->name('child-mode.quiz.')->controller(ChildQuizController::class)->group(function () {
+            Route::get('/', 'show')->name('show');
+            Route::post('/', 'submit')->middleware('throttle:20,1')->name('submit');
+            Route::get('/keputusan', 'result')->name('result');
         });
         Route::post('/mod-anak/bacaan/{book:slug}', [ReadingProgressController::class, 'store'])
             ->middleware('throttle:30,1')

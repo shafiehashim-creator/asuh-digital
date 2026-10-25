@@ -65,6 +65,14 @@
                 </div>
             @endif
 
+            @if ($progress['quizUrl'] ?? null)
+                {{-- Mod Anak: shown once the last page is on screen. --}}
+                <div data-quiz-cta hidden class="border-t-2 border-ink bg-kuning px-4 py-4 text-center">
+                    <p class="font-display text-lg font-extrabold">Tahniah, kamu sudah habis membaca!</p>
+                    <a href="{{ $progress['quizUrl'] }}" class="btn-gelap mt-2">Jawab kuiz dan dapatkan lencana</a>
+                </div>
+            @endif
+
             <nav class="flex items-center justify-between gap-3 border-t-2 border-ink/10 bg-white px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]" aria-label="Halaman">
                 <button type="button" data-prev class="btn-gelap px-4 disabled:opacity-40 sm:px-5" aria-label="Halaman sebelum" disabled>&larr;<span class="ml-1 hidden sm:inline">Sebelum</span></button>
                 <p data-page aria-live="polite" class="text-center text-sm font-bold whitespace-nowrap"></p>
