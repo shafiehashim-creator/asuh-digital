@@ -16,7 +16,7 @@ class AccountController extends Controller
             'activePass' => $user->activePass(),
             // Includes passes waiting for the launch date (starts_at still null).
             'passes' => $user->passes()->with('plan')->latest()->get(),
-            'orders' => $user->orders()->with('plan')->latest()->get(),
+            'orders' => $user->orders()->with(['plan', 'book'])->latest()->get(),
         ]);
     }
 }

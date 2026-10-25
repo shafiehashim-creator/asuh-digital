@@ -27,6 +27,10 @@
                     <span class="font-bold text-biru">Aktif</span> sehingga
                     <strong>{{ $activePass->ends_at->translatedFormat('j F Y') }}</strong>.
                 </p>
+                @if ($activePass->ends_at->lessThan(now()->addDays(60)))
+                    <a href="{{ route('purchase.pass') }}" class="btn-utama mt-4">Perbaharui Pas Tahunan</a>
+                    <p class="mt-2 text-sm text-ink/70">Pas baharu bermula sebaik Pas semasa tamat.</p>
+                @endif
             @elseif ($pendingPass)
                 <p class="mt-2 text-lg">
                     Bayaran diterima. Pas anda akan <strong>bermula pada tarikh platform ASUH Digital dilancarkan</strong>.
@@ -34,7 +38,7 @@
                 </p>
             @else
                 <p class="mt-2 text-ink/80">Anda belum mempunyai Pas Tahunan yang aktif.</p>
-                <a href="{{ url('/') }}" class="btn-utama mt-4">Dapatkan Pas Tahunan</a>
+                <a href="{{ route('purchase.pass') }}" class="btn-utama mt-4">Dapatkan Pas Tahunan</a>
             @endif
         </section>
 
@@ -49,7 +53,7 @@
                     @foreach ($orders as $order)
                         <li class="flex flex-wrap items-center justify-between gap-3 py-4">
                             <div>
-                                <p class="font-bold">{{ $order->plan?->name ?? 'Pesanan' }}</p>
+                                <p class="font-bold">{{ $order->itemName() }}</p>
                                 <p class="text-sm text-ink/70">
                                     {{ $order->reference }} · {{ $order->created_at->translatedFormat('j M Y') }} · {{ $order->payment_method->getLabel() }}
                                 </p>

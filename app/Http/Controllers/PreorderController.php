@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Enums\OrderStatus;
-use App\Enums\PreorderStatus;
 use App\Exceptions\PreorderUnavailable;
 use App\Http\Requests\StorePreorderRequest;
 use App\Models\Order;
@@ -72,19 +71,24 @@ class PreorderController extends Controller
         // Orders are only visible to their owner; 404 so references cannot be probed.
         abort_unless($order->user_id === $request->user()->id, 404);
 
-        $order->load(['plan', 'preorder']);
+        $order->load(['plan', 'book', 'preorder']);
 
         // Keep the "checking payment" notice across the auto-refreshes.
         if ($request->boolean('semak') && $order->status === OrderStatus::Pending) {
             $request->session()->flash('payment_checking', true);
         }
 
-        $awaitingConfirmation = $order->status === OrderStatus::Pending
-            && $order->preorder?->status === PreorderStatus::AwaitingConfirmation;
+        $awaitingConfirmation = $order->isAwaitingConfirmation();
 
         return view('preorder.pay', [
             'order' => $order,
             'preorder' => $order->preorder,
+            // Where "try again" goes: the early bird form, the book, or the regular pass.
+            'retryUrl' => match (true) {
+                $order->preorder !== null => route('preorder.create'),
+                $order->book !== null => route('catalog.show', $order->book),
+                default => route('purchase.pass'),
+            },
             'awaitingConfirmation' => $awaitingConfirmation,
             'canUploadReceipt' => $bankTransfers->canUploadReceipt($order),
             'isExpired' => ! $awaitingConfirmation && (

@@ -2,7 +2,11 @@
     use App\Enums\PassStartRule;
     use App\Support\Money;
 
-    $checkoutUrl = Route::has('preorder.create') ? route('preorder.create') : '#harga';
+    // Early bird first; once its slots are gone the regular pass is sold instead.
+    $regularSale = $soldOut && $regularPlan?->is_active;
+    $checkoutUrl = $regularSale ? route('purchase.pass') : (Route::has('preorder.create') ? route('preorder.create') : '#harga');
+    $ctaLabel = $regularSale ? 'Beli Pas Tahunan' : 'Tempah slot saya';
+    $offerPlan = $regularSale ? $regularPlan : $plan;
     $pilotUrl = Route::has('pilot.create') ? route('pilot.create') : null;
     $categories = ['Komik', 'Kisah nabi', 'Akhlak', 'Doa harian', 'Cerita bergambar', 'Novel kanak-kanak', 'Sirah'];
 @endphp
@@ -13,15 +17,15 @@
         <div class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 md:grid-cols-[1.1fr_1fr] md:py-16">
             <div>
                 <p class="inline-block rounded-full border-2 border-ink bg-oren px-3 py-1 text-sm font-extrabold text-ink">
-                    Pre-order · Harga early bird
+                    {{ $regularSale ? 'Pas Tahunan · Seisi keluarga' : 'Pre-order · Harga early bird' }}
                 </p>
                 <h1 class="mt-4 font-display text-4xl leading-tight font-extrabold text-magenta sm:text-5xl">{{ $headline }}</h1>
                 <p class="mt-4 text-lg text-ink/80">{{ $subheadline }}</p>
 
-                @if ($plan)
+                @if ($offerPlan)
                     <div class="mt-6 flex flex-wrap items-end gap-x-4 gap-y-1">
-                        <p class="font-display text-5xl font-extrabold text-plum">{{ Money::short($plan->price_sen) }}</p>
-                        @if ($regularPlan && $regularPlan->price_sen > $plan->price_sen)
+                        <p class="font-display text-5xl font-extrabold text-plum">{{ Money::short($offerPlan->price_sen) }}</p>
+                        @if (! $regularSale && $regularPlan && $regularPlan->price_sen > $plan->price_sen)
                             <p class="pb-2 text-xl font-bold text-ink/70 line-through" aria-label="Harga biasa {{ Money::short($regularPlan->price_sen) }}">
                                 {{ Money::short($regularPlan->price_sen) }}
                             </p>
@@ -30,13 +34,15 @@
                     </div>
                 @endif
 
-                <x-slot-counter :limit="$slotLimit" :remaining="$slotsRemaining" class="mt-6 max-w-md" />
+                @unless ($regularSale)
+                    <x-slot-counter :limit="$slotLimit" :remaining="$slotsRemaining" class="mt-6 max-w-md" />
+                @endunless
 
                 <div class="mt-6 flex flex-wrap gap-3">
-                    @if ($soldOut)
+                    @if ($soldOut && ! $regularSale)
                         <span class="btn-utama" aria-disabled="true">Slot early bird telah habis</span>
                     @else
-                        <a href="{{ $checkoutUrl }}" class="btn-utama text-lg">Tempah slot saya</a>
+                        <a href="{{ $checkoutUrl }}" class="btn-utama text-lg">{{ $ctaLabel }}</a>
                     @endif
                     <a href="#soalan" class="btn-gelap">Soalan lazim</a>
                 </div>
@@ -109,13 +115,13 @@
     {{-- Pricing --}}
     <section id="harga" class="mx-auto max-w-6xl scroll-mt-4 px-4 py-16">
         <div class="mx-auto max-w-xl rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_6px_0_var(--color-ink)] sm:p-8">
-            <p class="inline-block rounded-full border-2 border-ink bg-oren px-3 py-0.5 text-sm font-extrabold text-ink">Harga early bird</p>
+            <p class="inline-block rounded-full border-2 border-ink bg-oren px-3 py-0.5 text-sm font-extrabold text-ink">{{ $regularSale ? 'Harga Pas Tahunan' : 'Harga early bird' }}</p>
             <h2 class="mt-2 font-display text-3xl font-extrabold text-plum">Pas Tahunan ASUH Digital</h2>
 
-            @if ($plan)
+            @if ($offerPlan)
                 <p class="mt-4 font-display text-5xl font-extrabold text-magenta">
-                    {{ Money::short($plan->price_sen) }}
-                    @if ($regularPlan && $regularPlan->price_sen > $plan->price_sen)
+                    {{ Money::short($offerPlan->price_sen) }}
+                    @if (! $regularSale && $regularPlan && $regularPlan->price_sen > $plan->price_sen)
                         <span class="text-2xl text-ink/70 line-through">{{ Money::short($regularPlan->price_sen) }}</span>
                     @endif
                 </p>
@@ -135,14 +141,16 @@
                 @endforeach
             </ul>
 
-            <x-slot-counter :limit="$slotLimit" :remaining="$slotsRemaining" class="mt-6" />
+            @unless ($regularSale)
+                <x-slot-counter :limit="$slotLimit" :remaining="$slotsRemaining" class="mt-6" />
+            @endunless
 
-            @if ($soldOut)
+            @if ($soldOut && ! $regularSale)
                 <p class="mt-6 rounded-xl bg-ink/5 p-4 font-semibold">
                     Slot early bird telah habis. Terima kasih atas sokongan anda! Pas Tahunan akan dijual pada harga biasa apabila platform dilancarkan.
                 </p>
             @else
-                <a href="{{ $checkoutUrl }}" class="btn-utama mt-6 w-full text-lg">Tempah slot saya</a>
+                <a href="{{ $checkoutUrl }}" class="btn-utama mt-6 w-full text-lg">{{ $ctaLabel }}</a>
             @endif
         </div>
     </section>
@@ -185,12 +193,12 @@
     </section>
 
     {{-- Final call to action --}}
-    @unless ($soldOut)
+    @unless ($soldOut && ! $regularSale)
         <section class="mx-auto max-w-6xl px-4 pb-4">
             <div class="rounded-3xl border-2 border-ink bg-kuning p-8 text-center shadow-[0_6px_0_var(--color-ink)]">
                 <h2 class="font-display text-3xl font-extrabold text-ink">Jom Jadi Baik bersama ASUH!</h2>
-                <p class="mt-2 font-semibold text-ink/80">Tempah slot early bird sebelum habis.</p>
-                <a href="{{ $checkoutUrl }}" class="btn-gelap mt-6 text-lg">Tempah slot saya</a>
+                <p class="mt-2 font-semibold text-ink/80">{{ $regularSale ? 'Satu Pas untuk seisi keluarga, semua e-book selama 12 bulan.' : 'Tempah slot early bird sebelum habis.' }}</p>
+                <a href="{{ $checkoutUrl }}" class="btn-gelap mt-6 text-lg">{{ $ctaLabel }}</a>
             </div>
         </section>
     @endunless

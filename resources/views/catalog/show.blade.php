@@ -53,14 +53,14 @@
                         <p class="font-display text-lg font-bold text-plum">Baca dengan Pas Tahunan</p>
                         <p class="mt-1 text-ink/80">Satu Pas untuk seisi keluarga: semua e-book ASUH Digital selama 12 bulan.</p>
                         <div class="mt-4 flex flex-wrap gap-3">
-                            <a href="{{ route('home') }}#harga" class="btn-utama">Dapatkan Pas Tahunan</a>
+                            <a href="{{ route('purchase.pass') }}" class="btn-utama">Dapatkan Pas Tahunan</a>
+                            @if ($book->single_price_sen)
+                                <a href="{{ route('purchase.book', $book) }}" class="btn-gelap">Beli buku ini {{ Money::short($book->single_price_sen) }}</a>
+                            @endif
                             @guest
                                 <a href="{{ route('login') }}" class="btn-gelap">Log masuk</a>
                             @endguest
                         </div>
-                        @if ($book->single_price_sen)
-                            <p class="mt-3 text-sm text-ink/70">Harga buku ini secara single: {{ Money::short($book->single_price_sen) }}</p>
-                        @endif
                     @endif
                 </div>
             </div>

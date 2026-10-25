@@ -8,6 +8,7 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PilotRequestController;
 use App\Http\Controllers\PreorderController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReaderController;
 use App\Http\Controllers\ReceiptController;
 use Illuminate\Support\Facades\Route;
@@ -16,10 +17,21 @@ Route::get('/', LandingController::class)->name('home');
 Route::get('/privasi', [LegalController::class, 'privacy'])->name('privacy');
 Route::get('/terma', [LegalController::class, 'terms'])->name('terms');
 
+// Regular yearly pass once the early bird slots are gone (redirects to the pre-order before that).
+Route::get('/beli/pas', [PurchaseController::class, 'pass'])->name('purchase.pass');
+Route::post('/beli/pas', [PurchaseController::class, 'storePass'])
+    ->middleware('throttle:10,1')
+    ->name('purchase.pass.store');
+
 // Phase B: hidden (404) until the admin opens the catalogue; staff can always preview.
 Route::middleware(EnsureCatalogOpen::class)->group(function () {
     Route::get('/buku', [CatalogController::class, 'index'])->name('catalog.index');
     Route::get('/buku/{book:slug}', [CatalogController::class, 'show'])->name('catalog.show');
+
+    Route::get('/beli/buku/{book:slug}', [PurchaseController::class, 'book'])->name('purchase.book');
+    Route::post('/beli/buku/{book:slug}', [PurchaseController::class, 'storeBook'])
+        ->middleware('throttle:10,1')
+        ->name('purchase.book.store');
 
     Route::middleware('auth')->group(function () {
         Route::get('/baca/{book:slug}', [ReaderController::class, 'show'])->name('reader.show');

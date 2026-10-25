@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PassStartRule;
 use App\Enums\PreorderStatus;
 use App\Events\OrderPaid;
+use App\Models\Entitlement;
 use App\Models\Order;
 use App\Models\Pass;
 use App\Models\Setting;
@@ -47,8 +48,17 @@ class PaymentProcessor
             // paid_at is later than reserved_until.
             $locked->preorder?->update(['status' => PreorderStatus::Paid]);
 
+            if ($locked->book_id) {
+                // A single e-book stays readable on this account for good.
+                Entitlement::query()->firstOrCreate(
+                    ['user_id' => $locked->user_id, 'book_id' => $locked->book_id],
+                    ['order_id' => $locked->id],
+                );
+            }
+
             if ($locked->plan) {
                 [$startsAt, $endsAt] = $this->passPeriod($locked->plan->duration_months ?? 12);
+                [$startsAt, $endsAt] = $this->afterCurrentPass($locked, $startsAt, $endsAt, $locked->plan->duration_months ?? 12);
 
                 Pass::query()->firstOrCreate(
                     ['order_id' => $locked->id],
@@ -69,6 +79,29 @@ class PaymentProcessor
         }
 
         return $newlyPaid;
+    }
+
+    /**
+     * Renewals: a family that still has days left starts the new pass when
+     * the current one ends, so no paid days are lost.
+     *
+     * @return array{0: ?Carbon, 1: ?Carbon}
+     */
+    private function afterCurrentPass(Order $order, ?Carbon $startsAt, ?Carbon $endsAt, int $months): array
+    {
+        $latestEnd = Pass::query()
+            ->where('user_id', $order->user_id)
+            ->where('order_id', '!=', $order->id)
+            ->where('ends_at', '>', $startsAt ?? now())
+            ->max('ends_at');
+
+        if (! $latestEnd) {
+            return [$startsAt, $endsAt];
+        }
+
+        $start = Carbon::parse($latestEnd);
+
+        return [$start, $start->copy()->addMonthsNoOverflow($months)];
     }
 
     /**

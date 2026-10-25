@@ -9,7 +9,7 @@ Bayaran anda telah diterima. Ini resit untuk rekod anda.
 |:--|--:|
 | **No. resit / rujukan** | {{ $order->reference }} |
 | **Tarikh bayaran** | {{ $order->paid_at?->translatedFormat('j F Y, g:i A') }} |
-| **Item** | {{ $order->plan?->name ?? 'ASUH Digital' }} |
+| **Item** | {{ $order->itemName() }} |
 | **Kaedah bayaran** | {{ $order->payment_method->getLabel() }} |
 | **Jumlah dibayar** | **{{ Money::format($order->amount_sen) }}** |
 </x-mail::table>

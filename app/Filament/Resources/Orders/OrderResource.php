@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Orders;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
-use App\Enums\PreorderStatus;
 use App\Filament\Resources\Orders\Pages\ListOrders;
 use App\Filament\Resources\Orders\Pages\ViewOrder;
 use App\Models\Order;
@@ -69,7 +68,7 @@ class OrderResource extends Resource
                     ->schema([
                         TextEntry::make('reference')->label('Rujukan')->copyable(),
                         TextEntry::make('status')->label('Status')->badge(),
-                        TextEntry::make('plan.name')->label('Item'),
+                        TextEntry::make('item')->label('Item')->state(fn (Order $record) => $record->itemName()),
                         TextEntry::make('amount_sen')->label('Jumlah')->formatStateUsing(fn (int $state) => Money::format($state)),
                         TextEntry::make('payment_method')->label('Kaedah'),
                         TextEntry::make('chip_purchase_id')->label('ID purchase CHIP')->placeholder('-')->copyable(),
@@ -134,7 +133,9 @@ class OrderResource extends Resource
         return $query
             ->where('payment_method', PaymentMethod::BankTransfer)
             ->where('status', OrderStatus::Pending)
-            ->whereHas('preorder', fn (Builder $q) => $q->where('status', PreorderStatus::AwaitingConfirmation));
+            // Same rule as Order::isAwaitingConfirmation(): covers pre-orders,
+            // regular passes and single books alike.
+            ->whereNotNull('bank_receipt_path');
     }
 
     public static function isLatePayment(Order $order): bool

@@ -39,9 +39,22 @@ it('counts down the remaining slots, ignoring expired reservations', function ()
     $this->get('/')->assertSeeInOrder(['Tinggal', '97', 'daripada 100 slot']);
 });
 
-it('closes the offer when every slot is taken', function () {
+it('switches to the regular pass at full price once every slot is taken', function () {
     Setting::set('preorder_slot_limit', 2);
     Preorder::factory()->status(PreorderStatus::Paid)->count(2)->create();
+
+    $this->get('/')
+        ->assertSee('Beli Pas Tahunan')
+        ->assertSee(route('purchase.pass'), false)
+        ->assertSee('RM99')
+        ->assertDontSee('Tempah slot saya')
+        ->assertDontSee('Slot early bird telah habis');
+});
+
+it('closes the offer when slots are gone and the regular pass is not on sale', function () {
+    Setting::set('preorder_slot_limit', 2);
+    Preorder::factory()->status(PreorderStatus::Paid)->count(2)->create();
+    Plan::findByCode(Plan::PAS_TAHUNAN)->update(['is_active' => false]);
 
     $this->get('/')
         ->assertSee('Slot early bird telah habis')

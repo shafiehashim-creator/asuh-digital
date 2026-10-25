@@ -43,7 +43,7 @@ class ChipClient
             'purchase' => [
                 'currency' => $order->currency,
                 'products' => [[
-                    'name' => $order->plan?->name ?? 'ASUH Digital',
+                    'name' => $order->itemName(),
                     // CHIP prices are in cents (sen), like amount_sen.
                     'price' => $order->amount_sen,
                     'quantity' => 1,
