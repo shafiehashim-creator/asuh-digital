@@ -95,3 +95,18 @@ it('shows the institution pilot length from settings', function () {
 
     $this->get('/')->assertSeeInOrder(['secara percuma selama', '45 hari']);
 });
+
+it('can be installed on a phone and shows an app-style tab bar', function () {
+    $this->get('/')
+        ->assertSee('<link rel="manifest" href="/manifest.webmanifest">', false)
+        ->assertSee('aria-label="Menu utama"', false)
+        ->assertSeeInOrder(['Utama', 'Log masuk']);
+
+    $manifest = json_decode(file_get_contents(public_path('manifest.webmanifest')), true);
+
+    expect($manifest['display'])->toBe('standalone')
+        ->and($manifest['start_url'])->toBe('/');
+    foreach ($manifest['icons'] as $icon) {
+        expect(public_path(ltrim($icon['src'], '/')))->toBeFile();
+    }
+});

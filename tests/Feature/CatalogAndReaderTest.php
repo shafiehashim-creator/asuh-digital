@@ -161,7 +161,22 @@ it('streams the PDF through a valid signed link for its owner', function () {
     expect($response->headers->get('Content-Type'))->toBe('application/pdf')
         ->and($response->headers->get('Cache-Control'))->toContain('no-store')
         ->and($response->headers->get('Content-Disposition'))->toContain('inline')
-        ->and($response->streamedContent())->toBe('%PDF-1.4 ujian');
+        ->and($response->headers->get('Accept-Ranges'))->toBe('bytes')
+        ->and($response->getFile()->getContent())->toBe('%PDF-1.4 ujian');
+});
+
+it('serves the PDF in pieces so big books open quickly', function () {
+    Setting::set('catalog_open', true);
+    $book = Book::factory()->published()->withFile()->create();
+    $reader = readerWithPass();
+
+    $response = $this->actingAs($reader)->get(fileUrlFor($book, $reader), ['Range' => 'bytes=0-3']);
+
+    $response->assertStatus(206);
+    expect($response->headers->get('Content-Range'))->toBe('bytes 0-3/14')
+        ->and($response->headers->get('Content-Length'))->toBe('4')
+        // Pieces keep being fetched while reading, so the link must outlive a session.
+        ->and(App\Http\Controllers\ReaderController::LINK_MINUTES)->toBeGreaterThanOrEqual(60);
 });
 
 it('refuses file links that are unsigned, expired, tampered or shared', function () {
@@ -209,7 +224,7 @@ it('rate limits file requests', function () {
     $reader = readerWithPass();
     $url = fileUrlFor($book, $reader);
 
-    foreach (range(1, 30) as $i) {
+    foreach (range(1, 180) as $i) {
         $this->actingAs($reader)->get($url);
     }
 

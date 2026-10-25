@@ -36,7 +36,7 @@ Route::middleware(EnsureCatalogOpen::class)->group(function () {
     Route::middleware('auth')->group(function () {
         Route::get('/baca/{book:slug}', [ReaderController::class, 'show'])->name('reader.show');
         Route::get('/baca/{book:slug}/fail/{file}', [ReaderController::class, 'file'])
-            ->middleware(['signed', 'throttle:30,1'])
+            ->middleware(['signed', 'throttle:180,1']) // the reader fetches the PDF in pieces
             ->name('reader.file');
     });
 });

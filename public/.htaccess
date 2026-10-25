@@ -2,6 +2,7 @@
 # served without a JavaScript MIME type, and older Apache configs lack one.
 <IfModule mod_mime.c>
     AddType text/javascript .mjs
+    AddType application/manifest+json .webmanifest
 </IfModule>
 
 <IfModule mod_rewrite.c>
