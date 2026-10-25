@@ -85,6 +85,22 @@ if [ -s "$CPANEL_BLOCKS" ]; then
     echo "Carried cPanel-generated .htaccess blocks into the release."
 fi
 
+# The MultiPHP INI Editor may also write .user.ini / php.ini (upload limits and
+# the like) into current/public. Carry them forward too; the live release is the
+# source of truth, so a file removed in cPanel stays removed.
+mkdir -p "$SHARED/cpanel-ini"
+for ini in .user.ini php.ini; do
+    if [ -f "$APP_DIR/current/public/$ini" ]; then
+        cp "$APP_DIR/current/public/$ini" "$SHARED/cpanel-ini/$ini"
+    elif [ -e "$APP_DIR/current" ]; then
+        rm -f "$SHARED/cpanel-ini/$ini"
+    fi
+    if [ -f "$SHARED/cpanel-ini/$ini" ]; then
+        cp "$SHARED/cpanel-ini/$ini" "$REL/public/$ini"
+        echo "Carried cPanel $ini into the release."
+    fi
+done
+
 # --- Document root (checked before anything changes) -------------------------
 
 if [ -n "$DOCROOT" ]; then

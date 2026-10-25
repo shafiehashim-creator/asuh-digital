@@ -109,6 +109,30 @@ it('creates a book with a cover and a private PDF', function () {
     Storage::disk('public')->assertMissing($file->path);
 });
 
+it('accepts a cover of any ratio and a large PDF', function () {
+    $this->actingAs($this->editor);
+
+    Livewire::test(CreateBook::class)
+        ->fillForm([
+            'title' => 'Buku Besar',
+            'author' => 'Penulis',
+            'category_id' => Category::query()->value('id'),
+            'age_group' => '6-9',
+            'synopsis' => 'Sinopsis',
+            'cover_path' => UploadedFile::fake()->image('kaver-segi-empat.jpg', 2000, 2000)->size(8000),
+            'files' => [['edition' => 'original', 'path' => [UploadedFile::fake()->create('buku.pdf', 86000, 'application/pdf')]]],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Book::query()->sole()->files()->count())->toBe(1);
+});
+
+it('caps admin uploads at 200 MB and gives slow connections enough time', function () {
+    expect(config('livewire.temporary_file_upload.rules'))->toContain('max:204800')
+        ->and(config('livewire.temporary_file_upload.max_upload_time'))->toBeGreaterThanOrEqual(30);
+});
+
 it('rejects files that are not PDFs', function () {
     $this->actingAs($this->editor);
 

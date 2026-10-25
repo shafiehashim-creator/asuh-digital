@@ -112,6 +112,13 @@ jobs:
           grep -q 'RewriteEngine On' "$DOCROOT/.htaccess"
           head -n 1 "$DOCROOT/.htaccess" | grep -q 'BEGIN cPanel-generated handler'
 
+          # Upload limits set in the MultiPHP INI Editor land in current/public
+          # and must survive the next deploy.
+          printf 'upload_max_filesize = 256M\npost_max_size = 256M\n' > "$APP/current/public/.user.ini"
+          sleep 1
+          (cd "$CLONE" && HOME="$FAKE_HOME" bash -c "$TASK")
+          grep -q 'upload_max_filesize = 256M' "$DOCROOT/.user.ini"
+
           # A docroot .htaccess with hand-written rules must stop the deploy.
           ODD_HOME=/tmp/oddhome
           mkdir -p "$ODD_HOME/asuh-app" "$ODD_HOME/public_html/asuh.galeriilmu.com.my"
@@ -136,9 +143,9 @@ jobs:
           test -d "$BAD_DOCROOT" && test ! -L "$BAD_DOCROOT"
           test ! -e "$BAD_HOME/asuh-app/current"
 
-          first="$(ls -d "$APP"/releases/* | sort | head -n 1)"
+          previous="$(ls -d "$APP"/releases/* | sort | tail -n 2 | head -n 1)"
           HOME="$FAKE_HOME" bash "$APP/current/scripts/deploy/rollback.sh" "$APP" "$(command -v php)"
-          test "$(readlink -f "$APP/current")" = "$first"
+          test "$(readlink -f "$APP/current")" = "$previous"
 
           # Cron auto-deploy: deploys a new deploy-build commit exactly once.
           AUTO_HOME=/tmp/autohome
