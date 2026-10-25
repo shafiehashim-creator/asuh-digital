@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\PageImageController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Middleware\AuthenticateOrPupil;
@@ -8,6 +9,7 @@ use App\Http\Middleware\EnsureCatalogOpen;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ChildModeController;
 use App\Http\Controllers\ChildQuizController;
+use App\Http\Controllers\ChildVideoController;
 use App\Http\Controllers\ChipPaymentController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LandingController;
@@ -41,6 +43,12 @@ Route::permanentRedirect('/beli/pas', '/beli/langganan');
 Route::post('/beli/langganan', [PurchaseController::class, 'storePass'])
     ->middleware('throttle:10,1')
     ->name('purchase.pass.store');
+
+// Phase 2: Langganan Plus (e-books and animated videos), on sale once the videos open.
+Route::get('/beli/langganan-plus', [PurchaseController::class, 'plus'])->name('purchase.plus');
+Route::post('/beli/langganan-plus', [PurchaseController::class, 'storePlus'])
+    ->middleware('throttle:10,1')
+    ->name('purchase.plus.store');
 
 // Phase B: hidden (404) until the admin opens the catalogue; staff can always preview.
 Route::middleware(EnsureCatalogOpen::class)->group(function () {
@@ -94,6 +102,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/pesanan/{order:reference}/resit', [ReceiptController::class, 'store'])
         ->middleware('throttle:10,1')
         ->name('preorder.receipt.store');
+
+    // Staff only (checked in the controller): watch a video before it is published.
+    Route::get('/admin/video-pratonton/{video:slug}', Admin\VideoPreviewController::class)->name('admin.video.preview');
 
     // Admin only (checked in the controller); used by the Filament order page.
     Route::get('/admin/resit/{order:reference}', [ReceiptController::class, 'show'])->name('admin.receipt');
@@ -178,6 +189,12 @@ Route::middleware([EnsureCatalogOpen::class, AuthenticateOrPupil::class])->group
     Route::post('/mod-anak/bacaan/{book:slug}', [ReadingProgressController::class, 'store'])
         ->middleware('throttle:30,1')
         ->name('child-mode.progress');
+
+    // Phase 2 animated videos.
+    Route::get('/mod-anak/video/{video:slug}', [ChildVideoController::class, 'show'])->name('child-mode.video');
+    Route::post('/mod-anak/video/{video:slug}/tonton', [ChildVideoController::class, 'progress'])
+        ->middleware('throttle:20,1')
+        ->name('child-mode.video.progress');
 });
 
 // Phase D: pupils join with a class code and pick their name.

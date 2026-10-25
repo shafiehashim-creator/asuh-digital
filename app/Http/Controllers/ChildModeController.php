@@ -7,6 +7,7 @@ use App\Models\Quiz;
 use App\Services\ChildMode;
 use App\Services\ParentGate;
 use App\Services\ReadingLog;
+use App\Services\VideoWatching;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -25,7 +26,7 @@ class ChildModeController extends Controller
         return redirect()->route('child-mode.home');
     }
 
-    public function home(Request $request, ReadingLog $log): View|RedirectResponse
+    public function home(Request $request, ReadingLog $log, VideoWatching $watching): View|RedirectResponse
     {
         $child = $this->childMode->child($request->user());
 
@@ -37,6 +38,11 @@ class ChildModeController extends Controller
             'child' => $child,
             'books' => $this->childMode->shelf($child),
             'badges' => $child->badges()->get(),
+            // Phase 2 animated videos, each with the reason it is locked (if any).
+            'videos' => $watching->hasAccess($child)
+                ? $watching->shelf($child)->map(fn ($video) => ['video' => $video, 'locked' => $watching->lockReason($child, $video)])
+                : collect(),
+            'videoSecondsLeft' => $watching->hasAccess($child) ? $watching->secondsLeftToday($child) : null,
             // Books with a quiz the child has not passed yet.
             'quizBookIds' => Quiz::query()->where('is_active', true)->has('questions', '>=', Quiz::MIN_QUESTIONS)
                 ->whereDoesntHave('attempts', fn ($q) => $q->where('child_id', $child->id)->where('passed', true))

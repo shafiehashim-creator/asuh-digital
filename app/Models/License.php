@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * transfer outside the site) or starts a free pilot. Opens every published
  * book to the institution's pupils, up to max_students names.
  */
-#[Fillable(['institution_id', 'kind', 'max_students', 'starts_on', 'ends_on', 'notes'])]
+#[Fillable(['institution_id', 'kind', 'max_students', 'starts_on', 'ends_on', 'notes', 'includes_videos'])]
 class License extends Model
 {
     /** @use HasFactory<LicenseFactory> */
@@ -28,6 +28,7 @@ class License extends Model
             'max_students' => 'integer',
             'starts_on' => 'date',
             'ends_on' => 'date',
+            'includes_videos' => 'boolean',
         ];
     }
 

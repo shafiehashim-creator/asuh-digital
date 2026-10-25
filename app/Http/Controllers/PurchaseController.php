@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PurchaseRequest;
 use App\Models\Book;
 use App\Models\Order;
+use App\Services\PlusOffer;
 use App\Services\Purchases;
 use App\Support\Money;
 use Illuminate\Http\RedirectResponse;
@@ -48,6 +49,59 @@ class PurchaseController extends Controller
         }
 
         return $this->complete($request, fn () => $this->purchases->buyPass($request->user(), $request->all()));
+    }
+
+    /**
+     * Langganan Plus (Phase 2): a new subscription, or for families on
+     * Langganan Tahunan an upgrade at the difference for the days left.
+     */
+    public function plus(Request $request, PlusOffer $offer): View|RedirectResponse
+    {
+        abort_unless($offer->available() || ($request->user()?->isStaff() && $offer->plan()), 404);
+
+        $plan = $offer->plan();
+        $user = $request->user();
+        $upgrade = $user ? $offer->upgradablePass($user) : null;
+        $upgradePrice = $upgrade ? $offer->upgradePriceSen($upgrade) : null;
+
+        $this->rememberForLogin($request, route('purchase.plus'));
+
+        if ($upgrade && $upgradePrice) {
+            return view('purchase.create', [
+                'title' => 'Naik taraf ke Langganan Plus',
+                'item' => 'Naik taraf ke '.$plan->name,
+                'price' => Money::short($upgradePrice),
+                'details' => [
+                    'Semua video animasi ASUH, ditambah e-book yang sedia ada',
+                    $upgrade->ends_at
+                        ? 'Untuk baki langganan anda, hingga '.$upgrade->ends_at->translatedFormat('j F Y')
+                        : 'Untuk seluruh tempoh langganan anda',
+                    'Anda hanya membayar beza harga untuk hari yang berbaki',
+                ],
+                'note' => null,
+                'action' => route('purchase.plus.store'),
+            ]);
+        }
+
+        return view('purchase.create', [
+            'title' => 'Beli Langganan Plus',
+            'item' => $plan->name,
+            'price' => Money::short($plan->price_sen),
+            'details' => ['Semua e-book dan video animasi ASUH Digital selama 12 bulan', 'Sehingga 4 profil anak', 'Sekali bayar, tiada caj automatik'],
+            'note' => $user?->activePass()?->isPlus()
+                ? 'Anda masih ada Langganan Plus aktif. Langganan baharu bermula sebaik langganan semasa tamat, jadi tiada hari yang hilang.'
+                : null,
+            'action' => route('purchase.plus.store'),
+        ]);
+    }
+
+    public function storePlus(PurchaseRequest $request, PlusOffer $offer): RedirectResponse
+    {
+        $user = $request->user();
+
+        return $this->complete($request, fn () => $user && $offer->upgradablePass($user)
+            ? $this->purchases->upgradeToPlus($user, $request->all())
+            : $this->purchases->buyPlus($user, $request->all()));
     }
 
     public function book(Request $request, Book $book): View|RedirectResponse

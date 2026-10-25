@@ -9,6 +9,41 @@
             <span class="text-sm font-bold text-biru">{{ $badges->count() }} / {{ count(App\Enums\Badge::cases()) }}</span>
         </a>
 
+        @if (session('video_locked'))
+            <p role="status" class="mt-4 rounded-2xl border-2 border-ink bg-kuning p-3 font-bold">{{ session('video_locked') }}</p>
+        @endif
+
+        @if ($videos->isNotEmpty())
+            <div class="mt-8 flex flex-wrap items-end justify-between gap-2">
+                <h2 class="font-display text-2xl font-bold text-plum">Video animasi</h2>
+                @if ($videoSecondsLeft !== null)
+                    <p class="text-sm font-bold text-biru">Baki masa menonton hari ini: {{ intdiv($videoSecondsLeft + 59, 60) }} minit</p>
+                @endif
+            </div>
+            <div class="mt-3 flex snap-x gap-4 overflow-x-auto pb-2">
+                @foreach ($videos as $item)
+                    @php($video = $item['video'])
+                    <a href="{{ route('child-mode.video', $video) }}" class="group block w-64 shrink-0 snap-start">
+                        <div class="relative aspect-video overflow-hidden rounded-2xl border-2 border-ink bg-plum shadow-[0_3px_0_var(--color-ink)]">
+                            @if ($video->thumbnail_path)
+                                <img src="{{ Storage::disk('public')->url($video->thumbnail_path) }}" alt="" loading="lazy" @class(['h-full w-full object-cover', 'opacity-40 grayscale' => $item['locked']])>
+                            @else
+                                <div class="flex h-full items-center justify-center p-3 text-center font-display text-lg font-extrabold text-white">{{ $video->title }}</div>
+                            @endif
+                            <span class="absolute bottom-2 left-2 flex size-10 items-center justify-center rounded-full border-2 border-ink bg-kuning text-lg text-ink" aria-hidden="true">{{ $item['locked'] ? '🔒' : '▶' }}</span>
+                            @if ($video->durationLabel())
+                                <span class="absolute right-2 bottom-2 rounded-full bg-ink/80 px-2 text-xs font-bold text-white">{{ $video->durationLabel() }}</span>
+                            @endif
+                        </div>
+                        <p class="mt-2 font-display leading-tight font-bold group-hover:text-plum">{{ $video->title }}</p>
+                        @if ($item['locked'])
+                            <p class="text-sm font-semibold text-magenta">{{ $item['locked'] }}</p>
+                        @endif
+                    </a>
+                @endforeach
+            </div>
+        @endif
+
         @if ($recent->isNotEmpty())
             <h2 class="mt-8 font-display text-2xl font-bold text-plum">Sambung membaca</h2>
             <div class="mt-3 grid grid-cols-2 gap-5 sm:grid-cols-4">

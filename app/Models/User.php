@@ -116,6 +116,13 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return ($this->role?->isInstitutionStaff() ?? false) && $this->institution_id !== null;
     }
 
+    /** Phase 2 videos: staff, or a family with an active Langganan Plus. */
+    public function canWatchVideos(): bool
+    {
+        return $this->isStaff()
+            || $this->passes()->active()->whereHas('plan', fn ($q) => $q->where('code', Plan::PAS_PLUS))->exists();
+    }
+
     public function isStaff(): bool
     {
         return in_array($this->role, [Role::Admin, Role::Editor], true);

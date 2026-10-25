@@ -139,6 +139,18 @@ Keputusan pengguna (2026-10-26): murid masuk dengan kod kelas dan pilih nama; pe
 - **Peringatan lesen**: `php artisan asuh:license-reminders` setiap hari 9:00 pagi menghantar e-mel kepada pentadbir institusi 30 dan 7 hari sebelum lesen tamat (kecuali sudah diperbaharui). Portal guru memaparkan amaran 30 hari. Widget papan pemuka: Institusi berlesen.
 - Belum dibina: institusi membeli lesen dalam talian, dan admin melihat kemajuan murid (guru sahaja buat masa ini).
 
+## Status Fasa 2: video animasi dan Langganan Plus (2026-10-26)
+
+Keputusan pengguna (2026-10-26): dua pakej (Langganan Tahunan kekal, Langganan Plus = e-book + animasi); YouTube unlisted dahulu, boleh pindah ke Bunny Stream; animasi 16:9 (9:16 untuk iklan sahaja); "Baca dulu, tonton kemudian" ialah suis ibu bapa; had tonton harian ditetapkan ibu bapa; lesen institusi boleh termasuk video.
+
+- **Suis**: semua bahagian video dan jualan Plus tersembunyi sehingga **Buka video animasi dan Langganan Plus** (`videos_open`) dihidupkan di Tetapan, dan harga Plus (pelan `pas_plus`) lebih daripada 0. Staf sentiasa boleh pratonton.
+- **Video** (`videos`, `/admin/video`, admin dan editor): dengan atau tanpa buku, umur, kategori, gambar kecil sendiri (16:9, cakera `public`), dan hanya **penyedia + ID** (`App\Enums\VideoProvider`: `youtube`, `bunny`). Editor tampal pautan YouTube; ID diambil oleh `App\Support\VideoId`. Semakan syariah sama seperti buku (`App\Services\ContentWorkflow`, dahulu `BookWorkflow`; `syariah_reviews.video_id`). Butang **Tonton** untuk pratonton staf.
+- **Langganan Plus** (`/beli/langganan-plus`, `App\Services\PlusOffer`): langganan baharu, atau **naik taraf** untuk pemilik Langganan Tahunan dengan bayaran beza harga ikut baki hari (dibundarkan ke atas ke RM penuh). Pesanan naik taraf (`orders.upgrades_pass_id`) menukar pelan langganan sedia ada dengan tarikh yang sama melalui `PaymentProcessor::markPaid()`. Akaun saya memaparkan tawaran naik taraf. `licenses.includes_videos` untuk institusi.
+- **Menonton dalam Mod Anak** (`/mod-anak/video/{video}`, `App\Services\VideoWatching`): baris "Video animasi" di rak ikut umur. ID video hanya dihantar ke pelayar di halaman pemain selepas semakan akses. YouTube melalui IFrame API (`youtube-nocookie.com`, `rel=0`, kawalan ASUH sendiri, lapisan pelindung, skrin jeda dan tamat ASUH); Bunny melalui embed bertoken (`BUNNY_STREAM_LIBRARY_ID`, `BUNNY_STREAM_TOKEN_KEY` dalam `.env`). Heartbeat setiap 30 saat ke `video_views` (satu baris setiap anak, video dan hari; tidak lebih daripada masa sebenar berlalu).
+- **Kawalan ibu bapa** pada profil anak: `children.daily_video_minutes` (15–90 atau tiada had) dan `children.read_before_watch` (video sesuatu buku dikunci sehingga anak membaca buku itu).
+- **Laporan**: minit menonton dalam laporan mingguan ibu bapa dan laporan kelas guru (jika lesen termasuk video).
+- Belum dibina: kuiz untuk video tanpa buku, dan treler percuma di halaman awam.
+
 ## Perlindungan e-book
 
 - Fail disimpan dalam `storage/app/private`, **tidak** dalam `public/`.

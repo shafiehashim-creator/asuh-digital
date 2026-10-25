@@ -25,6 +25,8 @@ return [
         // Phase B catalogue and reader stay hidden from the public until the
         // admin opens them (deploys are automatic, so unfinished work can ship).
         'catalog_open' => false,
+        // Phase 2 animated videos and Langganan Plus stay hidden until the admin opens them.
+        'videos_open' => false,
         // Pages anyone may read free from a book's "versi pantas" (0 turns previews off).
         'preview_pages' => 5,
         // Floating WhatsApp button (digits with country code, e.g. 60123456789); hidden when empty.

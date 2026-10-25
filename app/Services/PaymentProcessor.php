@@ -56,7 +56,10 @@ class PaymentProcessor
                 );
             }
 
-            if ($locked->plan) {
+            if ($locked->upgrades_pass_id) {
+                // Langganan Plus upgrade: the same subscription and dates, now with videos.
+                $locked->upgradesPass?->update(['plan_id' => $locked->plan_id]);
+            } elseif ($locked->plan) {
                 [$startsAt, $endsAt] = $this->passPeriod($locked->plan->duration_months ?? 12);
                 [$startsAt, $endsAt] = $this->afterCurrentPass($locked, $startsAt, $endsAt, $locked->plan->duration_months ?? 12);
 

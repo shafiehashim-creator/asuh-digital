@@ -47,4 +47,10 @@ return [
         'webhook_public_key' => env('CHIP_WEBHOOK_PUBLIC_KEY'),
     ],
 
+    // Phase 2 videos on Bunny Stream (optional; YouTube needs no keys).
+    'bunny_stream' => [
+        'library_id' => env('BUNNY_STREAM_LIBRARY_ID'),
+        'token_key' => env('BUNNY_STREAM_TOKEN_KEY'),
+    ],
+
 ];
