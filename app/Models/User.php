@@ -97,6 +97,19 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->belongsTo(Institution::class);
     }
 
+    public function isInstitutionAdmin(): bool
+    {
+        return $this->isInstitutionStaff() && $this->role === Role::InstitutionAdmin;
+    }
+
+    /** Institution administrators see every class; teachers their own. */
+    public function canManageClassroom(Classroom $classroom): bool
+    {
+        return $this->isInstitutionStaff()
+            && $classroom->institution_id === $this->institution_id
+            && ($this->isInstitutionAdmin() || $classroom->teacher_id === $this->id);
+    }
+
     /** Institution administrators and teachers (the /guru portal). */
     public function isInstitutionStaff(): bool
     {

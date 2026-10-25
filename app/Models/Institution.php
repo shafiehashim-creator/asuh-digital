@@ -32,6 +32,17 @@ class Institution extends Model
         return $this->licenses()->active()->first();
     }
 
+    public function classrooms(): HasMany
+    {
+        return $this->hasMany(Classroom::class)->orderBy('name');
+    }
+
+    /** Pupils in all classes, counted against the licence's max_students. */
+    public function pupilCount(): int
+    {
+        return Child::query()->whereIn('classroom_id', $this->classrooms()->select('id'))->count();
+    }
+
     public function users(): HasMany
     {
         return $this->hasMany(User::class);

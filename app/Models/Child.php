@@ -43,6 +43,17 @@ class Child extends Model
         return $this->hasMany(ChildBadge::class)->orderBy('awarded_at');
     }
 
+    /** Pupils belong to a class (Phase D) instead of a parent's account. */
+    public function classroom(): BelongsTo
+    {
+        return $this->belongsTo(Classroom::class);
+    }
+
+    public function isPupil(): bool
+    {
+        return $this->classroom_id !== null;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

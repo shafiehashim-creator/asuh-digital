@@ -153,4 +153,19 @@ Route::post('/jemputan/{token}', [InvitationController::class, 'accept'])->middl
 
 Route::middleware(['auth', 'verified', EnsureInstitutionStaff::class])->prefix('/guru')->name('teacher.')->group(function () {
     Route::get('/', Teacher\HomeController::class)->name('home');
+
+    Route::controller(Teacher\ClassroomController::class)->prefix('/kelas')->name('classrooms.')->group(function () {
+        Route::get('/baru', 'create')->name('create');
+        Route::post('/', 'store')->middleware('throttle:20,1')->name('store');
+        Route::get('/{classroom}', 'show')->name('show');
+        Route::get('/{classroom}/ubah', 'edit')->name('edit');
+        Route::put('/{classroom}', 'update')->name('update');
+        Route::delete('/{classroom}', 'destroy')->name('destroy');
+        Route::post('/{classroom}/kod-baharu', 'newCode')->middleware('throttle:10,1')->name('code');
+    });
+    Route::post('/kelas/{classroom}/murid', [Teacher\PupilController::class, 'store'])->middleware('throttle:20,1')->name('pupils.store');
+    Route::delete('/kelas/{classroom}/murid/{pupil}', [Teacher\PupilController::class, 'destroy'])->name('pupils.destroy');
+
+    Route::post('/guru', [Teacher\TeacherController::class, 'store'])->middleware('throttle:10,1')->name('teachers.store');
+    Route::delete('/guru/{teacher}', [Teacher\TeacherController::class, 'destroy'])->name('teachers.destroy');
 });
