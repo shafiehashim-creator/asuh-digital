@@ -10,6 +10,10 @@ class SendOrderReceipt
 {
     public function handle(OrderPaid $event): void
     {
+        if (! $event->sendReceipt) {
+            return;
+        }
+
         Mail::to($event->order->user)->send(new OrderReceipt($event->order));
     }
 }

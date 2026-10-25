@@ -13,5 +13,6 @@ class OrderPaid
 {
     use Dispatchable, SerializesModels;
 
-    public function __construct(public Order $order) {}
+    /** $sendReceipt is false only when an admin adds an order by hand and chooses not to e-mail. */
+    public function __construct(public Order $order, public bool $sendReceipt = true) {}
 }

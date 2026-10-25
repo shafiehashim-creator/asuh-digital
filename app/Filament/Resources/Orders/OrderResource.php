@@ -76,6 +76,7 @@ class OrderResource extends Resource
                         TextEntry::make('paid_at')->label('Dibayar')->dateTime('j M Y, g:i A')->placeholder('-'),
                         TextEntry::make('confirmedBy.name')->label('Disahkan oleh')->placeholder('-'),
                         TextEntry::make('confirmed_at')->label('Disahkan pada')->dateTime('j M Y, g:i A')->placeholder('-'),
+                        TextEntry::make('admin_note')->label('Catatan admin')->placeholder('-')->columnSpanFull(),
                     ]),
                 Section::make('Pembeli')
                     ->columns(2)

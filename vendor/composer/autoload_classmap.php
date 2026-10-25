@@ -170,6 +170,7 @@ return array(
     'App\\Services\\ContentWorkflow' => $baseDir . '/app/Services/ContentWorkflow.php',
     'App\\Services\\DashboardStats' => $baseDir . '/app/Services/DashboardStats.php',
     'App\\Services\\Invitations' => $baseDir . '/app/Services/Invitations.php',
+    'App\\Services\\ManualGrants' => $baseDir . '/app/Services/ManualGrants.php',
     'App\\Services\\ParentGate' => $baseDir . '/app/Services/ParentGate.php',
     'App\\Services\\PassOffer' => $baseDir . '/app/Services/PassOffer.php',
     'App\\Services\\PaymentProcessor' => $baseDir . '/app/Services/PaymentProcessor.php',

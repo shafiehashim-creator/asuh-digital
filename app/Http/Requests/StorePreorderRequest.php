@@ -43,7 +43,7 @@ class StorePreorderRequest extends FormRequest
             'state' => ['required', Rule::in(config('asuh.states'))],
             'children_count' => ['required', 'integer', 'min:1', 'max:10'],
             'children_age_group' => ['required', Rule::enum(AgeGroup::class)],
-            'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
+            'payment_method' => ['required', Rule::enum(PaymentMethod::class)->only(PaymentMethod::forCheckout())],
             'pdpa_consent' => ['accepted'],
         ];
     }

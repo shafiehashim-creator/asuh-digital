@@ -26,7 +26,7 @@ class PaymentProcessor
     /**
      * @return bool true if this call marked the order as paid
      */
-    public function markPaid(Order $order, ?User $confirmedBy = null): bool
+    public function markPaid(Order $order, ?User $confirmedBy = null, bool $sendReceipt = true): bool
     {
         $newlyPaid = DB::transaction(function () use ($order, $confirmedBy) {
             $locked = Order::query()->lockForUpdate()->findOrFail($order->id);
@@ -78,7 +78,7 @@ class PaymentProcessor
         });
 
         if ($newlyPaid) {
-            OrderPaid::dispatch($order->fresh());
+            OrderPaid::dispatch($order->fresh(), $sendReceipt);
         }
 
         return $newlyPaid;

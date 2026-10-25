@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 #[Fillable([
     'reference', 'user_id', 'plan_id', 'book_id', 'amount_sen', 'currency',
     'payment_method', 'status', 'chip_purchase_id', 'bank_receipt_path',
-    'confirmed_by', 'confirmed_at', 'paid_at', 'upgrades_pass_id',
+    'confirmed_by', 'confirmed_at', 'paid_at', 'upgrades_pass_id', 'admin_note',
 ])]
 class Order extends Model
 {

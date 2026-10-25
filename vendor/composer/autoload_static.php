@@ -960,6 +960,7 @@ class ComposerStaticInitdd831e7fdde172bdfa9c4bc1ead60323
         'App\\Services\\ContentWorkflow' => __DIR__ . '/../..' . '/app/Services/ContentWorkflow.php',
         'App\\Services\\DashboardStats' => __DIR__ . '/../..' . '/app/Services/DashboardStats.php',
         'App\\Services\\Invitations' => __DIR__ . '/../..' . '/app/Services/Invitations.php',
+        'App\\Services\\ManualGrants' => __DIR__ . '/../..' . '/app/Services/ManualGrants.php',
         'App\\Services\\ParentGate' => __DIR__ . '/../..' . '/app/Services/ParentGate.php',
         'App\\Services\\PassOffer' => __DIR__ . '/../..' . '/app/Services/PassOffer.php',
         'App\\Services\\PaymentProcessor' => __DIR__ . '/../..' . '/app/Services/PaymentProcessor.php',

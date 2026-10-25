@@ -41,7 +41,7 @@ class PurchaseRequest extends FormRequest
         ];
 
         return $account + [
-            'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
+            'payment_method' => ['required', Rule::enum(PaymentMethod::class)->only(PaymentMethod::forCheckout())],
         ];
     }
 }
