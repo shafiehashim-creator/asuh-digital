@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\LicenseKind;
 use App\Enums\OrderStatus;
 use App\Enums\PilotStatus;
 use App\Enums\PreorderStatus;
+use App\Models\License;
 use App\Models\Order;
 use App\Models\Pass;
 use App\Models\PilotRequest;
@@ -67,6 +69,20 @@ class DashboardStats
             'expiring' => Pass::query()->active()->where('ends_at', '<=', now()->addDays(30))->count(),
             // Paid, but waiting for the launch date to be set.
             'waiting' => Pass::query()->whereNull('starts_at')->count(),
+        ];
+    }
+
+    /**
+     * @return array{active: int, paid: int, expiring: int}
+     */
+    public function licenses(): array
+    {
+        $active = License::query()->active();
+
+        return [
+            'active' => (clone $active)->distinct()->count('institution_id'),
+            'paid' => (clone $active)->where('kind', LicenseKind::Paid)->distinct()->count('institution_id'),
+            'expiring' => (clone $active)->whereDate('ends_on', '<=', today()->addDays(30))->count(),
         ];
     }
 

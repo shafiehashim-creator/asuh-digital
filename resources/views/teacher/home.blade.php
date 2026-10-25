@@ -13,6 +13,11 @@
                     <strong>{{ $license->ends_on->translatedFormat('j F Y') }}</strong>, untuk sehingga {{ $license->max_students }} murid.
                 </p>
                 <p class="mt-1 text-ink/80">{{ $pupilCount }} murid didaftarkan · baki {{ max(0, $license->max_students - $pupilCount) }} tempat.</p>
+                @if ($license->ends_on->lte(today()->addDays(30)))
+                    <p role="status" class="mt-3 rounded-2xl bg-oren/15 p-3 font-semibold">
+                        Lesen akan tamat dalam {{ (int) today()->diffInDays($license->ends_on) }} hari. Hubungi ASUH Digital untuk memperbaharui supaya murid boleh terus membaca.
+                    </p>
+                @endif
             @else
                 <p class="mt-2 text-ink/80">Tiada lesen aktif. Murid tidak boleh membaca sehingga lesen diperbaharui. Hubungi pasukan ASUH Digital.</p>
             @endif

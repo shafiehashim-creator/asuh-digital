@@ -29,6 +29,12 @@
             Ibu bapa boleh memadam profil anak di halaman Akaun saya, dan semua rekod bacaan anak itu dipadam bersama.
         </p>
         <p>
+            Untuk institusi (tadika, sekolah dan pusat tahfiz) yang melanggan lesen, guru mendaftarkan murid dengan
+            nama panggilan sahaja. Murid masuk menggunakan kod kelas tanpa e-mel atau kata laluan. Rekod bacaan,
+            kuiz dan lencana murid dipaparkan kepada guru kelas dan pentadbir institusi, dan dipadam apabila guru
+            memadam murid atau kelas tersebut.
+        </p>
+        <p>
             Butiran kad atau perbankan dalam talian anda dimasukkan terus di halaman bayaran CHIP dan
             <strong>tidak</strong> disimpan oleh kami.
         </p>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Teacher;
 use App\Enums\AgeGroup;
 use App\Http\Controllers\Controller;
 use App\Models\Classroom;
+use App\Services\ClassReport;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -26,7 +27,7 @@ class ClassroomController extends Controller
         return redirect()->route('teacher.classrooms.show', $classroom)->with('status', 'classroom-created');
     }
 
-    public function show(Request $request, Classroom $classroom): View
+    public function show(Request $request, Classroom $classroom, ClassReport $report): View
     {
         $this->authorizeClassroom($request, $classroom);
         $institution = $request->user()->institution;
@@ -36,6 +37,7 @@ class ClassroomController extends Controller
             'classroom' => $classroom->load('pupils', 'teacher'),
             'license' => $license,
             'seatsLeft' => $license ? max(0, $license->max_students - $institution->pupilCount()) : 0,
+            'report' => $report->forClassroom($classroom),
         ]);
     }
 

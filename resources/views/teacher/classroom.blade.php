@@ -32,6 +32,42 @@
             </form>
         </section>
 
+        {{-- Progress --}}
+        @if ($report->isNotEmpty())
+            <section aria-labelledby="report-heading" class="rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)]">
+                <h2 id="report-heading" class="font-display text-xl font-bold text-plum">Kemajuan bacaan</h2>
+                <p class="mt-1 text-sm text-ink/70">Minggu ini bermula Isnin. Minit dikira hanya semasa murid menyelak halaman.</p>
+                <div class="mt-4 overflow-x-auto">
+                    <table class="w-full min-w-[36rem] text-left">
+                        <thead class="text-sm text-ink/70">
+                            <tr class="border-b-2 border-ink/10">
+                                <th scope="col" class="py-2 pr-3 font-semibold">Murid</th>
+                                <th scope="col" class="py-2 pr-3 text-right font-semibold">Minit minggu ini</th>
+                                <th scope="col" class="py-2 pr-3 text-right font-semibold">Jumlah minit</th>
+                                <th scope="col" class="py-2 pr-3 text-right font-semibold">Buku</th>
+                                <th scope="col" class="py-2 pr-3 text-right font-semibold">Kuiz lulus</th>
+                                <th scope="col" class="py-2 pr-3 text-right font-semibold">Lencana</th>
+                                <th scope="col" class="py-2 font-semibold">Kali terakhir</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($report as $row)
+                                <tr class="border-b border-ink/10">
+                                    <th scope="row" class="py-2 pr-3 font-bold">{{ $row['pupil']->nickname }}</th>
+                                    <td class="py-2 pr-3 text-right">{{ $row['week_minutes'] }}</td>
+                                    <td class="py-2 pr-3 text-right">{{ $row['total_minutes'] }}</td>
+                                    <td class="py-2 pr-3 text-right">{{ $row['books'] }}</td>
+                                    <td class="py-2 pr-3 text-right">{{ $row['quizzes'] }}</td>
+                                    <td class="py-2 pr-3 text-right">{{ $row['badges'] }}</td>
+                                    <td class="py-2 text-sm">{{ $row['last_read']?->translatedFormat('j M') ?? 'Belum membaca' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        @endif
+
         {{-- Pupils --}}
         <section aria-labelledby="pupils-heading" class="rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)]">
             <h2 id="pupils-heading" class="font-display text-xl font-bold text-plum">Murid ({{ $classroom->pupils->count() }})</h2>
