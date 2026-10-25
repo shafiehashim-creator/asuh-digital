@@ -19,8 +19,14 @@
         </ul>
         <p>
             Tentang anak-anak: akaun adalah milik ibu bapa. Anak tidak mempunyai e-mel atau kata laluan sendiri.
-            Kami <strong>tidak</strong> mengumpul nama penuh, foto, tarikh lahir atau sekolah anak. Apabila profil anak
-            diperkenalkan, hanya nama panggilan dan kumpulan umur akan disimpan.
+            Kami <strong>tidak</strong> mengumpul nama penuh, foto, tarikh lahir atau sekolah anak. Profil anak hanya
+            menyimpan nama panggilan, kumpulan umur dan avatar lukisan yang dipilih.
+        </p>
+        <p>
+            Semasa anak membaca dalam Mod Anak, kami merekod minit membaca, halaman terakhir, buku yang dibaca,
+            keputusan kuiz dan lencana yang diperoleh. Rekod ini digunakan untuk menyambung bacaan, memberi lencana
+            dan menghantar laporan bacaan mingguan kepada ibu bapa (boleh dihentikan pada bila-bila masa).
+            Ibu bapa boleh memadam profil anak di halaman Akaun saya, dan semua rekod bacaan anak itu dipadam bersama.
         </p>
         <p>
             Butiran kad atau perbankan dalam talian anda dimasukkan terus di halaman bayaran CHIP dan
