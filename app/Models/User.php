@@ -56,6 +56,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->hasMany(Pass::class);
     }
 
+    /** @return HasMany<Child, $this> */
+    public function children(): HasMany
+    {
+        return $this->hasMany(Child::class)->orderBy('created_at')->orderBy('id');
+    }
+
     public function preorders(): HasMany
     {
         return $this->hasMany(Preorder::class);

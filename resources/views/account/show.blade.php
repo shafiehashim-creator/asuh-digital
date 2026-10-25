@@ -42,6 +42,42 @@
             @endif
         </section>
 
+        {{-- Children --}}
+        @if ($shelfOpen)
+            <section aria-labelledby="children-heading" class="rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)]">
+                <h2 id="children-heading" class="font-display text-xl font-bold text-plum">Profil anak</h2>
+
+                @if (session('status') === 'child-saved')
+                    <p role="status" class="mt-3 text-sm font-semibold text-biru">Profil anak disimpan.</p>
+                @elseif (session('status') === 'child-deleted')
+                    <p role="status" class="mt-3 text-sm font-semibold text-biru">Profil anak dan semua data bacaannya telah dipadam.</p>
+                @elseif (session('status') === 'children-full')
+                    <p role="status" class="mt-3 text-sm font-semibold text-magenta">Setiap akaun boleh mempunyai sehingga {{ App\Models\Child::MAX_PER_ACCOUNT }} profil anak.</p>
+                @endif
+
+                @if ($children->isEmpty())
+                    <p class="mt-2 text-ink/80">Tambah profil untuk setiap anak supaya mereka mendapat rak buku ikut umur sendiri.</p>
+                @else
+                    <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+                        @foreach ($children as $child)
+                            <li class="flex items-center gap-3 rounded-2xl border-2 border-ink/15 p-3">
+                                <x-child-avatar :avatar="$child->avatar" />
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate font-display text-lg font-bold">{{ $child->nickname }}</p>
+                                    <p class="text-sm text-ink/70">{{ $child->age_group->getLabel() }}</p>
+                                </div>
+                                <a href="{{ route('children.edit', $child) }}" class="pautan inline-flex min-h-11 items-center text-sm">Ubah</a>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+
+                @if ($children->count() < App\Models\Child::MAX_PER_ACCOUNT)
+                    <a href="{{ route('children.create') }}" class="btn-gelap mt-4">Tambah anak</a>
+                @endif
+            </section>
+        @endif
+
         {{-- Bookshelf --}}
         @if ($shelfOpen)
             <section aria-labelledby="shelf-heading" class="rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)]">

@@ -28,6 +28,7 @@ class AccountController extends Controller
             'recentBooks' => $shelfOpen ? $this->recentBooks($user) : new Collection,
             'ownedBooks' => $shelfOpen ? $this->ownedBooks($user) : new Collection,
             'canReadAll' => $activePass !== null || $user->isStaff(),
+            'children' => $shelfOpen ? $user->children()->get() : new Collection,
         ]);
     }
 

@@ -4,6 +4,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\PageImageController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Middleware\EnsureCatalogOpen;
+use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ChipPaymentController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LegalController;
@@ -99,4 +100,13 @@ Route::post('/webhooks/chip', [ChipPaymentController::class, 'callback'])
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/akaun', [AccountController::class, 'show'])->name('account');
+
+    // Phase C: child profiles are only useful with the catalogue, so they open with it.
+    Route::middleware(EnsureCatalogOpen::class)->prefix('/akaun/anak')->name('children.')->controller(ChildController::class)->group(function () {
+        Route::get('/tambah', 'create')->name('create');
+        Route::post('/', 'store')->middleware('throttle:20,1')->name('store');
+        Route::get('/{child}/ubah', 'edit')->name('edit');
+        Route::put('/{child}', 'update')->name('update');
+        Route::delete('/{child}', 'destroy')->name('destroy');
+    });
 });
