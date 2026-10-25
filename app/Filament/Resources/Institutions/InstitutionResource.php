@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Institutions;
 
 use App\Enums\InstitutionType;
+use App\Enums\OrderStatus;
 use App\Filament\Resources\Institutions\Pages\CreateInstitution;
 use App\Filament\Resources\Institutions\Pages\EditInstitution;
 use App\Filament\Resources\Institutions\Pages\ListInstitutions;
@@ -63,6 +64,17 @@ class InstitutionResource extends Resource
                             ->relationship('pilotRequest', 'institution_name')
                             ->searchable()->preload()->placeholder('Tiada'),
                     ]),
+                Section::make('Kod diskaun ibu bapa')
+                    ->description('Ibu bapa murid institusi ini memasukkan kod semasa membeli Langganan Tahunan atau Langganan Plus untuk rumah. Guru boleh melihat dan berkongsi kod ini di portal guru.')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('parent_code')->label('Kod')->maxLength(20)
+                            ->unique(ignoreRecord: true)->alphaDash()
+                            ->helperText('Dijana automatik jika dikosongkan. Contoh: TADIKA-ILMU'),
+                        TextInput::make('parent_discount_percent')->label('Diskaun (%)')
+                            ->integer()->minValue(0)->maxValue(50)->default(20)->required()->suffix('%')
+                            ->helperText('0 untuk mematikan kod.'),
+                    ]),
             ]);
     }
 
@@ -70,7 +82,10 @@ class InstitutionResource extends Resource
     {
         return $table
             ->defaultSort('created_at', 'desc')
-            ->modifyQueryUsing(fn (Builder $query) => $query->withCount('users'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->withCount([
+                'users',
+                'referredOrders as parent_sales_count' => fn (Builder $q) => $q->where('status', OrderStatus::Paid),
+            ]))
             ->columns([
                 TextColumn::make('name')->label('Institusi')->searchable()
                     ->description(fn (Institution $record) => $record->type->getLabel().' · '.$record->state),
@@ -82,6 +97,8 @@ class InstitutionResource extends Resource
                     })
                     ->color(fn (string $state) => str_starts_with($state, 'Tiada') ? 'gray' : 'success'),
                 TextColumn::make('users_count')->label('Guru')->alignEnd(),
+                TextColumn::make('parent_code')->label('Kod ibu bapa')->copyable()->placeholder('-'),
+                TextColumn::make('parent_sales_count')->label('Jualan ibu bapa')->alignEnd(),
                 TextColumn::make('created_at')->label('Dicipta')->date('j M Y')->sortable(),
             ])
             ->recordActions([

@@ -5,6 +5,7 @@
     $user = auth()->user();
     $cardClass = 'rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)] sm:p-8';
     $bankHours = (int) Setting::get('bank_transfer_reservation_hours');
+    $schoolCode ??= false;
 @endphp
 
 <x-layouts.app :title="$title">
@@ -52,6 +53,17 @@
                     </div>
                 @endif
             </section>
+
+            @if ($schoolCode)
+                {{-- Parents of pupils at a licensed school get its discount. --}}
+                <details class="{{ $cardClass }}" @if (old('school_code') || $errors->has('school_code')) open @endif>
+                    <summary class="cursor-pointer font-display text-lg font-bold text-plum">Ada kod sekolah? Dapatkan diskaun</summary>
+                    <div class="mt-4">
+                        <x-field name="school_code" label="Kod sekolah" autocomplete="off" class="uppercase"
+                            hint="Diberi oleh tadika atau sekolah anak anda yang menggunakan ASUH Digital. Diskaun dikira pada halaman bayaran." />
+                    </div>
+                </details>
+            @endif
 
             <section class="{{ $cardClass }} space-y-4" aria-labelledby="bayaran-heading">
                 <h2 id="bayaran-heading" class="font-display text-xl font-bold text-plum">2. Kaedah bayaran</h2>

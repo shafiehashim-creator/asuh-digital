@@ -5,6 +5,13 @@
 
         @if (! $licensed)
             <p class="mt-6 rounded-3xl border-2 border-ink bg-white p-6 text-lg font-semibold">Kelas ini belum boleh membaca buat masa ini. Tanya guru kamu.</p>
+        @elseif (! $open)
+            <div class="mt-6 rounded-3xl border-2 border-ink bg-white p-6">
+                <p class="text-4xl" aria-hidden="true">🏫</p>
+                <p class="mt-2 font-display text-xl font-bold">Kelas ASUH dibuka pada waktu sekolah sahaja.</p>
+                @if ($hours) <p class="mt-1 text-ink/80">Waktu kelas: {{ $hours }}</p> @endif
+                <p class="mt-3 font-semibold text-plum">Nak sambung baca di rumah? Minta ibu atau ayah langgan ASUH Digital.</p>
+            </div>
         @elseif ($classroom->pupils->isEmpty())
             <p class="mt-6 rounded-3xl border-2 border-ink bg-white p-6 text-lg font-semibold">Belum ada nama dalam kelas ini. Tanya guru kamu.</p>
         @else

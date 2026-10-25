@@ -39,6 +39,30 @@ class ChildMode
         $this->session->forget([self::SESSION_KEY, self::PUPIL_KEY]);
     }
 
+    /**
+     * Why a pupil cannot read right now, or null: no active licence, or
+     * outside the school days and hours set on it (reading at home is for
+     * family subscriptions).
+     */
+    public static function pupilClosedReason(Child $pupil): ?string
+    {
+        $license = $pupil->classroom?->institution?->activeLicense();
+
+        if (! $license) {
+            return 'pupil-ended';
+        }
+
+        return $license->isOpenNow() ? null : 'pupil-after-hours';
+    }
+
+    /** The pupil in this session, whether or not they may read now. */
+    public function sessionPupil(): ?Child
+    {
+        $id = $this->session->get(self::SESSION_KEY);
+
+        return $id && $this->isPupil() ? Child::query()->whereKey($id)->with('classroom.institution')->first() : null;
+    }
+
     public function isPupil(): bool
     {
         return (bool) $this->session->get(self::PUPIL_KEY);
@@ -64,7 +88,7 @@ class ChildMode
         if ($this->isPupil()) {
             $pupil = Child::query()->whereKey($id)->whereNotNull('classroom_id')->with('classroom.institution')->first();
 
-            return $pupil?->classroom->institution->activeLicense() ? $pupil : null;
+            return $pupil && self::pupilClosedReason($pupil) === null ? $pupil : null;
         }
 
         return $parent?->children()->whereKey($id)->first();

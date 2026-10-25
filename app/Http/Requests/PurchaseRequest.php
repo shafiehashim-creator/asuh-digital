@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\PaymentMethod;
+use App\Models\Institution;
 use App\Models\User;
 use App\Support\Phone;
 use Illuminate\Foundation\Http\FormRequest;
@@ -42,6 +43,12 @@ class PurchaseRequest extends FormRequest
 
         return $account + [
             'payment_method' => ['required', Rule::enum(PaymentMethod::class)->only(PaymentMethod::forCheckout())],
+            // School parent discount code (yearly subscriptions only; ignored elsewhere).
+            'school_code' => ['nullable', 'string', 'max:20', function (string $attribute, mixed $value, \Closure $fail) {
+                if (filled($value) && ! Institution::findByParentCode($value)) {
+                    $fail('Kod sekolah tidak sah. Semak semula dengan guru atau sekolah anak anda.');
+                }
+            }],
         ];
     }
 }
