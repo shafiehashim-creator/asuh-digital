@@ -3,8 +3,8 @@
 // the PDF itself; every drawn page gets the account e-mail as a light watermark.
 //
 // Two modes: "flip" (default) turns pages like a real book, two pages side by
-// side on large screens and one on phones; "single" is the plain one-page view
-// with zoom, for slow devices.
+// side on wide landscape screens and one on phones and upright tablets;
+// "single" is the plain one-page view with zoom, for slow devices.
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { PageFlip } from 'page-flip/dist/js/page-flip.module.js';
@@ -12,6 +12,10 @@ import { PageFlip } from 'page-flip/dist/js/page-flip.module.js';
 GlobalWorkerOptions.workerSrc = workerUrl;
 
 const SPREAD_MIN_WIDTH = 768; // below this the flip book shows one page
+
+// Two pages side by side only on wide, landscape screens: a tablet held
+// upright gets one big page instead of two small ones.
+const wantsSpread = (el) => el.clientWidth >= SPREAD_MIN_WIDTH && el.clientWidth > el.clientHeight;
 const RENDER_AHEAD = { before: 2, after: 3 }; // pages kept drawn around the current one
 const KEEP = { before: 4, after: 5 }; // pages further away are released to save memory
 
@@ -28,6 +32,8 @@ if (root) {
     const zoomIn = root.querySelector('[data-zoom-in]');
     const zoomOut = root.querySelector('[data-zoom-out]');
     const modeToggle = root.querySelector('[data-mode-toggle]');
+    const fullscreenButton = root.querySelector('[data-fullscreen]');
+    const fullscreenLabel = root.querySelector('[data-fullscreen-label]');
     const previewCta = root.querySelector('[data-preview-cta]'); // free preview only
     const quizCta = root.querySelector('[data-quiz-cta]'); // Mod Anak, books with a quiz
     const watermark = root.dataset.watermark;
@@ -333,7 +339,7 @@ if (root) {
         async build() {
             const base = await doc.size(1);
             flip.pageRatio = base.height / base.width;
-            flip.spread = stage.clientWidth >= SPREAD_MIN_WIDTH;
+            flip.spread = wantsSpread(stage);
 
             flip.sizer = document.createElement('div');
             flip.sizer.className = 'mx-auto';
@@ -380,7 +386,7 @@ if (root) {
         },
 
         resize() {
-            if ((stage.clientWidth >= SPREAD_MIN_WIDTH) !== flip.spread) {
+            if (wantsSpread(stage) !== flip.spread) {
                 flip.stop();
                 flip.start();
                 return;
@@ -432,6 +438,31 @@ if (root) {
     zoomIn.addEventListener('click', () => { single.zoom = Math.min(single.zoom + 0.25, 3); single.render(); });
     zoomOut.addEventListener('click', () => { single.zoom = Math.max(single.zoom - 0.25, 0.5); single.render(); });
     modeToggle.addEventListener('click', () => { if (doc) setMode(mode === 'flip' ? 'single' : 'flip'); });
+
+    // Full screen: on tablets the browser's own bars take a quarter of the
+    // height, and the book is fitted to the height. Not offered where the
+    // browser does not allow it (iPhone).
+    const fullscreenElement = () => document.fullscreenElement || document.webkitFullscreenElement;
+    if (fullscreenButton && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) {
+        fullscreenButton.hidden = false;
+        fullscreenButton.addEventListener('click', () => {
+            if (fullscreenElement()) {
+                (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+            } else {
+                const el = document.documentElement;
+                const request = el.requestFullscreen || el.webkitRequestFullscreen;
+                Promise.resolve(request.call(el, { navigationUI: 'hide' })).catch(() => {});
+            }
+        });
+        const onFullscreenChange = () => {
+            const on = Boolean(fullscreenElement());
+            fullscreenButton.setAttribute('aria-label', on ? 'Keluar skrin penuh' : 'Skrin penuh');
+            if (fullscreenLabel) fullscreenLabel.textContent = on ? 'Keluar' : 'Skrin penuh';
+            window.dispatchEvent(new Event('resize')); // refit the book to the new height
+        };
+        document.addEventListener('fullscreenchange', onFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    }
 
     document.addEventListener('keydown', (event) => {
         if (!doc) return;
