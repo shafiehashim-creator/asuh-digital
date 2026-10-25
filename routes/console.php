@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\PageVisit;
 use Illuminate\Support\Facades\Schedule;
 
 // Runs from the cPanel cron (`* * * * * php artisan schedule:run`).
@@ -13,3 +14,6 @@ Schedule::command('asuh:weekly-reports')->weeklyOn(1, '8:00')->withoutOverlappin
 
 // Institution licences: reminders 30 and 7 days before the end.
 Schedule::command('asuh:license-reminders')->dailyAt('9:00')->withoutOverlapping();
+
+// Admin traffic report: old page visits are removed (see PageVisit::KEEP_DAYS).
+Schedule::command('model:prune', ['--model' => [PageVisit::class]])->dailyAt('3:00');

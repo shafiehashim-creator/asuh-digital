@@ -65,6 +65,8 @@ Rujukan skrin: prototaip ASUH Digital di claude.ai (7 skrin: utama, katalog, hal
 
 Resource: Buku (dengan muat naik fail dan semakan syariah), Kategori, Pelanggan, Profil anak (baca sahaja), Pesanan, Pas, Institusi dan lesen, Permohonan pilot, Pre-order, Kuiz dan lencana, Pengguna admin.
 
+**Laporan** (`/admin/laporan`, Super Admin sahaja, 2026-10-26): halaman `App\Filament\Pages\Reports` dengan penapis tarikh (lalai 30 hari) dan widget dalam `app/Filament/ReportWidgets` (tidak dimuat di papan pemuka utama), dikira oleh `App\Services\Reports\AdminReports`: jualan (dengan perbandingan tempoh sebelum), graf jualan harian ikut jenis, produk terjual, buku paling banyak dibaca, saluran jualan (`App\Support\SalesChannel`: Terus, Iklan berbayar, Media sosial, Carian, E-mel, Laman lain, Kod sekolah, Manual), kempen UTM, kaedah bayaran, jualan melalui kod sekolah, pelanggan (baharu, membayar, berulang, penukaran, negeri), trafik (pelawat unik, paparan, sumber, peranti, halaman popular) dan corong penukaran. Trafik direkod oleh middleware `TrackVisits` ke `page_visits` (halaman awam sahaja; tanpa IP; ID pelawat rawak dalam sesi; bot, staf dan halaman admin tidak dikira; dipadam selepas 400 hari melalui `model:prune`). Sumber pertama lawatan (UTM, `gclid`/`fbclid` atau laman perujuk) disimpan pada pesanan baharu (`orders.source`, `medium`, `campaign`). Pautan iklan patut menggunakan `?utm_source=…&utm_medium=cpc&utm_campaign=…`.
+
 Widget papan pemuka:
 - Pre-order berbanding target 100 (Ujian Permintaan)
 - Jualan hari ini, minggu ini dan bulan ini
