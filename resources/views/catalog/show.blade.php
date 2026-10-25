@@ -28,7 +28,9 @@
             <div>
                 <p class="flex flex-wrap gap-2 text-sm font-bold">
                     <span class="rounded-full bg-lavender px-3 py-1">{{ $book->age_group->getLabel() }}</span>
-                    <a href="{{ route('catalog.index', ['kategori' => $book->category->slug]) }}" class="rounded-full bg-biru/10 px-3 py-1 text-biru hover:bg-biru/20">{{ $book->category->name }}</a>
+                    @foreach ($book->categories as $category)
+                        <a href="{{ route('catalog.index', ['kategori' => $category->slug]) }}" class="rounded-full bg-biru/10 px-3 py-1 text-biru hover:bg-biru/20">{{ $category->name }}</a>
+                    @endforeach
                     <span class="rounded-full bg-kuning px-3 py-1">✓ Disemak syariah</span>
                 </p>
                 <h1 class="mt-4 font-display text-3xl font-extrabold text-magenta sm:text-4xl">{{ $book->title }}</h1>
@@ -66,15 +68,36 @@
             </div>
         </div>
 
-        @if ($related->isNotEmpty())
-            <section class="mt-16" aria-labelledby="related-heading">
-                <h2 id="related-heading" class="font-display text-2xl font-bold text-plum">Buku lain dalam {{ $book->category->name }}</h2>
-                <ul class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                    @foreach ($related as $other)
-                        <li>
+        @if ($recommended->isNotEmpty())
+            <section class="mt-16" aria-labelledby="recommended-heading">
+                <div class="flex flex-wrap items-end justify-between gap-2">
+                    <h2 id="recommended-heading" class="font-display text-2xl font-bold text-plum">Anda mungkin suka juga</h2>
+                    <a href="{{ route('catalog.index') }}" class="pautan text-sm">Lihat semua buku</a>
+                </div>
+
+                @unless ($hasPass)
+                    <div class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-ink bg-kuning px-5 py-4">
+                        <p class="font-bold">Semua buku ini termasuk dalam Pas Tahunan. Satu bayaran, seisi keluarga baca sepanjang tahun.</p>
+                        <a href="{{ route('purchase.pass') }}" class="btn-gelap">Dapatkan Pas Tahunan</a>
+                    </div>
+                @endunless
+
+                {{-- A swipeable row on phones, a grid on larger screens. --}}
+                <ul class="-mx-4 mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-4 sm:overflow-visible sm:px-0">
+                    @foreach ($recommended as $other)
+                        <li class="w-36 shrink-0 snap-start sm:w-auto">
                             <a href="{{ route('catalog.show', $other) }}" class="group block">
-                                <x-book-cover :book="$other" />
+                                <x-book-cover :book="$other" class="transition group-hover:-translate-y-1" />
                                 <p class="mt-2 font-display font-bold leading-tight group-hover:text-plum">{{ $other->title }}</p>
+                                <p class="mt-1 text-xs font-bold">
+                                    @if ($other->readable)
+                                        <span class="text-biru">✓ Boleh dibaca</span>
+                                    @elseif ($other->single_price_sen)
+                                        <span class="text-magenta">{{ Money::short($other->single_price_sen) }}</span> <span class="text-ink/60">atau dengan Pas</span>
+                                    @else
+                                        <span class="text-ink/60">Dengan Pas Tahunan</span>
+                                    @endif
+                                </p>
                             </a>
                         </li>
                     @endforeach

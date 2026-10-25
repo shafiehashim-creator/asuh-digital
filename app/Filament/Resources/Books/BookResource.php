@@ -80,9 +80,10 @@ class BookResource extends Resource
                     ->schema([
                         TextInput::make('title')->label('Tajuk')->required()->maxLength(200)->columnSpanFull(),
                         TextInput::make('author')->label('Penulis')->required()->maxLength(150),
-                        Select::make('category_id')->label('Kategori')
-                            ->relationship('category', 'name', fn ($query) => $query->orderBy('sort_order'))
-                            ->required()->native(false),
+                        Select::make('categories')->label('Kategori')
+                            ->relationship('categories', 'name', fn ($query) => $query->orderBy('sort_order'))
+                            ->multiple()->preload()->required()->native(false)
+                            ->helperText('Boleh pilih lebih daripada satu.'),
                         Select::make('age_group')->label('Umur pembaca')->options(AgeGroup::class)->required()->native(false),
                         TextInput::make('single_price_sen')->label('Harga single (RM)')
                             ->helperText('Kosongkan jika buku hanya melalui Pas Tahunan.')
@@ -137,7 +138,7 @@ class BookResource extends Resource
             ->columns([
                 ImageColumn::make('cover_path')->label('Kaver')->disk('public')->imageHeight(56),
                 TextColumn::make('title')->label('Tajuk')->searchable()->description(fn (Book $record) => $record->author),
-                TextColumn::make('category.name')->label('Kategori'),
+                TextColumn::make('categories.name')->label('Kategori')->badge(),
                 TextColumn::make('age_group')->label('Umur'),
                 TextColumn::make('status')->label('Status')->badge(),
                 TextColumn::make('latestReview.status')->label('Semakan syariah')->badge()->placeholder('Belum dihantar'),
@@ -145,7 +146,7 @@ class BookResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('status')->label('Status')->options(BookStatus::class),
-                SelectFilter::make('category')->label('Kategori')->relationship('category', 'name'),
+                SelectFilter::make('categories')->label('Kategori')->relationship('categories', 'name')->multiple(),
                 SelectFilter::make('age_group')->label('Umur')->options(AgeGroup::class),
                 SelectFilter::make('review')->label('Semakan syariah')->options(ReviewStatus::class)
                     ->query(fn ($query, array $data) => filled($data['value'])

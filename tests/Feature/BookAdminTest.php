@@ -81,7 +81,7 @@ it('creates a book with a cover and a private PDF', function () {
         ->fillForm([
             'title' => 'Anis Belajar Berkongsi',
             'author' => 'Penulis Ujian',
-            'category_id' => Category::query()->where('slug', 'akhlak')->value('id'),
+            'categories' => [Category::query()->where('slug', 'akhlak')->value('id'), Category::query()->where('slug', 'komik')->value('id')],
             'age_group' => '6-9',
             'single_price_sen' => '9.90',
             'synopsis' => 'Anis belajar bahawa berkongsi itu indah.',
@@ -102,7 +102,8 @@ it('creates a book with a cover and a private PDF', function () {
         ->and($book->status)->toBe(BookStatus::Draft)
         ->and($book->single_price_sen)->toBe(990)
         ->and($file->path)->toStartWith('books/')
-        ->and($file->page_count)->toBe(24);
+        ->and($file->page_count)->toBe(24)
+        ->and($book->categories->pluck("slug")->sort()->values()->all())->toBe(["akhlak", "komik"]);
 
     Storage::disk('local')->assertExists($file->path);
     Storage::disk('public')->assertExists($book->cover_path);
@@ -116,7 +117,7 @@ it('accepts a cover of any ratio and a large PDF', function () {
         ->fillForm([
             'title' => 'Buku Besar',
             'author' => 'Penulis',
-            'category_id' => Category::query()->value('id'),
+            'categories' => [Category::query()->value('id')],
             'age_group' => '6-9',
             'synopsis' => 'Sinopsis',
             'cover_path' => UploadedFile::fake()->image('kaver-segi-empat.jpg', 2000, 2000)->size(8000),
@@ -140,7 +141,7 @@ it('rejects files that are not PDFs', function () {
         ->fillForm([
             'title' => 'Ujian',
             'author' => 'Penulis',
-            'category_id' => Category::query()->value('id'),
+            'categories' => [Category::query()->value('id')],
             'age_group' => '6-9',
             'synopsis' => 'Sinopsis',
             'files' => [['edition' => 'original', 'path' => [UploadedFile::fake()->create('virus.exe', 10, 'application/x-msdownload')]]],

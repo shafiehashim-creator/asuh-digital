@@ -52,8 +52,8 @@ class DemoBooks extends Command
                 'author' => $author,
                 'synopsis' => $synopsis,
                 'age_group' => $age,
-                'category_id' => Category::query()->where('name', $category)->value('id'),
             ]);
+            $book->categories()->attach(Category::query()->where('name', $category)->value('id'));
 
             $path = "books/demo-{$book->slug}.pdf";
             $pages = random_int(6, 12);

@@ -47,7 +47,7 @@ Rujukan skrin: prototaip ASUH Digital di claude.ai (7 skrin: utama, katalog, hal
 - `users`: role `admin`, `editor`, `parent`, `institution_admin`
 - `children`: `user_id`, `nickname`, `age_group` (`6-9` / `10-13`), `avatar`. Maksimum 4 setiap akaun.
 - `categories`: Komik, Kisah nabi, Akhlak, Doa harian, Cerita bergambar, Novel kanak-kanak, Sirah
-- `books`: tajuk, slug, penulis, sinopsis, `age_group`, kategori, harga single, `is_enhanced_edition`, `published_at`, status (`draft` / `review` / `published`)
+- `books`: tajuk, slug, penulis, sinopsis, `age_group`, kategori (banyak, melalui jadual `book_category`), harga single, `is_enhanced_edition`, `published_at`, status (`draft` / `review` / `published`)
 - `book_files`: `book_id`, edisi (`original` / `enhanced`), path fail peribadi, bilangan halaman
 - `syariah_reviews`: `book_id`, penyemak, status, catatan, tarikh. **Buku tidak boleh diterbitkan tanpa semakan yang lulus.**
 - `plans`: `pas_tahunan` (RM99), `pas_tahunan_early` (RM79), `pas_plus` (Fasa 2), `single`
@@ -106,6 +106,7 @@ Gateway ialah **CHIP** (chip-in.asia), bukan BCL. Semua kaedah CHIP dibenarkan (
 ## Status Fasa B (2026-10-25)
 
 - Dibina: model buku/kategori/fail/semakan syariah/entitlement, admin Buku dan Kategori (aliran Hantar → Semak → Terbitkan), katalog `/buku`, halaman buku, pembaca `/baca/{buku}` (PDF.js 4.10.38) dengan mod flip (page-flip 2.0.7: dua muka di skrin ≥768px, satu muka di telefon) dan suis ke mod biasa satu halaman dengan zum. PDF dihantar dengan sokongan Range (BinaryFileResponse) supaya PDF.js memuat bahagian yang perlu sahaja; pautan fail sah 180 minit dan dihadkan 180 permintaan/minit.
+- Cadangan buku (2026-10-25): halaman buku memaparkan "Anda mungkin suka juga" (`AppServicesBookRecommendations`: kategori sama terbanyak, kemudian umur sama, kemudian terbaru; 8 buku) dengan ajakan Pas Tahunan untuk pembaca tanpa Pas.
 - **Versi pantas** (2026-10-25): selepas buku dengan PDF baharu disimpan, admin dibawa ke `/admin/buku/{buku}/versi-pantas` di mana pelayar admin menukar setiap halaman kepada WebP 1400px (JPEG jika pelayar tiada WebP) dan memuat naiknya ke `storage/app/private/book-pages/{fail}`. Pembaca guna gambar ini (pautan bertandatangan setiap halaman, `reader.page`) dan kembali kepada PDF jika belum sedia. Gambar dipadam apabila PDF diganti.
 - Paparan mobile gaya app: bar tab bawah (Utama, Katalog, Akaun) di bawah 768px, dan `public/manifest.webmanifest` dengan ikon `public/icons/` supaya laman boleh ditambah ke skrin utama telefon.
 - **Katalog dan pembaca disembunyikan (404) daripada orang ramai** sehingga suis "Buka katalog" (`catalog_open`) dihidupkan di Tetapan; staf sentiasa boleh pratonton. Deploy adalah automatik, jadi kerja Fasa B boleh dihantar berperingkat dengan selamat.

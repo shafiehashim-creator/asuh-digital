@@ -53,7 +53,9 @@
                             <p class="text-sm text-ink/70">{{ $book->author }}</p>
                             <p class="mt-1 flex flex-wrap gap-1 text-xs font-bold">
                                 <span class="rounded-full bg-lavender px-2 py-0.5">{{ $book->age_group->getLabel() }}</span>
-                                <span class="rounded-full bg-biru/10 px-2 py-0.5 text-biru">{{ $book->category->name }}</span>
+                                @foreach ($book->categories as $category)
+                                    <span class="rounded-full bg-biru/10 px-2 py-0.5 text-biru">{{ $category->name }}</span>
+                                @endforeach
                             </p>
                         </a>
                     </li>

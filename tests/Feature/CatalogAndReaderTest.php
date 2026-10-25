@@ -79,8 +79,8 @@ it('filters by category, age and search', function () {
     Setting::set('catalog_open', true);
     $akhlak = Category::query()->where('slug', 'akhlak')->first();
     $sirah = Category::query()->where('slug', 'sirah')->first();
-    Book::factory()->published()->create(['title' => 'Buku Akhlak Kecil', 'category_id' => $akhlak->id, 'age_group' => AgeGroup::SixToNine]);
-    Book::factory()->published()->create(['title' => 'Buku Sirah Besar', 'category_id' => $sirah->id, 'age_group' => AgeGroup::TenToThirteen, 'author' => 'Ustaz Hamid']);
+    Book::factory()->published()->inCategories($akhlak)->create(['title' => 'Buku Akhlak Kecil', 'age_group' => AgeGroup::SixToNine]);
+    Book::factory()->published()->inCategories($sirah)->create(['title' => 'Buku Sirah Besar', 'age_group' => AgeGroup::TenToThirteen, 'author' => 'Ustaz Hamid']);
 
     $this->get('/buku?kategori=akhlak')->assertSee('Buku Akhlak Kecil')->assertDontSee('Buku Sirah Besar');
     $this->get('/buku?umur=10-13')->assertSee('Buku Sirah Besar')->assertDontSee('Buku Akhlak Kecil');
@@ -235,4 +235,54 @@ it('keeps book files out of the public folder', function () {
     expect(App\Models\BookFile::DISK)->toBe('local')
         ->and(config('filesystems.disks.local.root'))->toBe(storage_path('app/private'))
         ->and(config('filesystems.disks.local.serve'))->toBeFalse();
+});
+
+// --- Several categories and recommendations ----------------------------------
+
+it('lists a book under every category it belongs to', function () {
+    Setting::set('catalog_open', true);
+    $komik = Category::query()->where('slug', 'komik')->sole();
+    $nabi = Category::query()->where('slug', 'kisah-nabi')->sole();
+    $book = Book::factory()->published()->inCategories($komik, $nabi)->create(['title' => 'Komik Nabi Nuh']);
+
+    $this->get(route('catalog.index', ['kategori' => 'komik']))->assertSee('Komik Nabi Nuh');
+    $this->get(route('catalog.index', ['kategori' => 'kisah-nabi']))->assertSee('Komik Nabi Nuh');
+    $this->get(route('catalog.show', $book))->assertSee('Komik')->assertSee('Kisah nabi');
+});
+
+it('recommends books from the same categories and age first', function () {
+    Setting::set('catalog_open', true);
+    [$komik, $akhlak, $sirah] = [
+        Category::query()->where('slug', 'komik')->sole(),
+        Category::query()->where('slug', 'akhlak')->sole(),
+        Category::query()->where('slug', 'sirah')->sole(),
+    ];
+    $book = Book::factory()->published()->inCategories($komik, $akhlak)->create(['age_group' => AgeGroup::SixToNine]);
+    $bothCategories = Book::factory()->published()->inCategories($komik, $akhlak)->create(['title' => 'Dua Kategori Sama']);
+    $sameAge = Book::factory()->published()->inCategories($komik)->create(['title' => 'Satu Kategori Umur Sama', 'age_group' => AgeGroup::SixToNine]);
+    $otherAge = Book::factory()->published()->inCategories($komik)->create(['title' => 'Satu Kategori Umur Lain', 'age_group' => AgeGroup::TenToThirteen]);
+    $unrelated = Book::factory()->published()->inCategories($sirah)->create(['title' => 'Tiada Kaitan']);
+    Book::factory()->inCategories($komik, $akhlak)->create(['title' => 'Draf Tersembunyi']);
+
+    $recommended = app(App\Services\BookRecommendations::class)->for($book->load('categories'));
+
+    expect($recommended->pluck('id')->all())->toBe([$bothCategories->id, $sameAge->id, $otherAge->id, $unrelated->id]);
+
+    $this->get(route('catalog.show', $book))
+        ->assertSeeInOrder(['Anda mungkin suka juga', 'Dua Kategori Sama', 'Satu Kategori Umur Sama'])
+        ->assertDontSee('Draf Tersembunyi');
+});
+
+it('pitches the yearly pass under recommendations only to readers without one', function () {
+    Setting::set('catalog_open', true);
+    $book = Book::factory()->published()->create();
+    Book::factory()->published()->create(['title' => 'Buku Seterusnya', 'single_price_sen' => 990]);
+
+    $this->get(route('catalog.show', $book))
+        ->assertSee('Semua buku ini termasuk dalam Pas Tahunan')
+        ->assertSee('RM9.90');
+
+    $this->actingAs(readerWithPass())->get(route('catalog.show', $book))
+        ->assertDontSee('Semua buku ini termasuk dalam Pas Tahunan')
+        ->assertSee('✓ Boleh dibaca');
 });

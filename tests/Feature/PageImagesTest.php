@@ -146,7 +146,7 @@ it('opens the fast version page right after a book with a PDF is created', funct
         ->fillForm([
             'title' => 'Buku Pantas',
             'author' => 'Penulis',
-            'category_id' => Category::query()->value('id'),
+            'categories' => [Category::query()->value('id')],
             'age_group' => '6-9',
             'synopsis' => 'Sinopsis',
             'files' => [['edition' => 'original', 'path' => [UploadedFile::fake()->create('buku.pdf', 300, 'application/pdf')]]],
