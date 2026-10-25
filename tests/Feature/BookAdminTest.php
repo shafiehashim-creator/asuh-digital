@@ -10,7 +10,7 @@ use App\Filament\Resources\Books\Pages\ListBooks;
 use App\Models\Book;
 use App\Models\Category;
 use App\Models\User;
-use App\Services\BookWorkflow;
+use App\Services\ContentWorkflow;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -26,13 +26,13 @@ beforeEach(function () {
 it('needs a PDF before a book can go to syariah review', function () {
     $book = Book::factory()->create();
 
-    expect(fn () => app(BookWorkflow::class)->submitForReview($book))->toThrow(InvalidArgumentException::class)
+    expect(fn () => app(ContentWorkflow::class)->submitForReview($book))->toThrow(InvalidArgumentException::class)
         ->and($book->fresh()->status)->toBe(BookStatus::Draft);
 });
 
 it('moves a book from draft to review to published', function () {
     $book = Book::factory()->withFile()->create();
-    $workflow = app(BookWorkflow::class);
+    $workflow = app(ContentWorkflow::class);
 
     $workflow->submitForReview($book);
     expect($book->fresh()->status)->toBe(BookStatus::Review)
@@ -47,7 +47,7 @@ it('moves a book from draft to review to published', function () {
 
 it('sends a rejected book back to draft and requires notes', function () {
     $book = Book::factory()->withFile()->create();
-    $workflow = app(BookWorkflow::class);
+    $workflow = app(ContentWorkflow::class);
     $workflow->submitForReview($book);
 
     expect(fn () => $workflow->review($book->fresh(), $this->editor, approved: false))->toThrow(InvalidArgumentException::class);
@@ -60,9 +60,9 @@ it('sends a rejected book back to draft and requires notes', function () {
 
 it('only lets staff review', function () {
     $book = Book::factory()->withFile()->create();
-    app(BookWorkflow::class)->submitForReview($book);
+    app(ContentWorkflow::class)->submitForReview($book);
 
-    expect(fn () => app(BookWorkflow::class)->review($book->fresh(), User::factory()->create(), approved: true))
+    expect(fn () => app(ContentWorkflow::class)->review($book->fresh(), User::factory()->create(), approved: true))
         ->toThrow(InvalidArgumentException::class);
 });
 
@@ -184,7 +184,7 @@ it('walks a book through review and publishing from the edit page', function () 
 it('shows books awaiting review in the list', function () {
     $this->actingAs($this->editor);
     $inReview = Book::factory()->withFile()->create();
-    app(BookWorkflow::class)->submitForReview($inReview);
+    app(ContentWorkflow::class)->submitForReview($inReview);
     $draft = Book::factory()->create();
 
     Livewire::test(ListBooks::class)

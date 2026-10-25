@@ -153,6 +153,12 @@ class Book extends Model
         );
     }
 
+    /** Animated videos made from this book (Phase 2). */
+    public function videos(): HasMany
+    {
+        return $this->hasMany(Video::class);
+    }
+
     public function quiz(): HasOne
     {
         return $this->hasOne(Quiz::class);

@@ -7,7 +7,7 @@ use App\Enums\ReviewStatus;
 use App\Exceptions\BookNotApproved;
 use App\Filament\Resources\Books\BookResource;
 use App\Models\Book;
-use App\Services\BookWorkflow;
+use App\Services\ContentWorkflow;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\DateTimePicker;
@@ -51,7 +51,7 @@ class EditBook extends EditRecord
                 ->requiresConfirmation()
                 ->modalDescription('Penyemak akan menyemak kandungan buku ini sebelum ia boleh diterbitkan.')
                 ->visible(fn () => $this->record->status === BookStatus::Draft)
-                ->action(fn (BookWorkflow $workflow) => $this->run(fn () => $workflow->submitForReview($this->record), 'Buku dihantar untuk semakan syariah.')),
+                ->action(fn (ContentWorkflow $workflow) => $this->run(fn () => $workflow->submitForReview($this->record), 'Buku dihantar untuk semakan syariah.')),
 
             Action::make('review')
                 ->label('Semak syariah')
@@ -66,7 +66,7 @@ class EditBook extends EditRecord
                         ->helperText('Wajib jika perlu pembetulan. Catatan ini disimpan dalam sejarah semakan.'),
                 ])
                 ->modalSubmitActionLabel('Simpan keputusan')
-                ->action(fn (array $data, BookWorkflow $workflow) => $this->run(
+                ->action(fn (array $data, ContentWorkflow $workflow) => $this->run(
                     fn () => $workflow->review($this->record, auth()->user(), $data['decision'] === 'approve', $data['notes'] ?? null),
                     $data['decision'] === 'approve' ? 'Semakan syariah lulus. Buku boleh diterbitkan.' : 'Buku dikembalikan untuk pembetulan.',
                 )),
@@ -82,7 +82,7 @@ class EditBook extends EditRecord
                         ->helperText('Pilih tarikh akan datang untuk menjadualkan penerbitan.'),
                 ])
                 ->modalSubmitActionLabel('Terbitkan')
-                ->action(fn (array $data, BookWorkflow $workflow) => $this->run(
+                ->action(fn (array $data, ContentWorkflow $workflow) => $this->run(
                     fn () => $workflow->publish($this->record, Carbon::parse($data['published_at'])),
                     'Buku diterbitkan.',
                 )),
@@ -94,7 +94,7 @@ class EditBook extends EditRecord
                 ->requiresConfirmation()
                 ->modalDescription('Buku akan disembunyikan daripada katalog. Semakan syariah yang lulus dikekalkan.')
                 ->visible(fn () => $this->record->status === BookStatus::Published)
-                ->action(fn (BookWorkflow $workflow) => $this->run(fn () => $workflow->unpublish($this->record), 'Buku dinyahterbit.')),
+                ->action(fn (ContentWorkflow $workflow) => $this->run(fn () => $workflow->unpublish($this->record), 'Buku dinyahterbit.')),
 
             DeleteAction::make()
                 ->visible(fn () => $this->record->status !== BookStatus::Published),

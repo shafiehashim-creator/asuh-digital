@@ -7,30 +7,32 @@ use App\Enums\ReviewStatus;
 use App\Models\Book;
 use App\Models\SyariahReview;
 use App\Models\User;
+use App\Models\Video;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 /**
- * Draft -> review -> published. The syariah rule itself lives in Book::booted(),
- * so even a mistake here cannot publish an unreviewed book.
+ * Draft -> review -> published, for books and animated videos alike. The
+ * syariah rule itself lives in Book::booted() and Video::booted(), so even a
+ * mistake here cannot publish unreviewed content.
  */
-class BookWorkflow
+class ContentWorkflow
 {
-    public function submitForReview(Book $book): SyariahReview
+    public function submitForReview(Book|Video $book): SyariahReview
     {
-        if ($book->files()->doesntExist()) {
+        if ($book instanceof Book && $book->files()->doesntExist()) {
             throw new InvalidArgumentException('Muat naik sekurang-kurangnya satu fail PDF sebelum menghantar untuk semakan.');
         }
 
         return DB::transaction(function () use ($book) {
             $book->update(['status' => BookStatus::Review]);
 
-            return SyariahReview::query()->create(['book_id' => $book->id, 'status' => ReviewStatus::Pending]);
+            return SyariahReview::query()->create([$this->key($book) => $book->id, 'status' => ReviewStatus::Pending]);
         });
     }
 
-    public function review(Book $book, User $reviewer, bool $approved, ?string $notes = null): SyariahReview
+    public function review(Book|Video $book, User $reviewer, bool $approved, ?string $notes = null): SyariahReview
     {
         if (! $reviewer->isStaff()) {
             throw new InvalidArgumentException('Hanya admin atau editor boleh membuat semakan syariah.');
@@ -44,7 +46,7 @@ class BookWorkflow
             $review = $book->latestReview()->first();
 
             if ($review?->status !== ReviewStatus::Pending) {
-                $review = new SyariahReview(['book_id' => $book->id]);
+                $review = new SyariahReview([$this->key($book) => $book->id]);
             }
 
             $review->fill([
@@ -54,7 +56,7 @@ class BookWorkflow
                 'reviewed_at' => now(),
             ])->save();
 
-            // A failed review sends the book back to the editors.
+            // A failed review sends the book or video back to the editors.
             if (! $approved) {
                 $book->update(['status' => BookStatus::Draft]);
             }
@@ -63,13 +65,19 @@ class BookWorkflow
         });
     }
 
-    public function publish(Book $book, ?Carbon $at = null): void
+    public function publish(Book|Video $book, ?Carbon $at = null): void
     {
         $book->update(['status' => BookStatus::Published, 'published_at' => $at ?? now()]);
     }
 
-    public function unpublish(Book $book): void
+    public function unpublish(Book|Video $book): void
     {
         $book->update(['status' => BookStatus::Draft]);
+    }
+
+    /** The review row's link to its content. */
+    private function key(Book|Video $content): string
+    {
+        return $content instanceof Book ? 'book_id' : 'video_id';
     }
 }
