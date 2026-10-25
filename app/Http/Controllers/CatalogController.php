@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\AgeGroup;
 use App\Models\Book;
 use App\Models\Category;
+use App\Services\BookRecommendations;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -21,8 +22,8 @@ class CatalogController extends Controller
 
         $books = Book::query()
             ->published()
-            ->with('category')
-            ->when($category, fn (Builder $q) => $q->where('category_id', $category->id))
+            ->with('categories')
+            ->when($category, fn (Builder $q) => $q->whereRelation('categories', 'categories.id', $category->id))
             ->when($age && $age !== AgeGroup::Both, fn (Builder $q) => $q->forAge($age))
             ->when($search !== '', fn (Builder $q) => $q->where(fn (Builder $q) => $q
                 ->where('title', 'like', "%{$search}%")
@@ -40,22 +41,20 @@ class CatalogController extends Controller
         ]);
     }
 
-    public function show(Request $request, Book $book): View
+    public function show(Request $request, Book $book, BookRecommendations $recommendations): View
     {
         $user = $request->user();
 
         // Unpublished books exist only for staff previews.
         abort_unless($book->isPublished() || $user?->isStaff(), 404);
 
-        $book->load(['category', 'files']);
+        $book->load(['categories', 'files']);
 
         return view('catalog.show', [
             'book' => $book,
             'canRead' => $user?->canReadBook($book) ?? false,
-            'related' => Book::query()->published()
-                ->where('category_id', $book->category_id)
-                ->whereKeyNot($book->id)
-                ->latest('published_at')->limit(4)->get(),
+            'recommended' => $recommendations->for($book, $user),
+            'hasPass' => $user && ($user->isStaff() || $user->passes()->active()->exists()),
         ]);
     }
 }

@@ -884,6 +884,7 @@ class ComposerStaticInitdd831e7fdde172bdfa9c4bc1ead60323
         'App\\Providers\\Filament\\AdminPanelProvider' => __DIR__ . '/../..' . '/app/Providers/Filament/AdminPanelProvider.php',
         'App\\Providers\\FortifyServiceProvider' => __DIR__ . '/../..' . '/app/Providers/FortifyServiceProvider.php',
         'App\\Services\\BankTransfers' => __DIR__ . '/../..' . '/app/Services/BankTransfers.php',
+        'App\\Services\\BookRecommendations' => __DIR__ . '/../..' . '/app/Services/BookRecommendations.php',
         'App\\Services\\BookWorkflow' => __DIR__ . '/../..' . '/app/Services/BookWorkflow.php',
         'App\\Services\\Chip\\ChipClient' => __DIR__ . '/../..' . '/app/Services/Chip/ChipClient.php',
         'App\\Services\\DashboardStats' => __DIR__ . '/../..' . '/app/Services/DashboardStats.php',

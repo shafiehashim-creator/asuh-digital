@@ -23,9 +23,26 @@ class BookFactory extends Factory
             'author' => fake()->name(),
             'synopsis' => fake()->paragraph(),
             'age_group' => fake()->randomElement([AgeGroup::SixToNine, AgeGroup::TenToThirteen]),
-            'category_id' => fn () => Category::query()->inRandomOrder()->value('id'),
             'status' => BookStatus::Draft,
         ];
+    }
+
+    /** Every book gets a category unless a test attaches its own. */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Book $book) {
+            if ($book->categories()->doesntExist()) {
+                $book->categories()->attach(Category::query()->inRandomOrder()->value('id'));
+            }
+        });
+    }
+
+    /** @param  Category|int  ...$categories */
+    public function inCategories(Category|int ...$categories): static
+    {
+        return $this->afterCreating(fn (Book $book) => $book->categories()->sync(
+            array_map(fn ($c) => $c instanceof Category ? $c->id : $c, $categories),
+        ));
     }
 
     /**

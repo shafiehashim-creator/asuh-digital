@@ -94,6 +94,7 @@ return array(
     'App\\Providers\\Filament\\AdminPanelProvider' => $baseDir . '/app/Providers/Filament/AdminPanelProvider.php',
     'App\\Providers\\FortifyServiceProvider' => $baseDir . '/app/Providers/FortifyServiceProvider.php',
     'App\\Services\\BankTransfers' => $baseDir . '/app/Services/BankTransfers.php',
+    'App\\Services\\BookRecommendations' => $baseDir . '/app/Services/BookRecommendations.php',
     'App\\Services\\BookWorkflow' => $baseDir . '/app/Services/BookWorkflow.php',
     'App\\Services\\Chip\\ChipClient' => $baseDir . '/app/Services/Chip/ChipClient.php',
     'App\\Services\\DashboardStats' => $baseDir . '/app/Services/DashboardStats.php',

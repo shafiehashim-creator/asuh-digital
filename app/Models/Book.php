@@ -11,13 +11,13 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 #[Fillable([
-    'title', 'slug', 'author', 'synopsis', 'age_group', 'category_id', 'single_price_sen',
+    'title', 'slug', 'author', 'synopsis', 'age_group', 'single_price_sen',
     'is_enhanced_edition', 'cover_path', 'status', 'published_at',
 ])]
 class Book extends Model
@@ -111,9 +111,10 @@ class Book extends Model
             ?? $files->get(BookEdition::Original->value);
     }
 
-    public function category(): BelongsTo
+    /** A book may sit in several categories, shown in the admin's order. */
+    public function categories(): BelongsToMany
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsToMany(Category::class)->orderBy('sort_order');
     }
 
     public function files(): HasMany

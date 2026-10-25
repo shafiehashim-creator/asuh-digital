@@ -64,7 +64,7 @@ class CategoryResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
-                // A category in use cannot be deleted (books.category_id restricts it).
+                // A category in use cannot be deleted (book_category restricts it).
                 DeleteAction::make()->visible(fn (Category $record) => $record->books()->doesntExist()),
             ]);
     }
