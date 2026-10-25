@@ -13,6 +13,7 @@
                     <strong>{{ $license->ends_on->translatedFormat('j F Y') }}</strong>, untuk sehingga {{ $license->max_students }} murid.
                 </p>
                 <p class="mt-1 text-ink/80">{{ $pupilCount }} murid didaftarkan · baki {{ max(0, $license->max_students - $pupilCount) }} tempat.</p>
+                <p class="mt-1 text-ink/80">Waktu murid boleh membaca: <strong>{{ $license->schoolHoursLabel() ?? 'sepanjang masa' }}</strong></p>
                 @if ($license->ends_on->lte(today()->addDays(30)))
                     <p role="status" class="mt-3 rounded-2xl bg-oren/15 p-3 font-semibold">
                         Lesen akan tamat dalam {{ (int) today()->diffInDays($license->ends_on) }} hari. Hubungi ASUH Digital untuk memperbaharui supaya murid boleh terus membaca.
@@ -22,6 +23,17 @@
                 <p class="mt-2 text-ink/80">Tiada lesen aktif. Murid tidak boleh membaca sehingga lesen diperbaharui. Hubungi pasukan ASUH Digital.</p>
             @endif
         </section>
+
+        @if ($institution->parent_code && $institution->parent_discount_percent > 0)
+            {{-- Reading at home is a family subscription; the school's code gives parents a discount. --}}
+            <section aria-labelledby="parents-heading" class="rounded-3xl border-2 border-ink bg-lavender p-6 shadow-[0_4px_0_var(--color-ink)]">
+                <h2 id="parents-heading" class="font-display text-xl font-bold text-plum">Untuk ibu bapa: baca di rumah</h2>
+                <p class="mt-2 text-ink/80">Kongsi kod ini dengan ibu bapa murid. Mereka mendapat diskaun {{ $institution->parent_discount_percent }}% untuk Langganan Tahunan di rumah.</p>
+                <p class="mt-3 inline-block rounded-2xl border-2 border-ink bg-kuning px-4 py-2 font-mono text-2xl font-extrabold tracking-widest">{{ $institution->parent_code }}</p>
+                <label for="parent-message" class="label mt-4">Mesej untuk dihantar kepada ibu bapa (WhatsApp atau surat)</label>
+                <textarea id="parent-message" rows="5" readonly class="input text-sm" onclick="this.select()">Assalamualaikum ibu bapa {{ $institution->name }}. Anak-anak kini membaca e-book Islamik ASUH Digital di sekolah. Untuk terus membaca di rumah, langgan ASUH Digital di {{ route('pass.show') }} dan masukkan kod sekolah {{ $institution->parent_code }} untuk diskaun {{ $institution->parent_discount_percent }}%. Jom Jadi Baik!</textarea>
+            </section>
+        @endif
 
         @if (session('status') === 'classroom-deleted')
             <p role="status" class="font-semibold text-biru">Kelas dan semua data muridnya telah dipadam.</p>

@@ -46,9 +46,13 @@ class PupilAccessController extends Controller
             return redirect()->route('pupil.join');
         }
 
+        $license = $classroom->institution->activeLicense();
+
         return view('pupil.names', [
             'classroom' => $classroom->load('pupils', 'institution'),
-            'licensed' => $classroom->institution->activeLicense() !== null,
+            'licensed' => $license !== null,
+            'open' => $license?->isOpenNow() ?? false,
+            'hours' => $license?->schoolHoursLabel(),
         ]);
     }
 
@@ -57,7 +61,7 @@ class PupilAccessController extends Controller
         $classroom = $this->classroom($request);
         abort_unless($classroom && $pupil->classroom_id === $classroom->id, 404);
 
-        if (! $classroom->institution->activeLicense()) {
+        if (! $classroom->institution->activeLicense()?->isOpenNow()) {
             return redirect()->route('pupil.names');
         }
 

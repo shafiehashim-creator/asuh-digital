@@ -11,6 +11,9 @@ Bayaran anda telah diterima. Ini resit untuk rekod anda.
 | **Tarikh bayaran** | {{ $order->paid_at?->translatedFormat('j F Y, g:i A') }} |
 | **Item** | {{ $order->itemName() }} |
 | **Kaedah bayaran** | {{ $order->payment_method->getLabel() }} |
+@if ($order->discount_sen > 0)
+| **Diskaun kod sekolah** | −{{ Money::format($order->discount_sen) }} |
+@endif
 | **Jumlah dibayar** | **{{ Money::format($order->amount_sen) }}** |
 </x-mail::table>
 

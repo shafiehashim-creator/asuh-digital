@@ -6,6 +6,7 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Models\Book;
+use App\Models\Institution;
 use App\Models\Order;
 use App\Models\Plan;
 use App\Models\User;
@@ -50,7 +51,7 @@ class Purchases
     {
         $plan = $this->regularPlan() ?? throw new InvalidArgumentException('Langganan Tahunan tidak dijual buat masa ini.');
 
-        return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen);
+        return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen, schoolDiscount: true);
     }
 
     /**
@@ -71,7 +72,7 @@ class Purchases
             throw new InvalidArgumentException('Anda sudah ada Langganan Tahunan. Naik taraf ke Langganan Plus dengan membayar bezanya sahaja.');
         }
 
-        return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen);
+        return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen, schoolDiscount: true);
     }
 
     /**
@@ -112,12 +113,18 @@ class Purchases
      *
      * @param  array{plan_id?: int, book_id?: int, upgrades_pass_id?: int}  $item
      */
-    private function order(?User $user, array $input, array $item, int $priceSen): Order
+    private function order(?User $user, array $input, array $item, int $priceSen, bool $schoolDiscount = false): Order
     {
         $isNewAccount = $user === null;
         $method = PaymentMethod::from($input['payment_method']);
 
-        $order = DB::transaction(function () use ($user, $input, $item, $priceSen, $method) {
+        // A school's parent code takes its percentage off a new yearly subscription.
+        $school = $schoolDiscount ? Institution::findByParentCode($input['school_code'] ?? null) : null;
+        $discountSen = $school ? (int) round($priceSen * $school->parent_discount_percent / 100) : 0;
+        $priceSen -= $discountSen;
+        $referral = ['referral_institution_id' => $school?->id, 'discount_sen' => $discountSen];
+
+        $order = DB::transaction(function () use ($user, $input, $item, $priceSen, $method, $referral) {
             $user ??= $this->createNewUser->create($input);
 
             $existing = $user->orders()
@@ -133,12 +140,12 @@ class Purchases
                 // chip_purchase_id is kept on purpose: if the buyer still
                 // completes an earlier CHIP checkout, its callback must find
                 // this order.
-                $existing->update(['payment_method' => $method, 'amount_sen' => $priceSen]);
+                $existing->update(['payment_method' => $method, 'amount_sen' => $priceSen] + $referral);
 
                 return $existing;
             }
 
-            return $existing ?? Order::query()->create($item + [
+            return $existing ?? Order::query()->create($item + $referral + [
                 'user_id' => $user->id,
                 'amount_sen' => $priceSen,
                 'payment_method' => $method,

@@ -6,6 +6,8 @@
 
             @if (session('status') === 'pupil-ended')
                 <p role="status" class="mt-4 rounded-2xl bg-oren/15 p-3 font-semibold">Akses kelas sudah tamat. Tanya guru kamu.</p>
+            @elseif (session('status') === 'pupil-after-hours')
+                <p role="status" class="mt-4 rounded-2xl bg-oren/15 p-3 font-semibold">Waktu kelas dah tamat. Nak sambung baca di rumah? Minta ibu atau ayah langgan ASUH Digital.</p>
             @endif
 
             <form method="POST" action="{{ route('pupil.code') }}" class="mt-6 space-y-4">

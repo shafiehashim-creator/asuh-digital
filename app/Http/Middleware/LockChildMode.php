@@ -27,12 +27,14 @@ class LockChildMode
 
         // Nothing to lock any more: logged out, profile deleted, licence ended or catalogue closed.
         if (! $this->childMode->child($request->user()) || ! EnsureCatalogOpen::isOpenFor($request->user())) {
+            $pupil = $this->childMode->sessionPupil();
+            $reason = $pupil ? ChildMode::pupilClosedReason($pupil) ?? 'pupil-ended' : null;
             $wasPupil = $this->childMode->isPupil();
             $this->childMode->leave();
 
             // A pupil has no account to fall back on: back to the class code page.
             if ($wasPupil && ! $request->route()?->named('pupil.*')) {
-                return redirect()->route('pupil.join')->with('status', 'pupil-ended');
+                return redirect()->route('pupil.join')->with('status', $reason ?? 'pupil-ended');
             }
 
             return $next($request);

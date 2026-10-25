@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 #[Fillable([
     'reference', 'user_id', 'plan_id', 'book_id', 'amount_sen', 'currency',
     'payment_method', 'status', 'chip_purchase_id', 'bank_receipt_path',
-    'confirmed_by', 'confirmed_at', 'paid_at', 'upgrades_pass_id', 'admin_note',
+    'confirmed_by', 'confirmed_at', 'paid_at', 'upgrades_pass_id', 'admin_note', 'referral_institution_id', 'discount_sen',
 ])]
 class Order extends Model
 {
@@ -79,6 +79,12 @@ class Order extends Model
         }
 
         return $this->plan?->name ?? 'ASUH Digital';
+    }
+
+    /** The school whose parent code gave this order its discount. */
+    public function referralInstitution(): BelongsTo
+    {
+        return $this->belongsTo(Institution::class, 'referral_institution_id');
     }
 
     /** The subscription this order upgrades to Langganan Plus (Phase 2). */
