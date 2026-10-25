@@ -138,6 +138,18 @@ it('opens the reader with a watermark and a signed file link for pass holders', 
         ->assertDontSee('books/contoh.pdf');
 });
 
+it('offers the flip book with a switch to the plain reader', function () {
+    Setting::set('catalog_open', true);
+    $book = Book::factory()->published()->withFile()->create();
+
+    $this->actingAs(readerWithPass())
+        ->get(route('reader.show', $book))
+        ->assertOk()
+        ->assertSee('data-flip', false)
+        ->assertSee('data-mode-toggle', false)
+        ->assertSee('Mod biasa');
+});
+
 it('streams the PDF through a valid signed link for its owner', function () {
     Setting::set('catalog_open', true);
     $book = Book::factory()->published()->withFile()->create();

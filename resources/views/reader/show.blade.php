@@ -17,6 +17,7 @@
                     &larr; <span class="ml-1 hidden sm:inline">Tutup</span>
                 </a>
                 <p class="min-w-0 flex-1 truncate font-display text-lg font-bold">{{ $book->title }}</p>
+                <button type="button" data-mode-toggle hidden class="min-h-11 rounded-full border-2 border-white/40 px-3 text-sm font-bold hover:bg-white/10">Mod biasa</button>
                 <button type="button" data-zoom-out class="min-h-11 min-w-11 rounded-full font-display text-xl font-bold hover:bg-white/10" aria-label="Kecilkan">−</button>
                 <button type="button" data-zoom-in class="min-h-11 min-w-11 rounded-full font-display text-xl font-bold hover:bg-white/10" aria-label="Besarkan">+</button>
             </header>
@@ -24,6 +25,7 @@
             <main data-stage class="flex-1 overflow-auto px-2 py-4">
                 <p data-status role="status" class="mt-16 text-center font-semibold">Membuka buku…</p>
                 <canvas data-canvas class="mx-auto block rounded-lg bg-white shadow-[0_4px_0_var(--color-ink)]"></canvas>
+                <div data-flip hidden class="h-full items-center [&:not([hidden])]:flex"></div>
             </main>
 
             <nav class="flex items-center justify-between gap-3 border-t-2 border-ink/10 bg-white px-3 py-2" aria-label="Halaman">
