@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Book;
 use App\Models\Child;
 use App\Models\Quiz;
 use App\Services\ChildMode;
@@ -22,6 +23,13 @@ class ChildModeController extends Controller
         abort_unless($child->user_id === $request->user()->id, 404);
 
         $this->childMode->enter($child);
+
+        // "Sambung dalam Mod Anak" from the account summary opens the book straight away.
+        $book = $request->filled('buku') ? Book::query()->where('slug', $request->string('buku'))->first() : null;
+
+        if ($book && $this->childMode->allows($child, $book)) {
+            return redirect()->route('reader.show', $book);
+        }
 
         return redirect()->route('child-mode.home');
     }

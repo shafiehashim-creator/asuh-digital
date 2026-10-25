@@ -17,7 +17,7 @@ class ParentPinController extends Controller
 
         $request->user()->forceFill(['parent_pin' => $request->input('pin')])->save();
 
-        return redirect()->route('account')->with('status', 'pin-saved');
+        return redirect()->route('account.children')->with('status', 'pin-saved');
     }
 
     public function destroy(Request $request): RedirectResponse
@@ -28,6 +28,6 @@ class ParentPinController extends Controller
 
         $request->user()->forceFill(['parent_pin' => null])->save();
 
-        return redirect()->route('account')->with('status', 'pin-removed');
+        return redirect()->route('account.children')->with('status', 'pin-removed');
     }
 }

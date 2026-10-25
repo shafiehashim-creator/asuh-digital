@@ -101,9 +101,9 @@ it('switches the report on and off from the account page', function () {
     $parent = User::factory()->create();
     $this->actingAs($parent);
 
-    $this->get('/akaun')->assertSee('Laporan bacaan mingguan');
+    $this->get('/akaun/profil')->assertSee('Laporan bacaan mingguan');
 
-    $this->put('/akaun/laporan-mingguan', ['weekly_report' => '0'])->assertRedirect('/akaun');
+    $this->put('/akaun/laporan-mingguan', ['weekly_report' => '0'])->assertRedirect('/akaun/profil');
     expect($parent->refresh()->weekly_report)->toBeFalse();
 
     $this->put('/akaun/laporan-mingguan', ['weekly_report' => '1']);

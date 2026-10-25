@@ -28,6 +28,7 @@ it('hides the shelf while the catalogue is closed', function () {
         ->assertOk()
         ->assertDontSee('Rak buku saya')
         ->assertDontSee('Kisah Rahsia');
+    $this->get('/akaun/rak')->assertNotFound();
 });
 
 it('shows bought single books with a link to read them', function () {
@@ -36,7 +37,7 @@ it('shows bought single books with a link to read them', function () {
     $book = Book::factory()->published()->create(['title' => 'Adab Makan']);
     Entitlement::query()->create(['user_id' => $buyer->id, 'book_id' => $book->id]);
 
-    $this->actingAs($buyer)->get('/akaun')
+    $this->actingAs($buyer)->get('/akaun/rak')
         ->assertOk()
         ->assertSee('Rak buku saya')
         ->assertSee('Buku yang dibeli')
@@ -55,7 +56,7 @@ it('lists books opened lately, newest first, for pass holders', function () {
     $this->travelBack();
     $newer->recordReader($reader);
 
-    $this->actingAs($reader)->get('/akaun')
+    $this->actingAs($reader)->get('/akaun/rak')
         ->assertOk()
         ->assertSee('membuka <strong>semua buku</strong>', false)
         ->assertSee('Sambung membaca')
@@ -73,7 +74,7 @@ it('drops pass books from the shelf once the pass ends but keeps bought ones', f
 
     $reader->passes()->update(['ends_at' => now()->subMinute()]);
 
-    $this->actingAs($reader)->get('/akaun')
+    $this->actingAs($reader)->get('/akaun/rak')
         ->assertOk()
         ->assertDontSee('Buku Dalam Pas')
         ->assertSee('Buku Milik Sendiri');
@@ -85,7 +86,7 @@ it('leaves unpublished books off the shelf', function () {
     $book = Book::factory()->create(['title' => 'Draf Belum Terbit']);
     Entitlement::query()->create(['user_id' => $buyer->id, 'book_id' => $book->id]);
 
-    $this->actingAs($buyer)->get('/akaun')
+    $this->actingAs($buyer)->get('/akaun/rak')
         ->assertOk()
         ->assertDontSee('Draf Belum Terbit')
         ->assertSee('Rak anda masih kosong.');

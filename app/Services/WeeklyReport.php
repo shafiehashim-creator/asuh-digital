@@ -4,11 +4,7 @@ namespace App\Services;
 
 use App\Enums\Badge;
 use App\Models\Child;
-use App\Models\ChildBadge;
-use App\Models\QuizAttempt;
-use App\Models\ReadingSession;
 use App\Models\User;
-use App\Models\VideoView;
 use Illuminate\Support\Carbon;
 
 /**
@@ -16,6 +12,8 @@ use Illuminate\Support\Carbon;
  */
 class WeeklyReport
 {
+    public function __construct(private FamilyProgress $progress) {}
+
     /** The Monday-to-Sunday week before $now. */
     public static function lastWeek(?Carbon $now = null): array
     {
@@ -34,38 +32,13 @@ class WeeklyReport
         $report = [];
 
         foreach ($parent->children()->get() as $child) {
-            $sessions = ReadingSession::query()
-                ->where('child_id', $child->id)
-                ->whereBetween('read_on', [$from->toDateString(), $to->toDateString()])
-                ->with('book')
-                ->get();
+            $week = $this->progress->between($child, $from, $to);
 
-            // Phase 2: animated videos watched, shown apart from reading.
-            $watchedSeconds = (int) VideoView::query()
-                ->where('child_id', $child->id)
-                ->whereBetween('watched_on', [$from->toDateString(), $to->toDateString()])
-                ->sum('seconds');
-
-            if ($sessions->sum('minutes') === 0 && $watchedSeconds === 0) {
+            if ($week['minutes'] === 0 && $week['video_minutes'] === 0) {
                 continue;
             }
 
-            $report[] = [
-                'child' => $child,
-                'minutes' => (int) $sessions->sum('minutes'),
-                'video_minutes' => intdiv($watchedSeconds + 59, 60),
-                'days' => $sessions->where('minutes', '>', 0)->map(fn ($s) => $s->read_on->toDateString())->unique()->count(),
-                'books' => $sessions->pluck('book.title')->filter()->unique()->values()->all(),
-                'quizzes' => QuizAttempt::query()
-                    ->where('child_id', $child->id)->where('passed', true)
-                    ->whereBetween('created_at', [$from, $to])
-                    ->with('quiz.book')->get()
-                    ->pluck('quiz.book.title')->filter()->unique()->values()->all(),
-                'badges' => ChildBadge::query()
-                    ->where('child_id', $child->id)
-                    ->whereBetween('awarded_at', [$from, $to])
-                    ->get()->pluck('badge')->all(),
-            ];
+            $report[] = $week;
         }
 
         return $report;

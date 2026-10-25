@@ -9,7 +9,7 @@
 
 <x-layouts.app :title="$editing ? 'Ubah profil anak' : 'Tambah profil anak'">
     <div class="mx-auto max-w-2xl px-4 py-10">
-        <a href="{{ route('account') }}" class="pautan text-sm">← Kembali ke Akaun saya</a>
+        <a href="{{ route('account.children') }}" class="pautan text-sm">← Kembali ke Anak-anak</a>
         <h1 class="mt-3 font-display text-3xl font-extrabold text-magenta">{{ $editing ? 'Ubah profil '.$child->nickname : 'Tambah profil anak' }}</h1>
         <p class="mt-1 text-ink/80">Kami hanya menyimpan nama panggilan dan kumpulan umur. Tiada foto, tarikh lahir atau sekolah.</p>
 

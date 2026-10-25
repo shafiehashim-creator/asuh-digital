@@ -206,5 +206,5 @@ it('offers the upgrade on the account page once Plus is on sale', function () {
     $this->actingAs($user)->get('/akaun')->assertDontSee('Naik taraf');
 
     openPlus(15900);
-    $this->actingAs($user)->get('/akaun')->assertSee('Baharu: video animasi ASUH')->assertSee('Naik taraf · RM60');
+    $this->actingAs($user)->get('/akaun')->assertSee('Baharu: video animasi')->assertSee('Naik taraf · RM60');
 });

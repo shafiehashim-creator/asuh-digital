@@ -14,7 +14,7 @@
             ? ['Katalog', route('catalog.index'), request()->routeIs('catalog.*', 'purchase.book*'), 'M4 4h5a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zm16 0h-5a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h6z']
             : null,
         auth()->check()
-            ? [$isTeacher ? 'Guru' : 'Akaun', $isTeacher ? route('teacher.home') : route('account'), request()->routeIs('account', 'preorder.pay', 'preorder.receipt', 'teacher.*'), 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8m-7 9a7 7 0 0 1 14 0']
+            ? [$isTeacher ? 'Guru' : 'Akaun', $isTeacher ? route('teacher.home') : route('account'), request()->routeIs('account', 'account.*', 'children.*', 'preorder.pay', 'preorder.receipt', 'teacher.*'), 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8m-7 9a7 7 0 0 1 14 0']
             : ['Log masuk', route('login'), request()->routeIs('login', 'password.*'), 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8m-7 9a7 7 0 0 1 14 0'],
     ]));
 @endphp

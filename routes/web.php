@@ -128,6 +128,8 @@ Route::post('/webhooks/chip', [ChipPaymentController::class, 'callback'])
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/akaun', [AccountController::class, 'show'])->name('account');
+    Route::get('/akaun/langganan', [AccountController::class, 'billing'])->name('account.billing');
+    Route::get('/akaun/profil', [AccountController::class, 'profile'])->name('account.profile');
 
     // Phase C: child profiles are only useful with the catalogue, so they open with it.
     Route::middleware(EnsureCatalogOpen::class)->prefix('/akaun/anak')->name('children.')->controller(ChildController::class)->group(function () {
@@ -139,6 +141,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::middleware(EnsureCatalogOpen::class)->group(function () {
+        Route::get('/akaun/rak', [AccountController::class, 'shelf'])->name('account.shelf');
+        Route::get('/akaun/anak', [AccountController::class, 'children'])->name('account.children');
+        Route::get('/akaun/pencapaian', [AccountController::class, 'progress'])->name('account.progress');
         Route::post('/akaun/anak/{child}/mod-anak', [ChildModeController::class, 'enter'])->name('children.child-mode');
         Route::put('/akaun/laporan-mingguan', [WeeklyReportController::class, 'update'])->name('weekly-report.update');
         Route::put('/akaun/pin', [ParentPinController::class, 'update'])->middleware('throttle:10,1')->name('parent-pin.update');

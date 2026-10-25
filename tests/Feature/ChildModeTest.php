@@ -207,10 +207,10 @@ it('sets, hashes and removes the parent PIN with the account password', function
         ->assertSessionHasErrorsIn('parentPin', 'pin');
 
     $this->put('/akaun/pin', ['pin' => '4821', 'pin_confirmation' => '4821', 'current_password' => 'KataLaluan2026'])
-        ->assertRedirect('/akaun');
+        ->assertRedirect('/akaun/anak');
     expect($parent->refresh()->parent_pin)->not->toBe('4821')
         ->and(Hash::check('4821', $parent->parent_pin))->toBeTrue();
 
-    $this->delete('/akaun/pin', ['current_password' => 'KataLaluan2026'])->assertRedirect('/akaun');
+    $this->delete('/akaun/pin', ['current_password' => 'KataLaluan2026'])->assertRedirect('/akaun/anak');
     expect($parent->refresh()->hasParentPin())->toBeFalse();
 });

@@ -34,7 +34,7 @@ it('adds a child with only a nickname, age group and avatar', function () {
         'age_group' => '6-9',
         'avatar' => 'anis',
         'birth_date' => '2019-01-01', // ignored: never stored
-    ])->assertRedirect('/akaun');
+    ])->assertRedirect('/akaun/anak');
 
     $child = $parent->children()->sole();
     expect($child->nickname)->toBe('Aisyah')
@@ -42,7 +42,7 @@ it('adds a child with only a nickname, age group and avatar', function () {
         ->and($child->avatar)->toBe(ChildAvatar::Anis)
         ->and(array_keys($child->getAttributes()))->not->toContain('birth_date');
 
-    $this->actingAs($parent)->get('/akaun')->assertSee('Aisyah')->assertSee('6–9 tahun');
+    $this->actingAs($parent)->get('/akaun/anak')->assertSee('Aisyah')->assertSee('6–9 tahun');
 });
 
 it('validates the profile', function (array $data, string $field) {
@@ -60,11 +60,11 @@ it('allows at most four children per account', function () {
     $parent = User::factory()->create();
     Child::factory()->count(4)->for($parent)->create();
 
-    $this->actingAs($parent)->get('/akaun')->assertDontSee('Tambah anak');
-    $this->actingAs($parent)->get('/akaun/anak/tambah')->assertRedirect('/akaun');
+    $this->actingAs($parent)->get('/akaun/anak')->assertDontSee('Tambah anak');
+    $this->actingAs($parent)->get('/akaun/anak/tambah')->assertRedirect('/akaun/anak');
     $this->actingAs($parent)
         ->post('/akaun/anak', ['nickname' => 'Kelima', 'age_group' => '6-9', 'avatar' => 'unta'])
-        ->assertRedirect('/akaun');
+        ->assertRedirect('/akaun/anak');
 
     expect($parent->children()->count())->toBe(4);
 });
@@ -77,10 +77,10 @@ it('edits and deletes a child profile', function () {
 
     $this->actingAs($parent)
         ->put("/akaun/anak/{$child->id}", ['nickname' => 'Along', 'age_group' => '10-13', 'avatar' => 'penyu'])
-        ->assertRedirect('/akaun');
+        ->assertRedirect('/akaun/anak');
     expect($child->refresh()->age_group)->toBe(AgeGroup::TenToThirteen);
 
-    $this->actingAs($parent)->delete("/akaun/anak/{$child->id}")->assertRedirect('/akaun');
+    $this->actingAs($parent)->delete("/akaun/anak/{$child->id}")->assertRedirect('/akaun/anak');
     expect(Child::query()->find($child->id))->toBeNull();
 });
 

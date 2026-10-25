@@ -2,18 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Badge;
 use App\Http\Middleware\EnsureCatalogOpen;
 use App\Models\Book;
+use App\Models\ChildBadge;
 use App\Models\User;
+use App\Services\FamilyProgress;
 use App\Services\PlusOffer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
+/**
+ * The parent's account area: a summary page and one page per part (shelf,
+ * children, progress, subscription and orders, profile), sharing a side menu.
+ */
 class AccountController extends Controller
 {
-    public function show(Request $request, PlusOffer $plus): View|RedirectResponse
+    public function __construct(private PlusOffer $plus, private FamilyProgress $progress) {}
+
+    public function show(Request $request): View|RedirectResponse
     {
         $user = $request->user();
 
@@ -21,23 +30,84 @@ class AccountController extends Controller
         if ($user->isInstitutionStaff()) {
             return redirect()->route('teacher.home');
         }
-        $activePass = $user->activePass();
-        $shelfOpen = EnsureCatalogOpen::isOpenFor($user);
 
-        return view('account.show', [
+        $shelfOpen = EnsureCatalogOpen::isOpenFor($user);
+        $children = $shelfOpen ? $user->children()->get() : new Collection;
+        [$from, $to] = FamilyProgress::thisWeek();
+        $weeks = $children->map(fn ($child) => $this->progress->between($child, $from, $to));
+
+        return $this->page('account.show', $user, [
+            'children' => $children,
+            'weeks' => $weeks->keyBy(fn ($week) => $week['child']->id),
+            'weekMinutes' => $weeks->sum('minutes'),
+            'badgeCount' => ChildBadge::query()->whereIn('child_id', $children->modelKeys())->count(),
+            'continueReading' => $this->progress->continueReading($children),
+            // Before any child has read, the parent's own recent books.
+            'recentBooks' => $shelfOpen ? $this->recentBooks($user, 4) : new Collection,
+            'ownedCount' => $user->entitlements()->count(),
+            'orderCount' => $user->orders()->count(),
+        ]);
+    }
+
+    public function shelf(Request $request): View
+    {
+        $user = $request->user();
+
+        return $this->page('account.shelf', $user, [
+            'recentBooks' => $this->recentBooks($user, 12),
+            'ownedBooks' => $this->ownedBooks($user),
+        ]);
+    }
+
+    public function children(Request $request): View
+    {
+        $user = $request->user();
+
+        return $this->page('account.children', $user, [
+            'children' => $user->children()->get(),
+        ]);
+    }
+
+    public function progress(Request $request): View
+    {
+        $user = $request->user();
+        [$from, $to] = FamilyProgress::thisWeek();
+
+        return $this->page('account.progress', $user, [
+            'from' => $from,
+            'weeks' => $user->children()->with('badges')->get()->map(fn ($child) => $this->progress->between($child, $from, $to)),
+            'allBadges' => Badge::cases(),
+        ]);
+    }
+
+    public function billing(Request $request): View
+    {
+        $user = $request->user();
+
+        return $this->page('account.billing', $user, [
+            'orders' => $user->orders()->with(['plan', 'book'])->latest()->get(),
+        ]);
+    }
+
+    public function profile(Request $request): View
+    {
+        return $this->page('account.profile', $request->user());
+    }
+
+    /** Every account page gets the subscription state for its side menu and upgrade card. */
+    private function page(string $view, User $user, array $data = []): View
+    {
+        $activePass = $user->activePass();
+
+        return view($view, $data + [
             'user' => $user,
             'activePass' => $activePass,
-            // Includes passes waiting for the launch date (starts_at still null).
-            'passes' => $user->passes()->with('plan')->latest()->get(),
-            'orders' => $user->orders()->with(['plan', 'book'])->latest()->get(),
-            // The shelf links into the reader, so it stays hidden while the catalogue is closed.
-            'shelfOpen' => $shelfOpen,
-            'recentBooks' => $shelfOpen ? $this->recentBooks($user) : new Collection,
-            'ownedBooks' => $shelfOpen ? $this->ownedBooks($user) : new Collection,
+            // Paid before launch: the pass waits for the launch date (starts_at still null).
+            'pendingPass' => $user->passes()->whereNull('starts_at')->with('plan')->latest()->first(),
+            'shelfOpen' => EnsureCatalogOpen::isOpenFor($user),
             'canReadAll' => $activePass !== null || $user->isStaff(),
-            'children' => $shelfOpen ? $user->children()->get() : new Collection,
             // Phase 2: offer the Langganan Plus upgrade once it is on sale.
-            'plusUpgradePrice' => $plus->available() && ($pass = $plus->upgradablePass($user)) ? $plus->upgradePriceSen($pass) : null,
+            'plusUpgradePrice' => $this->plus->available() && ($pass = $this->plus->upgradablePass($user)) ? $this->plus->upgradePriceSen($pass) : null,
         ]);
     }
 
@@ -46,14 +116,14 @@ class AccountController extends Controller
      *
      * @return Collection<int, Book>
      */
-    private function recentBooks(User $user): Collection
+    private function recentBooks(User $user, int $limit): Collection
     {
         return $user->readBooks()->published()
             ->orderByPivot('last_read_at', 'desc')
-            ->limit(12)
+            ->limit($limit * 2)
             ->get()
             ->filter(fn (Book $book) => $user->canReadBook($book))
-            ->take(6)
+            ->take($limit)
             ->values();
     }
 

@@ -199,7 +199,7 @@ it('lets parents set the daily limit and "Baca dulu" on the child profile', func
     $this->put("/akaun/anak/{$child->id}", [
         'nickname' => 'Aisyah', 'age_group' => '6-9', 'avatar' => 'anis',
         'video_settings' => '1', 'daily_video_minutes' => '30', 'read_before_watch' => '1',
-    ])->assertRedirect('/akaun');
+    ])->assertRedirect('/akaun/anak');
     expect($child->refresh()->daily_video_minutes)->toBe(30)->and($child->read_before_watch)->toBeTrue();
 
     $this->put("/akaun/anak/{$child->id}", [
