@@ -17,7 +17,6 @@
     </form>
 
     <p class="mt-6 text-center text-sm text-ink/80">
-        Belum ada akaun? Akaun dicipta semasa anda membuat
-        <a href="{{ url('/') }}" class="pautan">pre-order Langganan Tahunan</a>.
+        Belum ada akaun? <a href="{{ route('register') }}" class="pautan font-bold">Daftar percuma</a>
     </p>
 </x-auth-card>

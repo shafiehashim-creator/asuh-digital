@@ -165,10 +165,17 @@ return [
     // pre-order checkout (CreateNewUser is reused there). Two-factor auth and
     // passkeys are out of scope for Phase A.
     'features' => [
+        // Parents may also open an account on their own at /daftar (2026-10-26).
+        Features::registration(),
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::updateProfileInformation(),
         Features::updatePasswords(),
+    ],
+
+    // Malay addresses for public pages.
+    'paths' => [
+        'register' => 'daftar',
     ],
 
 ];

@@ -48,6 +48,7 @@
                         </form>
                     @else
                         <a href="{{ route('login') }}" class="inline-flex min-h-11 items-center rounded-full px-3 hover:bg-white/10">Log masuk</a>
+                        <a href="{{ route('register') }}" class="inline-flex min-h-11 items-center rounded-full border-2 border-white/40 px-4 hover:bg-white/10">Daftar</a>
                     @endauth
                 </nav>
 

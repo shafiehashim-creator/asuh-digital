@@ -907,6 +907,7 @@ class ComposerStaticInitdd831e7fdde172bdfa9c4bc1ead60323
         'App\\Http\\Middleware\\EnsureCatalogOpen' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureCatalogOpen.php',
         'App\\Http\\Middleware\\EnsureInstitutionStaff' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureInstitutionStaff.php',
         'App\\Http\\Middleware\\LockChildMode' => __DIR__ . '/../..' . '/app/Http/Middleware/LockChildMode.php',
+        'App\\Http\\Middleware\\ThrottleRegistrations' => __DIR__ . '/../..' . '/app/Http/Middleware/ThrottleRegistrations.php',
         'App\\Http\\Requests\\ChildRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ChildRequest.php',
         'App\\Http\\Requests\\PurchaseRequest' => __DIR__ . '/../..' . '/app/Http/Requests/PurchaseRequest.php',
         'App\\Http\\Requests\\StorePilotRequest' => __DIR__ . '/../..' . '/app/Http/Requests/StorePilotRequest.php',

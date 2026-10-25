@@ -117,6 +117,7 @@ return array(
     'App\\Http\\Middleware\\EnsureCatalogOpen' => $baseDir . '/app/Http/Middleware/EnsureCatalogOpen.php',
     'App\\Http\\Middleware\\EnsureInstitutionStaff' => $baseDir . '/app/Http/Middleware/EnsureInstitutionStaff.php',
     'App\\Http\\Middleware\\LockChildMode' => $baseDir . '/app/Http/Middleware/LockChildMode.php',
+    'App\\Http\\Middleware\\ThrottleRegistrations' => $baseDir . '/app/Http/Middleware/ThrottleRegistrations.php',
     'App\\Http\\Requests\\ChildRequest' => $baseDir . '/app/Http/Requests/ChildRequest.php',
     'App\\Http\\Requests\\PurchaseRequest' => $baseDir . '/app/Http/Requests/PurchaseRequest.php',
     'App\\Http\\Requests\\StorePilotRequest' => $baseDir . '/app/Http/Requests/StorePilotRequest.php',

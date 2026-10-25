@@ -10,8 +10,8 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
 /**
- * Creates a parent account. Used by pre-order checkout, since the
- * standalone registration page is disabled.
+ * Creates a parent account: from the /daftar page, or during checkout
+ * (pre-order, Langganan, single books).
  */
 class CreateNewUser implements CreatesNewUsers
 {
