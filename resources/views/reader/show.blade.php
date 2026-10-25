@@ -2,14 +2,15 @@
 <html lang="ms">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+        {{-- The reader has its own zoom buttons; page zoom from quick taps only gets in the way. --}}
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
         @include('partials.app-meta')
         <meta name="robots" content="noindex, nofollow">
         <title>{{ $book->title }} · ASUH Digital</title>
         @fonts
         @vite(['resources/css/app.css', 'resources/js/reader.js'])
     </head>
-    <body class="bg-lavender font-sans text-ink antialiased">
+    <body class="touch-manipulation bg-lavender font-sans text-ink antialiased select-none">
         <div id="reader" class="flex h-dvh flex-col"
             data-src="{{ $fileUrl }}" data-book="{{ $book->slug }}" data-watermark="{{ $watermark }}"
             @if ($pageImages) data-pages="{{ json_encode($pageImages) }}" @endif>
