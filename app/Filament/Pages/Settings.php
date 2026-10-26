@@ -9,6 +9,8 @@ use App\Models\Setting;
 use App\Services\CatalogReadiness;
 use App\Services\Chip\ChipClient;
 use App\Services\PaymentProcessor;
+use App\Services\PlusOffer;
+use App\Services\PlusWaitlist;
 use App\Support\BrandVideo;
 use App\Support\VideoId;
 use BackedEnum;
@@ -65,7 +67,7 @@ class Settings extends Page
         'bank_name', 'bank_account_name', 'bank_account_number',
         'contact_email', 'company_name', 'company_ssm_no', 'company_address', 'company_sst_no',
         'admin_notification_emails',
-        'catalog_open', 'preview_pages', 'whatsapp_number', 'videos_open',
+        'catalog_open', 'preview_pages', 'whatsapp_number', 'videos_open', 'plus_sales_open', 'plus_opens_on',
         'chip_fee_fpx_fixed', 'chip_fee_fpx_percent', 'chip_fee_ewallet_fixed', 'chip_fee_ewallet_percent',
         'affiliates_open', 'affiliate_commission_percent', 'affiliate_hold_days', 'affiliate_cookie_days',
         'royalty_pool_percent', 'royalty_plus_ebook_share', 'royalty_min_minutes', 'royalty_single_percent',
@@ -119,6 +121,12 @@ class Settings extends Page
                     Toggle::make('videos_open')->label('Buka video animasi dan Langganan Plus')
                         ->helperText('Semasa ditutup, video dan jualan Langganan Plus tersembunyi daripada pelanggan; staf masih boleh pratonton.')
                         ->columnSpanFull(),
+                    Toggle::make('plus_sales_open')->label('Jual Langganan Plus')
+                        ->helperText(fn () => 'Semasa dimatikan, halaman Plus dan video percuma masih dipaparkan tetapi tiada pembelian atau naik taraf: pelawat boleh tekan "Beritahu saya" dan diajak melanggan Langganan Tahunan dahulu. Bila dihidupkan, semua dalam senarai menunggu ('.app(PlusWaitlist::class)->waitingCount().' orang) menerima e-mel.')
+                        ->columnSpanFull(),
+                    DatePicker::make('plus_opens_on')->label('Tarikh Langganan Plus dibuka (pilihan)')
+                        ->native(false)->displayFormat('j M Y')
+                        ->helperText('Dipaparkan sebagai "Langganan Plus dibuka pada …". Kosong = "tidak lama lagi". Jualan tetap dibuka dengan suis di atas.'),
                     TextInput::make('plus_price')->label('Harga Langganan Plus setahun (RM)')
                         ->helperText('0 bermaksud belum dijual. Pelanggan Langganan Tahunan membayar beza harga untuk baki hari mereka.')
                         ->numeric()->minValue(0)->step(0.01)->prefix('RM')->required(),
@@ -316,6 +324,7 @@ class Settings extends Page
     public function save(PaymentProcessor $payments): void
     {
         $data = $this->form->getState();
+        $plusWasOnSale = (bool) Setting::get('plus_sales_open');
 
         DB::transaction(function () use ($data) {
             foreach (self::KEYS as $key) {
@@ -332,9 +341,15 @@ class Settings extends Page
 
         $scheduled = $payments->scheduleWaitingPasses();
 
+        // Opening Plus sales tells everyone who asked to hear about it.
+        $notified = ! $plusWasOnSale && app(PlusOffer::class)->onSale() ? app(PlusWaitlist::class)->notifyAll() : 0;
+
         Notification::make()
             ->title('Tetapan disimpan.')
-            ->body($scheduled ? "{$scheduled} Langganan Tahunan yang menunggu telah dijadualkan." : null)
+            ->body(implode(' ', array_filter([
+                $scheduled ? "{$scheduled} Langganan Tahunan yang menunggu telah dijadualkan." : null,
+                $notified ? "{$notified} orang dalam senarai menunggu Plus akan menerima e-mel." : null,
+            ])) ?: null)
             ->success()
             ->send();
     }

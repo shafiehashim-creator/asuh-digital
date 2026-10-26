@@ -27,6 +27,10 @@ return [
         'catalog_open' => false,
         // Phase 2 animated videos and Langganan Plus stay hidden until the admin opens them.
         'videos_open' => false,
+        // Langganan Plus can be shown (videos open) before it is sold: the
+        // sales page then takes "notify me" sign-ups, with an optional date.
+        'plus_sales_open' => false,
+        'plus_opens_on' => null,
         // Pages anyone may read free from a book's "versi pantas" (0 turns previews off).
         'preview_pages' => 5,
         // Floating WhatsApp button (digits with country code, e.g. 60123456789); hidden when empty.

@@ -62,6 +62,11 @@ class PurchaseController extends Controller
     {
         abort_unless($offer->available() || ($request->user()?->isStaff() && $offer->plan()), 404);
 
+        // Shown but not sold yet: the sales page takes "Beritahu saya" sign-ups.
+        if (! $offer->onSale() && ! $request->user()?->isStaff()) {
+            return redirect()->route('plus.show');
+        }
+
         $plan = $offer->plan();
         // Staff preview Plus before the videos open: the yearly plan only.
         $plusPeriods = $this->plans->periods('plus') ?: [BillingPeriod::Yearly->value => $plan];
@@ -103,6 +108,10 @@ class PurchaseController extends Controller
     public function storePlus(PurchaseRequest $request, PlusOffer $offer): RedirectResponse
     {
         $user = $request->user();
+
+        if (! $offer->onSale()) {
+            return redirect()->route('plus.show');
+        }
 
         return $this->complete($request, fn () => $user && $offer->upgradablePass($user)
             ? $this->purchases->upgradeToPlus($user, $request->all())

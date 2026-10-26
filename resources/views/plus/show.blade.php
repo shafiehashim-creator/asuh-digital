@@ -29,10 +29,14 @@
                 <li>✓ {{ __('Tiada caj automatik') }}</li>
             </ul>
 
-            <a href="{{ $cta['url'] }}" class="btn-utama mt-8 text-lg">{{ $cta['label'] }} &rarr;</a>
+            @if (! $onSale && ! $subscribed)
+                <x-plus-waitlist :opens-on="$opensOn" class="mt-8" />
+            @else
+                <a href="{{ $cta['url'] }}" class="btn-utama mt-8 text-lg">{{ $cta['label'] }} &rarr;</a>
+            @endif
             @if ($upgradePrice !== null)
                 <p class="mt-3 text-sm font-semibold text-white/85">{{ __('Anda sudah ada Langganan Tahunan: bayar beza harga untuk baki hari sahaja.') }}</p>
-            @elseif (! $subscribed)
+            @elseif (! $subscribed && $onSale)
                 <x-monthly-option product="plus" dark class="mt-4" />
             @endif
         </div>
@@ -168,6 +172,9 @@
             <h2 class="font-display text-3xl font-extrabold">{{ __('Baca dan tonton. Seisi keluarga, setahun.') }}</h2>
             <p class="mt-2 font-display text-4xl font-extrabold">{{ Money::short($price) }}</p>
             <a href="{{ $cta['url'] }}" class="btn-gelap mt-6 text-lg">{{ $cta['label'] }} &rarr;</a>
+            @if (! $onSale && ! $subscribed)
+                <a href="{{ route('pass.show') }}" class="mt-4 block font-bold underline underline-offset-2">{{ __('Atau mulakan dengan Langganan Tahunan') }}</a>
+            @endif
         </div>
     </section>
 </x-layouts.app>

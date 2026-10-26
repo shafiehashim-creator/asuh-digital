@@ -42,7 +42,7 @@
             </p>
         @else
             <p class="mt-2 text-ink/80">Anda belum mempunyai langganan yang aktif.</p>
-            <a href="{{ route('purchase.pass') }}" class="btn-utama mt-4">Pilih langganan</a>
+            <a href="{{ route('pass.show') }}" class="btn-utama mt-4">Pilih langganan</a>
         @endif
     </section>
 

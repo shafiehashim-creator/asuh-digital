@@ -169,7 +169,7 @@ class AccountController extends Controller
             'shelfOpen' => EnsureCatalogOpen::isOpenFor($user),
             'canReadAll' => $activePass !== null || $user->isStaff(),
             // Phase 2: offer the Langganan Plus upgrade once it is on sale.
-            'plusUpgradePrice' => $this->plus->available() && ($pass = $this->plus->upgradablePass($user)) ? $this->plus->upgradePriceSen($pass) : null,
+            'plusUpgradePrice' => $this->plus->onSale() && ($pass = $this->plus->upgradablePass($user)) ? $this->plus->upgradePriceSen($pass) : null,
         ]);
     }
 

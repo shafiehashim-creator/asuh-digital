@@ -14,7 +14,9 @@ use Illuminate\View\View;
 /**
  * Sales page for Langganan Plus (Phase 2): why e-books and animation go
  * together, what Plus adds over the yearly subscription, a few of the
- * videos, and how upgrading works, before the checkout form.
+ * videos, and how upgrading works, before the checkout form. While Plus
+ * is shown but not sold, it takes "Beritahu saya" sign-ups instead and
+ * points families to the yearly subscription.
  */
 class PlusPageController extends Controller
 {
@@ -39,13 +41,16 @@ class PlusPageController extends Controller
             'videoCount' => $videos->count(),
             'bookCount' => $stats->summary()['books'],
             'showcase' => $showcase,
+            'onSale' => $offer->onSale(),
+            'opensOn' => $offer->opensOn(),
             'cta' => match (true) {
                 (bool) $user?->canWatchVideos() => ['label' => __('Tonton dalam Mod Anak'), 'url' => route('account.children')],
+                ! $offer->onSale() => ['label' => __('Beritahu saya bila dibuka'), 'url' => '#beritahu'],
                 $upgradePrice !== null => ['label' => __('Naik taraf · :price', ['price' => Money::short($upgradePrice)]), 'url' => route('purchase.plus')],
                 default => ['label' => __('Langgan Plus sekarang'), 'url' => route('purchase.plus')],
             },
             'subscribed' => (bool) $user?->canWatchVideos(),
-            'upgradePrice' => $upgradePrice,
+            'upgradePrice' => $offer->onSale() ? $upgradePrice : null,
             'refundPolicy' => Setting::localized('refund_policy'),
         ]);
     }

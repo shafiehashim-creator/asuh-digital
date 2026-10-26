@@ -75,8 +75,7 @@
                                         : __('Buku ini untuk seisi keluarga, selama 12 bulan.') }}
                                     @if ($bookCount > 1) {{ __('Kira-kira :price sebuku.', ['price' => Money::format(intdiv($offer->priceSen(), $bookCount))]) }} @endif
                                 </p>
-                                <a href="{{ $offer->checkoutUrl() }}" class="btn-gelap mt-3 w-full">{{ $offer->ctaLabel() }}</a>
-                                <a href="{{ route('pass.show') }}" class="mt-2 block text-center text-sm font-bold underline">{{ __('Apa yang termasuk?') }}</a>
+                                <a href="{{ route('pass.show') }}" class="btn-gelap mt-3 w-full">{{ $offer->ctaLabel() }}</a>
                             </div>
                         @endif
 

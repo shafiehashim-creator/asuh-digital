@@ -38,7 +38,7 @@
 
         <div class="mt-4 shrink-0 sm:mt-0">
             @if (! $hasAccess && ! $pendingPass)
-                <a href="{{ route('purchase.pass') }}" class="btn-utama">Langgan sekarang</a>
+                <a href="{{ route('pass.show') }}" class="btn-utama">Langgan sekarang</a>
             @elseif ($shelfOpen && $children->isEmpty())
                 <a href="{{ route('children.create') }}" class="btn-utama">Tambah profil anak</a>
             @elseif ($shelfOpen && $children->count() === 1)

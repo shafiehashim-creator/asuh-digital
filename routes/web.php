@@ -18,6 +18,7 @@ use App\Http\Controllers\ParentPinController;
 use App\Http\Controllers\PassPageController;
 use App\Http\Controllers\PilotRequestController;
 use App\Http\Controllers\PlusPageController;
+use App\Http\Controllers\PlusWaitlistController;
 use App\Http\Controllers\PreorderController;
 use App\Http\Controllers\PreviewController;
 use App\Http\Controllers\PupilAccessController;
@@ -61,6 +62,9 @@ Route::post('/beli/langganan', [PurchaseController::class, 'storePass'])
 
 // Phase 2: Langganan Plus (e-books and animated videos), on sale once the videos open.
 Route::get('/langganan-plus', PlusPageController::class)->name('plus.show');
+Route::post('/langganan-plus/beritahu', PlusWaitlistController::class)
+    ->middleware('throttle:10,1')
+    ->name('plus.waitlist');
 Route::get('/beli/langganan-plus', [PurchaseController::class, 'plus'])->name('purchase.plus');
 Route::post('/beli/langganan-plus', [PurchaseController::class, 'storePlus'])
     ->middleware('throttle:10,1')
