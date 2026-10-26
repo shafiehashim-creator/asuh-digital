@@ -171,7 +171,8 @@ Keputusan pengguna (2026-10-26): dua pakej (Langganan Tahunan kekal, Langganan P
 - **Menonton dalam Mod Anak** (`/mod-anak/video/{video}`, `App\Services\VideoWatching`): baris "Video animasi" di rak ikut umur. ID video hanya dihantar ke pelayar di halaman pemain selepas semakan akses. YouTube melalui IFrame API (`youtube-nocookie.com`, `rel=0`, kawalan ASUH sendiri, lapisan pelindung, skrin jeda dan tamat ASUH); Bunny melalui embed bertoken (`BUNNY_STREAM_LIBRARY_ID`, `BUNNY_STREAM_TOKEN_KEY` dalam `.env`). Heartbeat setiap 30 saat ke `video_views` (satu baris setiap anak, video dan hari; tidak lebih daripada masa sebenar berlalu).
 - **Kawalan ibu bapa** pada profil anak: `children.daily_video_minutes` (15–90 atau tiada had) dan `children.read_before_watch` (video sesuatu buku dikunci sehingga anak membaca buku itu).
 - **Laporan**: minit menonton dalam laporan mingguan ibu bapa dan laporan kelas guru (jika lesen termasuk video).
-- Belum dibina: kuiz untuk video tanpa buku, dan treler percuma di halaman awam.
+- **Video di halaman awam** (keputusan pengguna 2026-10-26, video ±1 minit jadi tiada pratonton setiap video): halaman `/video` (`VideoPageController`, `App\Services\VideoShowcase`, pautan "Video" di header dan footer) dan kotak **"Ada versi animasi!"** di halaman buku yang ada video. Admin tandakan 1–3 video **Percuma untuk ditonton** (`videos.is_free_sample`) yang dimainkan penuh dengan pemain ASUH (`x-showcase-video`), dengan skrin tamat yang mengajak melanggan (`x-video-player` `endCta`). Video lain dikunci: gambar kecil sahaja, ID penyedia tidak dihantar ke pelayar. Treler himpunan pilihan (`plus_trailer_url` di Tetapan) di atas `/video`. Butang: Langgan Plus sekarang / Naik taraf ke Langganan Plus / Tonton dalam Mod Anak. Tersembunyi (404) sehingga `videos_open` dan harga Plus > 0; staf sentiasa nampak.
+- Belum dibina: kuiz untuk video tanpa buku.
 
 ## Perlindungan e-book
 

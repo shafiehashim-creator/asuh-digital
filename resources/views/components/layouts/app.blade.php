@@ -4,6 +4,7 @@
     use App\Http\Middleware\EnsureCatalogOpen;
 
     $catalogOpen = EnsureCatalogOpen::isOpenFor(auth()->user());
+    $videosOpen = app(App\Services\VideoShowcase::class)->isOpenFor(auth()->user());
     // Teachers (Phase D) have the teacher portal instead of a parent's account page.
     $isTeacher = auth()->user()?->isInstitutionStaff() ?? false;
 
@@ -40,6 +41,9 @@
                     @if ($catalogOpen)
                         <a href="{{ route('catalog.index') }}" class="inline-flex min-h-11 items-center rounded-full px-3 hover:bg-white/10">{{ __('Katalog') }}</a>
                     @endif
+                    @if ($videosOpen)
+                        <a href="{{ route('videos.index') }}" class="inline-flex min-h-11 items-center rounded-full px-3 hover:bg-white/10">{{ __('Video') }}</a>
+                    @endif
                     @auth
                         <a href="{{ $isTeacher ? route('teacher.home') : route('account') }}" class="inline-flex min-h-11 items-center rounded-full px-3 hover:bg-white/10">{{ $isTeacher ? __('Portal guru') : __('Akaun saya') }}</a>
                         <form method="POST" action="{{ route('logout') }}">
@@ -69,6 +73,9 @@
                 <p class="hidden font-display text-base font-bold text-plum md:block">Jom Jadi Baik!</p>
                 <nav aria-label="{{ __('Maklumat') }}" class="flex flex-wrap gap-x-4 md:my-2">
                     <a href="{{ route('about') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">{{ __('Tentang kami') }}</a>
+                    @if ($videosOpen)
+                        <a href="{{ route('videos.index') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">{{ __('Video animasi') }}</a>
+                    @endif
                     <a href="{{ route('privacy') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">{{ __('Notis privasi') }}</a>
                     <a href="{{ route('terms') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">{{ __('Terma dan syarat') }}</a>
                     <a href="{{ route('refund') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">{{ __('Polisi bayaran balik') }}</a>

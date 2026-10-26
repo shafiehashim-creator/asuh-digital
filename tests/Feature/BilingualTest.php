@@ -119,6 +119,7 @@ it('has an English line for every text on the public pages', function () {
         'components/layouts/app', 'components/book-card', 'components/shelf-book', 'components/book-cover',
         'components/catalog-preview-notice', 'components/slot-counter', 'components/brand-video',
         'components/video-player', 'components/locale-switch', 'mail/order-receipt',
+        'videos/index', 'components/showcase-video',
     ])->map(fn ($view) => resource_path("views/{$view}.blade.php"))
         ->merge([
             app_path('Http/Controllers/PurchaseController.php'),
@@ -128,6 +129,7 @@ it('has an English line for every text on the public pages', function () {
             app_path('Enums/PaymentMethod.php'),
             app_path('Enums/ChipMethod.php'),
             app_path('Models/Order.php'),
+            app_path('Services/VideoShowcase.php'),
         ]);
 
     $missing = [];

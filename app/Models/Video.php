@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 #[Fillable([
     'title', 'slug', 'synopsis', 'age_group', 'book_id', 'provider', 'provider_video_id',
-    'duration_seconds', 'thumbnail_path', 'status', 'published_at',
+    'duration_seconds', 'thumbnail_path', 'status', 'is_free_sample', 'published_at',
 ])]
 #[Hidden(['provider_video_id'])]
 class Video extends Model
@@ -42,6 +42,7 @@ class Video extends Model
             // Same draft -> review -> published states as books.
             'status' => BookStatus::class,
             'duration_seconds' => 'integer',
+            'is_free_sample' => 'boolean',
             'published_at' => 'datetime',
         ];
     }
@@ -90,6 +91,12 @@ class Video extends Model
     public function scopeForAge(Builder $query, AgeGroup $age): void
     {
         $query->whereIn('age_group', $age === AgeGroup::Both ? AgeGroup::cases() : [$age, AgeGroup::Both]);
+    }
+
+    /** Published videos anyone may watch in full on the public pages. */
+    public function scopeFreeSample(Builder $query): void
+    {
+        $query->where('is_free_sample', true);
     }
 
     public function isPublished(): bool

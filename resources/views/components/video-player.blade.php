@@ -1,4 +1,4 @@
-@props(['video' => null, 'embed', 'progressUrl' => null, 'startAt' => 0, 'secondsLeft' => null, 'homeUrl' => null, 'lazy' => false, 'autoplay' => false])
+@props(['video' => null, 'embed', 'progressUrl' => null, 'startAt' => 0, 'secondsLeft' => null, 'homeUrl' => null, 'lazy' => false, 'autoplay' => false, 'endCta' => null])
 
 @php($seekId = 'video-seek-'.Str::random(6))
 
@@ -26,8 +26,15 @@
     <div data-ended hidden class="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-plum p-6 text-center text-white">
         <p class="text-5xl" aria-hidden="true">🌟</p>
         <p class="font-display text-2xl font-extrabold">{{ __('Tamat! Jom Jadi Baik!') }}</p>
+        {{-- Free sample on a public page: invite the family to Langganan Plus. --}}
+        @if ($endCta)
+            <p class="max-w-md font-semibold">{{ $endCta['text'] }}</p>
+        @endif
         <div class="flex flex-wrap justify-center gap-3">
-            <button type="button" data-replay class="btn-utama">{{ __('Tonton semula') }}</button>
+            @if ($endCta)
+                <a href="{{ $endCta['url'] }}" class="btn-utama">{{ $endCta['label'] }}</a>
+            @endif
+            <button type="button" data-replay @class(['btn-utama' => ! $endCta, 'inline-flex min-h-11 items-center rounded-full border-2 border-white px-5 font-bold' => $endCta])>{{ __('Tonton semula') }}</button>
             @if ($video?->book && $video->book->isPublished())
                 <a href="{{ route('reader.show', $video->book) }}" class="btn-utama">{{ __('Baca bukunya') }}</a>
             @endif

@@ -25,6 +25,7 @@ use App\Http\Controllers\ReadingProgressController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\SwitchAccountController;
 use App\Http\Controllers\Teacher;
+use App\Http\Controllers\VideoPageController;
 use App\Http\Controllers\WeeklyReportController;
 use App\Http\Middleware\AuthenticateOrPupil;
 use App\Http\Middleware\EnsureCatalogOpen;
@@ -34,6 +35,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', LandingController::class)->name('home');
 Route::get('/bahasa/{locale}', [LocaleController::class, 'switch'])->name('locale.switch');
 Route::get('/tentang-kami', [LegalController::class, 'about'])->name('about');
+// Phase 2: the animated videos for everyone, with free samples (hidden until the videos open).
+Route::get('/video', VideoPageController::class)->name('videos.index');
 Route::get('/privasi', [LegalController::class, 'privacy'])->name('privacy');
 Route::get('/terma', [LegalController::class, 'terms'])->name('terms');
 Route::get('/polisi-bayaran-balik', [LegalController::class, 'refund'])->name('refund');

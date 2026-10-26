@@ -69,7 +69,7 @@ class Settings extends Page
         'chip_fee_fpx_fixed', 'chip_fee_fpx_percent', 'chip_fee_ewallet_fixed', 'chip_fee_ewallet_percent',
         'affiliates_open', 'affiliate_commission_percent', 'affiliate_hold_days', 'affiliate_cookie_days',
         'royalty_pool_percent', 'royalty_plus_ebook_share', 'royalty_min_minutes', 'royalty_single_percent',
-        'brand_video_url', 'brand_video_title', 'brand_video_places',
+        'brand_video_url', 'brand_video_title', 'brand_video_places', 'plus_trailer_url',
     ];
 
     /** @var array<string, mixed> */
@@ -120,6 +120,14 @@ class Settings extends Page
                     TextInput::make('plus_price')->label('Harga Langganan Plus setahun (RM)')
                         ->helperText('0 bermaksud belum dijual. Pelanggan Langganan Tahunan membayar beza harga untuk baki hari mereka.')
                         ->numeric()->minValue(0)->step(0.01)->prefix('RM')->required(),
+                    TextInput::make('plus_trailer_url')->label('Treler himpunan animasi (pautan YouTube, pilihan)')
+                        ->helperText('Klip pendek babak terbaik semua animasi, dipaparkan di atas halaman Video animasi (/video). Tandakan juga 1–3 video sebagai "Percuma untuk ditonton" di menu Video animasi.')
+                        ->url()->maxLength(255)->columnSpanFull()
+                        ->rule(fn () => function (string $attribute, $value, \Closure $fail) {
+                            if (filled($value) && ! VideoId::isValid(VideoProvider::YouTube, VideoId::normalise(VideoProvider::YouTube, $value))) {
+                                $fail('Pautan YouTube tidak dikenali.');
+                            }
+                        }),
                 ]),
 
             Section::make('Video lagu ASUH')
