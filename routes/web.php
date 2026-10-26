@@ -193,6 +193,7 @@ Route::middleware([EnsureCatalogOpen::class, AuthenticateOrPupil::class])->group
     Route::prefix('/mod-anak')->name('child-mode.')->controller(ChildModeController::class)->group(function () {
         Route::get('/', 'home')->name('home');
         Route::get('/lencana', 'badges')->name('badges');
+        Route::get('/lagu', 'song')->name('song');
     });
     Route::prefix('/mod-anak/kuiz/{book:slug}')->name('child-mode.quiz.')->controller(ChildQuizController::class)->group(function () {
         Route::get('/', 'show')->name('show');

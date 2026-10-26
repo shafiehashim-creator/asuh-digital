@@ -69,6 +69,14 @@
         @endforeach
     </nav>
 
+    @if (App\Support\BrandVideo::shownOn('account'))
+        <section aria-labelledby="song-heading" class="rounded-3xl border-2 border-ink bg-white p-5 shadow-[0_4px_0_var(--color-ink)] sm:p-6">
+            <h2 id="song-heading" class="font-display text-xl font-bold text-plum">{{ App\Support\BrandVideo::title() }}</h2>
+            <p class="mt-1 text-sm text-ink/70">Tonton bersama anak, atau buka di Mod Anak supaya mereka boleh menontonnya sendiri.</p>
+            <x-brand-video place="account" class="mt-4" />
+        </section>
+    @endif
+
     @if ($shelfOpen)
         {{-- Continue reading, with how far each child got --}}
         <section aria-labelledby="continue-heading" class="rounded-3xl border-2 border-ink bg-white p-5 shadow-[0_4px_0_var(--color-ink)] sm:p-6">

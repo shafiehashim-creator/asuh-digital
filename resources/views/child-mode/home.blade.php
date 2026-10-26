@@ -9,6 +9,13 @@
             <span class="text-sm font-bold text-biru">{{ $badges->count() }} / {{ count(App\Enums\Badge::cases()) }}</span>
         </a>
 
+        @if (App\Support\BrandVideo::shownOn('child_mode'))
+            <a href="{{ route('child-mode.song') }}" class="mt-4 flex min-h-16 items-center gap-4 rounded-2xl border-2 border-ink bg-plum px-4 py-3 text-white shadow-[0_3px_0_var(--color-ink)] hover:bg-plum/90">
+                <span class="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-kuning text-2xl text-ink" aria-hidden="true">♪</span>
+                <span class="font-display text-lg font-bold">{{ App\Support\BrandVideo::title() }}</span>
+            </a>
+        @endif
+
         @if (session('video_locked'))
             <p role="status" class="mt-4 rounded-2xl border-2 border-ink bg-kuning p-3 font-bold">{{ session('video_locked') }}</p>
         @endif

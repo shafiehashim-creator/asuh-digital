@@ -9,6 +9,7 @@ use App\Services\ChildMode;
 use App\Services\ParentGate;
 use App\Services\ReadingLog;
 use App\Services\VideoWatching;
+use App\Support\BrandVideo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -60,6 +61,25 @@ class ChildModeController extends Controller
                 ->filter(fn ($session) => $session->book && $this->childMode->allows($child, $session->book))
                 ->take(4)
                 ->values(),
+        ]);
+    }
+
+    /**
+     * The ASUH music video for every child, on ASUH's own player (no links
+     * out to YouTube). Short and free, so it does not count towards the
+     * daily viewing limit.
+     */
+    public function song(Request $request): View|RedirectResponse
+    {
+        $child = $this->childMode->child($request->user());
+
+        if (! $child || ! BrandVideo::shownOn('child_mode')) {
+            return redirect()->route('child-mode.home');
+        }
+
+        return view('child-mode.song', [
+            'child' => $child,
+            'embed' => ['provider' => 'youtube', 'id' => BrandVideo::id(), 'url' => null],
         ]);
     }
 

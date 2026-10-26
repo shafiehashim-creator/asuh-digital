@@ -50,6 +50,10 @@ return [
         'royalty_plus_ebook_share' => 60,
         'royalty_min_minutes' => 5,
         'royalty_single_percent' => 10,
+        // The ASUH music video (YouTube link) and the pages that show it.
+        'brand_video_url' => null,
+        'brand_video_title' => 'Lagu ASUH: Jom Jadi Baik!',
+        'brand_video_places' => ['home', 'about', 'account', 'child_mode'],
 
         // Landing page copy
         'landing_headline' => 'Rak buku Islamik digital untuk anak 6–13 tahun',
