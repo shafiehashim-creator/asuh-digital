@@ -22,6 +22,21 @@ class LegalController extends Controller
         ]);
     }
 
+    public function refund(): View
+    {
+        return view('legal.refund', $this->company() + [
+            'refundPolicy' => Setting::get('refund_policy'),
+        ]);
+    }
+
+    /** Digital products only; payment gateways ask merchants for a delivery policy. */
+    public function delivery(): View
+    {
+        return view('legal.delivery', $this->company() + [
+            'startsOnLaunch' => PassStartRule::tryFrom(Setting::get('pass_start_rule')) === PassStartRule::OnLaunch,
+        ]);
+    }
+
     /**
      * @return array<string, mixed>
      */

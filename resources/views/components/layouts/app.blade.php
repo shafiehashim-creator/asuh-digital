@@ -66,6 +66,8 @@
                 <nav aria-label="Maklumat" class="flex flex-wrap gap-x-4 md:my-2">
                     <a href="{{ route('privacy') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">Notis privasi</a>
                     <a href="{{ route('terms') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">Terma dan syarat</a>
+                    <a href="{{ route('refund') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">Polisi bayaran balik</a>
+                    <a href="{{ route('delivery') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">Polisi penghantaran</a>
                     @auth
                         <form method="POST" action="{{ route('logout') }}" class="md:hidden">
                             @csrf

@@ -33,6 +33,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', LandingController::class)->name('home');
 Route::get('/privasi', [LegalController::class, 'privacy'])->name('privacy');
 Route::get('/terma', [LegalController::class, 'terms'])->name('terms');
+Route::get('/polisi-bayaran-balik', [LegalController::class, 'refund'])->name('refund');
+Route::get('/polisi-penghantaran', [LegalController::class, 'delivery'])->name('delivery');
 
 Route::get('/langganan', PassPageController::class)->name('pass.show');
 // The yearly plan was called "Pas Tahunan" until 2026-10-25; old links keep working.

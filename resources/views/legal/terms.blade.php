@@ -49,7 +49,7 @@
 
     <section>
         <h2>6. Bayaran balik</h2>
-        <p>{{ $refundPolicy }}</p>
+        <p>{{ $refundPolicy }} Cara memohon dan tempohnya diterangkan dalam <a href="{{ route('refund') }}" class="pautan">Polisi bayaran balik</a>.</p>
     </section>
 
     <section>
