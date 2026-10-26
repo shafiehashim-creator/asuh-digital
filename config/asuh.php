@@ -88,6 +88,37 @@ return [
         ],
         'refund_policy' => 'Bayaran balik penuh boleh dimohon sebelum platform ASUH Digital dilancarkan.',
 
+        // English versions (bilingual site, 2026-10-26); empty falls back to the BM text above.
+        'landing_headline_en' => 'A digital Islamic bookshelf for children aged 6–13',
+        'landing_subheadline_en' => 'Comics, stories of the prophets, good character and daily prayers, all syariah-reviewed. Jom Jadi Baik!',
+        'landing_faq_en' => [
+            [
+                'question' => 'What is ASUH Digital?',
+                'answer' => 'A digital Islamic bookshelf from ASUH, a Galeri Ilmu Media Group brand, for children aged 6 to 13. Children can read comics, stories of the prophets, books on good character, daily prayers and sirah on a phone, tablet or computer.',
+            ],
+            [
+                'question' => 'How many children can use one subscription?',
+                'answer' => 'One Yearly Subscription covers the whole family. You can create up to 4 child profiles, and each child sees the books for their age group.',
+            ],
+            [
+                'question' => 'Is the content syariah-reviewed?',
+                'answer' => 'Yes. Every book must pass a syariah review before it is published on ASUH Digital.',
+            ],
+            [
+                'question' => 'Is it safe for my child?',
+                'answer' => 'Kids Mode shows no prices, buy buttons or account settings. To leave Kids Mode, a parent has to pass the parent gate. We only keep a nickname and age group for each child, with no photos or dates of birth.',
+            ],
+            [
+                'question' => 'How do I pay?',
+                'answer' => 'By FPX, credit or debit card or e-wallet (through CHIP), or by bank transfer. You pay once for 12 months. There are no automatic charges.',
+            ],
+            [
+                'question' => 'Why are the slots limited?',
+                'answer' => 'The early bird price is only for the first families to support ASUH Digital. Once the slots are gone, the Yearly Subscription is sold at the regular price.',
+            ],
+        ],
+        'refund_policy_en' => 'A full refund can be requested before the ASUH Digital platform launches.',
+
         // Institution pilot
         'pilot_duration_days' => 30,
         'admin_notification_emails' => [],

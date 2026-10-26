@@ -102,7 +102,7 @@ function initVideoPlayer(root) {
         lastTick = Date.now();
         if (playButton) {
             playButton.textContent = value ? '❚❚' : '▶';
-            playButton.setAttribute('aria-label', value ? 'Jeda' : 'Main');
+            playButton.setAttribute('aria-label', value ? root.dataset.labelPause || 'Jeda' : root.dataset.labelPlay || 'Main');
         }
     };
 

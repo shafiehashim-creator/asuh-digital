@@ -7,10 +7,9 @@
 
 <x-layouts.app title="Mohon pilot institusi">
     <div class="mx-auto max-w-2xl px-4 py-10">
-        <h1 class="font-display text-3xl font-extrabold text-magenta sm:text-4xl">Mohon pilot percuma untuk institusi anda</h1>
+        <h1 class="font-display text-3xl font-extrabold text-magenta sm:text-4xl">{{ __('Mohon pilot percuma untuk institusi anda') }}</h1>
         <p class="mt-3 text-ink/80">
-            Untuk tadika, sekolah rendah agama, KAFA dan tahfiz. Cuba ASUH Digital bersama murid anda secara percuma selama
-            <strong>{{ $pilotDays }} hari</strong>. Isi borang ini dan pasukan kami akan menghubungi anda.
+            {!! __('Untuk tadika, sekolah rendah agama, KAFA dan tahfiz. Cuba ASUH Digital bersama murid anda secara percuma selama :days. Isi borang ini dan pasukan kami akan menghubungi anda.', ['days' => '<strong>'.e(__(':count hari', ['count' => $pilotDays])).'</strong>']) !!}
         </p>
 
         <form method="POST" action="{{ route('pilot.store') }}" class="mt-8 space-y-8" novalidate>
@@ -18,22 +17,22 @@
 
             {{-- Honeypot for spam bots; hidden from people and screen readers. --}}
             <div class="hidden" aria-hidden="true">
-                <label for="website">Laman web</label>
+                <label for="website">{{ __('Laman web') }}</label>
                 <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
             </div>
 
             <section class="{{ $cardClass }} space-y-5" aria-labelledby="institusi-heading">
-                <h2 id="institusi-heading" class="font-display text-xl font-bold text-plum">1. Institusi</h2>
+                <h2 id="institusi-heading" class="font-display text-xl font-bold text-plum">1. {{ __('Institusi') }}</h2>
 
                 <x-field name="institution_name" label="Nama institusi" autocomplete="organization" required />
 
                 <fieldset>
-                    <legend class="label">Jenis institusi</legend>
+                    <legend class="label">{{ __('Jenis institusi') }}</legend>
                     <div class="grid gap-3 sm:grid-cols-2">
                         @foreach (InstitutionType::cases() as $type)
                             <label class="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border-2 border-ink/20 px-4 py-2.5 font-semibold has-checked:border-biru has-checked:bg-biru/5">
                                 <input type="radio" name="institution_type" value="{{ $type->value }}" @checked(old('institution_type') === $type->value) class="size-5 text-biru" required>
-                                {{ $type->getLabel() }}
+                                {{ __($type->getLabel()) }}
                             </label>
                         @endforeach
                     </div>
@@ -42,11 +41,11 @@
 
                 <div class="grid gap-5 sm:grid-cols-2">
                     <div>
-                        <label for="state" class="label">Negeri</label>
+                        <label for="state" class="label">{{ __('Negeri') }}</label>
                         <select id="state" name="state" required @class(['input', 'border-magenta!' => $errors->has('state')])>
-                            <option value="">Pilih negeri</option>
+                            <option value="">{{ __('Pilih negeri') }}</option>
                             @foreach (config('asuh.states') as $state)
-                                <option value="{{ $state }}" @selected(old('state') === $state)>{{ $state }}</option>
+                                <option value="{{ $state }}" @selected(old('state') === $state)>{{ __($state) }}</option>
                             @endforeach
                         </select>
                         @error('state') <p class="mt-1 text-sm font-semibold text-magenta">{{ $message }}</p> @enderror
@@ -57,7 +56,7 @@
                 <x-field name="student_count" label="Anggaran bilangan murid" type="number" min="1" inputmode="numeric" required class="max-w-40" />
 
                 <fieldset>
-                    <legend class="label">Umur murid</legend>
+                    <legend class="label">{{ __('Umur murid') }}</legend>
                     <div class="grid gap-3 sm:grid-cols-3">
                         @foreach (AgeGroup::cases() as $group)
                             <label class="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border-2 border-ink/20 px-4 py-2.5 font-semibold has-checked:border-biru has-checked:bg-biru/5">
@@ -71,7 +70,7 @@
             </section>
 
             <section class="{{ $cardClass }} space-y-5" aria-labelledby="pegawai-heading">
-                <h2 id="pegawai-heading" class="font-display text-xl font-bold text-plum">2. Pegawai untuk dihubungi</h2>
+                <h2 id="pegawai-heading" class="font-display text-xl font-bold text-plum">2. {{ __('Pegawai untuk dihubungi') }}</h2>
 
                 <div class="grid gap-5 sm:grid-cols-2">
                     <x-field name="contact_name" label="Nama" autocomplete="name" required />
@@ -83,9 +82,9 @@
                 </div>
 
                 <div>
-                    <label for="notes" class="label">Catatan (pilihan)</label>
+                    <label for="notes" class="label">{{ __('Catatan (pilihan)') }}</label>
                     <textarea id="notes" name="notes" rows="4" maxlength="2000" class="input"
-                        placeholder="Contoh: waktu sesuai untuk dihubungi, bilangan kelas">{{ old('notes') }}</textarea>
+                        placeholder="{{ __('Contoh: waktu sesuai untuk dihubungi, bilangan kelas') }}">{{ old('notes') }}</textarea>
                     @error('notes') <p class="mt-1 text-sm font-semibold text-magenta">{{ $message }}</p> @enderror
                 </div>
             </section>
@@ -94,13 +93,12 @@
                 <label class="flex cursor-pointer gap-3">
                     <input type="checkbox" name="pdpa_consent" value="1" @checked(old('pdpa_consent')) class="mt-0.5 size-5 shrink-0 rounded border-2 border-ink/30 text-biru" required>
                     <span class="text-sm">
-                        Saya bersetuju maklumat di atas digunakan oleh ASUH (Galeri Ilmu Media Group) untuk menghubungi saya
-                        tentang program pilot, seperti dalam <a href="{{ route('privacy') }}" class="pautan" target="_blank">notis privasi</a>.
+                        {!! __('Saya bersetuju maklumat di atas digunakan oleh ASUH (Galeri Ilmu Media Group) untuk menghubungi saya tentang program pilot, seperti dalam :privacy.', ['privacy' => '<a href="'.route('privacy').'" class="pautan" target="_blank">'.e(__('notis privasi')).'</a>']) !!}
                     </span>
                 </label>
                 @error('pdpa_consent') <p class="text-sm font-semibold text-magenta">{{ $message }}</p> @enderror
 
-                <button type="submit" class="btn-utama w-full text-lg">Hantar permohonan</button>
+                <button type="submit" class="btn-utama w-full text-lg">{{ __('Hantar permohonan') }}</button>
             </div>
         </form>
     </div>

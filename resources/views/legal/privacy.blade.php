@@ -1,4 +1,4 @@
-<x-legal-page title="Notis privasi" updated="24 Oktober 2026">
+<x-legal-page title="Notis privasi" updated="26 Oktober 2026">
     <section>
         <h2>1. Siapa kami</h2>
         <p>
@@ -68,10 +68,13 @@
 
     <section>
         <h2>5. Kuki</h2>
-        <p>
-            Kami hanya menggunakan kuki yang perlu untuk laman berfungsi, iaitu kuki sesi log masuk dan kuki keselamatan
-            borang. Kami tidak menggunakan kuki analitik atau pengiklanan.
-        </p>
+        <p>Kami hanya menggunakan kuki kami sendiri:</p>
+        <ul>
+            <li>Kuki sesi log masuk dan kuki keselamatan borang, yang perlu untuk laman berfungsi.</li>
+            <li>Kuki pilihan bahasa (BM atau English), disimpan selama setahun.</li>
+            <li>Kuki rujukan affiliate: jika anda membuka pautan rakan affiliate ASUH, kod rakan itu disimpan untuk tempoh yang ditetapkan (lazimnya 30 hari) supaya pembelian anda dikreditkan kepadanya. Rakan affiliate hanya melihat jenis produk yang dibeli dan tarikhnya, bukan nama atau maklumat anda.</li>
+        </ul>
+        <p>Kami tidak menggunakan kuki analitik atau pengiklanan pihak ketiga.</p>
     </section>
 
     <section>

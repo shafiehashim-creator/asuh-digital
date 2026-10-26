@@ -36,13 +36,13 @@
             @csrf
 
             <section class="{{ $cardClass }} space-y-5" aria-labelledby="akaun-heading">
-                <h2 id="akaun-heading" class="font-display text-xl font-bold text-plum">1. Akaun anda</h2>
+                <h2 id="akaun-heading" class="font-display text-xl font-bold text-plum">1. {{ __('Akaun anda') }}</h2>
 
                 @if ($user)
-                    <p class="text-ink/80">Anda log masuk sebagai <strong>{{ $user->name }}</strong> ({{ $user->email }}).</p>
+                    <p class="text-ink/80">{!! __('Anda log masuk sebagai :name (:email).', ['name' => '<strong>'.e($user->name).'</strong>', 'email' => e($user->email)]) !!}</p>
                 @else
                     <p class="text-sm text-ink/80">
-                        Sudah ada akaun? <a href="{{ route('login') }}" class="pautan">Log masuk</a>
+                        {{ __('Sudah ada akaun?') }} <a href="{{ route('login') }}" class="pautan">{{ __('Log masuk') }}</a>
                     </p>
                     <x-field name="name" label="Nama penuh" autocomplete="name" required />
                     <x-field name="email" label="E-mel" type="email" autocomplete="email" required hint="Resit dan pengesahan akaun dihantar ke sini." />
@@ -57,7 +57,7 @@
             @if ($promoCode ?? false)
                 {{-- One code per order: a coupon, a school's parent code or an affiliate code. --}}
                 <details class="{{ $cardClass }}" @if (old('promo_code') || $errors->has('promo_code')) open @endif>
-                    <summary class="cursor-pointer font-display text-lg font-bold text-plum">Ada kod promosi atau kod sekolah?</summary>
+                    <summary class="cursor-pointer font-display text-lg font-bold text-plum">{{ __('Ada kod promosi atau kod sekolah?') }}</summary>
                     <div class="mt-4">
                         <x-field name="promo_code" label="Kod promosi" autocomplete="off" class="uppercase" :value="old('promo_code', request('kod'))"
                             hint="Kod kupon, kod sekolah daripada tadika atau sekolah anak anda, atau kod rakan affiliate. Satu kod setiap pesanan. Diskaun dikira pada halaman bayaran." />
@@ -66,11 +66,11 @@
             @endif
 
             <section class="{{ $cardClass }} space-y-4" aria-labelledby="bayaran-heading">
-                <h2 id="bayaran-heading" class="font-display text-xl font-bold text-plum">2. Kaedah bayaran</h2>
+                <h2 id="bayaran-heading" class="font-display text-xl font-bold text-plum">2. {{ __('Kaedah bayaran') }}</h2>
 
                 @foreach ([
-                    [PaymentMethod::Chip, 'Bayar dalam talian sekarang dan akses dibuka serta-merta.'],
-                    [PaymentMethod::BankTransfer, 'Pindahkan ke akaun bank kami dan muat naik resit. Akses dibuka selepas kami sahkan bayaran.'],
+                    [PaymentMethod::Chip, __('Bayar dalam talian sekarang dan akses dibuka serta-merta.')],
+                    [PaymentMethod::BankTransfer, __('Pindahkan ke akaun bank kami dan muat naik resit. Akses dibuka selepas kami sahkan bayaran.')],
                 ] as [$method, $text])
                     <label class="flex cursor-pointer gap-3 rounded-xl border-2 border-ink/20 p-4 has-checked:border-biru has-checked:bg-biru/5">
                         <input type="radio" name="payment_method" value="{{ $method->value }}" @checked(old('payment_method', PaymentMethod::Chip->value) === $method->value) class="mt-1 size-5 shrink-0 text-biru" required>
@@ -88,16 +88,17 @@
                     <label class="flex cursor-pointer gap-3">
                         <input type="checkbox" name="pdpa_consent" value="1" @checked(old('pdpa_consent')) class="mt-0.5 size-5 shrink-0 rounded border-2 border-ink/30 text-biru" required>
                         <span class="text-sm">
-                            Saya bersetuju dengan <a href="{{ route('terms') }}" class="pautan" target="_blank">terma dan syarat</a>
-                            (termasuk <a href="{{ route('refund') }}" class="pautan" target="_blank">polisi bayaran balik</a>)
-                            serta membenarkan data saya diproses oleh ASUH (Galeri Ilmu Media Group) seperti dalam
-                            <a href="{{ route('privacy') }}" class="pautan" target="_blank">notis privasi</a>.
+                            {!! __('Saya bersetuju dengan :terms (termasuk :refund) serta membenarkan data saya diproses oleh ASUH (Galeri Ilmu Media Group) seperti dalam :privacy.', [
+                                'terms' => '<a href="'.route('terms').'" class="pautan" target="_blank">'.e(__('terma dan syarat')).'</a>',
+                                'refund' => '<a href="'.route('refund').'" class="pautan" target="_blank">'.e(__('polisi bayaran balik')).'</a>',
+                                'privacy' => '<a href="'.route('privacy').'" class="pautan" target="_blank">'.e(__('notis privasi')).'</a>',
+                            ]) !!}
                         </span>
                     </label>
                     @error('pdpa_consent') <p class="text-sm font-semibold text-magenta">{{ $message }}</p> @enderror
                 @endguest
 
-                <button type="submit" class="btn-utama w-full text-lg">Teruskan ke bayaran</button>
+                <button type="submit" class="btn-utama w-full text-lg">{{ __('Teruskan ke bayaran') }}</button>
             </div>
         </form>
     </div>

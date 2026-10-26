@@ -61,6 +61,7 @@ class Settings extends Page
         'preorder_slot_limit', 'preorder_reservation_minutes', 'bank_transfer_reservation_hours',
         'pass_start_rule', 'launch_date',
         'landing_headline', 'landing_subheadline', 'landing_faq', 'refund_policy', 'pilot_duration_days',
+        'landing_headline_en', 'landing_subheadline_en', 'landing_faq_en', 'refund_policy_en',
         'bank_name', 'bank_account_name', 'bank_account_number',
         'contact_email', 'company_name', 'company_ssm_no', 'company_address', 'company_sst_no',
         'admin_notification_emails',
@@ -188,6 +189,23 @@ class Settings extends Page
                         ->reorderable()->collapsible()->collapsed()->defaultItems(0),
                 ]),
 
+            Section::make('Teks landing page (English)')
+                ->description('Dipaparkan apabila pelawat memilih EN. Kosongkan sesuatu medan untuk memaparkan teks BM.')
+                ->collapsible()->collapsed()
+                ->schema([
+                    TextInput::make('landing_headline_en')->label('Headline (EN)')->maxLength(120),
+                    Textarea::make('landing_subheadline_en')->label('Subheadline (EN)')->rows(2)->maxLength(300),
+                    Textarea::make('refund_policy_en')->label('Polisi bayaran balik (EN)')->rows(3)->maxLength(1000),
+                    Repeater::make('landing_faq_en')->label('Soalan lazim (EN)')
+                        ->schema([
+                            TextInput::make('question')->label('Soalan')->maxLength(200)->required(),
+                            Textarea::make('answer')->label('Jawapan')->rows(3)->maxLength(1500)->required(),
+                        ])
+                        ->itemLabel(fn (array $state) => $state['question'] ?? null)
+                        ->addActionLabel('Tambah soalan')
+                        ->reorderable()->collapsible()->collapsed()->defaultItems(0),
+                ]),
+
             Section::make('Caj pemprosesan CHIP (dibayar pembeli)')
                 ->description('Pembeli memilih FPX, e-wallet atau kad di halaman bayaran dan melihat caj sebelum membayar. Caj = amaun tetap + peratus harga. Isi ikut kadar dalam kontrak CHIP; 0 untuk tiada caj. Bayaran kad sentiasa tanpa caj, kerana peniaga di Malaysia tidak dibenarkan mengenakan caj tambahan kepada pemegang kad. Pindahan bank tanpa caj. Laporan jualan tidak mengira caj ini.')
                 ->columns(2)
@@ -286,7 +304,7 @@ class Settings extends Page
         DB::transaction(function () use ($data) {
             foreach (self::KEYS as $key) {
                 $value = $data[$key] ?? null;
-                Setting::set($key, in_array($key, ['landing_faq', 'brand_video_places'], true) ? array_values($value ?? []) : $value);
+                Setting::set($key, in_array($key, ['landing_faq', 'landing_faq_en', 'brand_video_places'], true) ? array_values($value ?? []) : $value);
             }
 
             $this->setPrice(Plan::PAS_TAHUNAN_EARLY, $data['early_bird_price']);

@@ -10,13 +10,13 @@ class LegalController extends Controller
 {
     public function privacy(): View
     {
-        return view('legal.privacy', $this->company());
+        return view($this->localized('legal.privacy'), $this->company());
     }
 
     public function terms(): View
     {
-        return view('legal.terms', $this->company() + [
-            'refundPolicy' => Setting::get('refund_policy'),
+        return view($this->localized('legal.terms'), $this->company() + [
+            'refundPolicy' => Setting::localized('refund_policy'),
             'passStartRule' => PassStartRule::tryFrom(Setting::get('pass_start_rule')) ?? PassStartRule::OnPayment,
             'slotLimit' => (int) Setting::get('preorder_slot_limit'),
         ]);
@@ -31,17 +31,25 @@ class LegalController extends Controller
 
     public function refund(): View
     {
-        return view('legal.refund', $this->company() + [
-            'refundPolicy' => Setting::get('refund_policy'),
+        return view($this->localized('legal.refund'), $this->company() + [
+            'refundPolicy' => Setting::localized('refund_policy'),
         ]);
     }
 
     /** Digital products only; payment gateways ask merchants for a delivery policy. */
     public function delivery(): View
     {
-        return view('legal.delivery', $this->company() + [
+        return view($this->localized('legal.delivery'), $this->company() + [
             'startsOnLaunch' => PassStartRule::tryFrom(Setting::get('pass_start_rule')) === PassStartRule::OnLaunch,
         ]);
+    }
+
+    /** Legal texts have a full English version (legal/en/*), kept apart for review. */
+    private function localized(string $view): string
+    {
+        $english = str_replace('legal.', 'legal.en.', $view);
+
+        return app()->getLocale() === 'en' && view()->exists($english) ? $english : $view;
     }
 
     /**

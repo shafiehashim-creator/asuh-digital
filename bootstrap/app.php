@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\LockChildMode;
 use App\Http\Middleware\RememberAffiliate;
+use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\ThrottleRegistrations;
 use App\Http\Middleware\TrackVisits;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
@@ -24,7 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // A signed-in user opening /login or /daftar is offered "Tukar akaun" instead of a silent redirect.
         $middleware->redirectUsersTo(fn () => route('switch-account'));
 
-        $middleware->web(append: [LockChildMode::class, ThrottleRegistrations::class, TrackVisits::class, RememberAffiliate::class]);
+        $middleware->web(append: [SetLocale::class, LockChildMode::class, ThrottleRegistrations::class, TrackVisits::class, RememberAffiliate::class]);
         // Before the login check, so a pupil (no account) is sent back to the shelf, not to the login page.
         $middleware->prependToPriorityList(before: AuthenticatesRequests::class, prepend: LockChildMode::class);
     })

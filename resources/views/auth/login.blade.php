@@ -8,15 +8,15 @@
         <div class="flex items-center justify-between gap-4">
             <label class="flex min-h-11 items-center gap-2 text-sm font-semibold">
                 <input type="checkbox" name="remember" class="size-5 rounded border-2 border-ink/30 text-biru">
-                Ingat saya
+                {{ __('Ingat saya') }}
             </label>
-            <a href="{{ route('password.request') }}" class="pautan text-sm">Lupa kata laluan?</a>
+            <a href="{{ route('password.request') }}" class="pautan text-sm">{{ __('Lupa kata laluan?') }}</a>
         </div>
 
-        <button type="submit" class="btn-utama w-full">Log masuk</button>
+        <button type="submit" class="btn-utama w-full">{{ __('Log masuk') }}</button>
     </form>
 
     <p class="mt-6 text-center text-sm text-ink/80">
-        Belum ada akaun? <a href="{{ route('register') }}" class="pautan font-bold">Daftar percuma</a>
+        {{ __('Belum ada akaun?') }} <a href="{{ route('register') }}" class="pautan font-bold">{{ __('Daftar percuma') }}</a>
     </p>
 </x-auth-card>

@@ -32,7 +32,7 @@ class PromoCodes
 
         if ($code !== '') {
             if ($school = Institution::findByParentCode($code)) {
-                $this->ensure(in_array($product, [PromoProduct::Pass, PromoProduct::Plus], true), 'Kod sekolah hanya untuk Langganan Tahunan dan Langganan Plus baharu.');
+                $this->ensure(in_array($product, [PromoProduct::Pass, PromoProduct::Plus], true), __('Kod sekolah hanya untuk Langganan Tahunan dan Langganan Plus baharu.'));
                 $result['referral_institution_id'] = $school->id;
                 $result['discount_sen'] = (int) round($priceSen * $school->parent_discount_percent / 100);
             } elseif ($coupon = Coupon::findByCode($code)) {
@@ -40,10 +40,10 @@ class PromoCodes
                 $result['coupon_id'] = $coupon->id;
                 $result['discount_sen'] = $coupon->discountSen($priceSen);
             } elseif ($affiliate = Affiliate::findActiveByCode($code)) {
-                $this->ensure($affiliate->user_id !== $buyer?->id, 'Anda tidak boleh menggunakan kod affiliate anda sendiri.');
+                $this->ensure($affiliate->user_id !== $buyer?->id, __('Anda tidak boleh menggunakan kod affiliate anda sendiri.'));
                 $result['affiliate_id'] = $affiliate->id;
             } else {
-                $this->ensure(false, 'Kod promosi tidak sah. Semak ejaan kod.');
+                $this->ensure(false, __('Kod promosi tidak sah. Semak ejaan kod.'));
             }
         }
 
@@ -63,14 +63,14 @@ class PromoCodes
 
     private function checkCoupon(Coupon $coupon, PromoProduct $product, ?User $buyer): void
     {
-        $this->ensure($coupon->is_active, 'Kod promosi ini tidak lagi aktif.');
-        $this->ensure(! $coupon->starts_at || $coupon->starts_at->isPast(), 'Kod promosi ini belum bermula.');
-        $this->ensure(! $coupon->ends_at || $coupon->ends_at->isFuture(), 'Kod promosi ini sudah tamat tempoh.');
-        $this->ensure($coupon->appliesTo($product), 'Kod promosi ini tidak boleh digunakan untuk produk ini.');
-        $this->ensure(! $coupon->max_uses || $coupon->usesCount() < $coupon->max_uses, 'Kod promosi ini sudah habis digunakan.');
+        $this->ensure($coupon->is_active, __('Kod promosi ini tidak lagi aktif.'));
+        $this->ensure(! $coupon->starts_at || $coupon->starts_at->isPast(), __('Kod promosi ini belum bermula.'));
+        $this->ensure(! $coupon->ends_at || $coupon->ends_at->isFuture(), __('Kod promosi ini sudah tamat tempoh.'));
+        $this->ensure($coupon->appliesTo($product), __('Kod promosi ini tidak boleh digunakan untuk produk ini.'));
+        $this->ensure(! $coupon->max_uses || $coupon->usesCount() < $coupon->max_uses, __('Kod promosi ini sudah habis digunakan.'));
         $this->ensure(
             ! $coupon->once_per_customer || ! $buyer || ! $buyer->orders()->where('coupon_id', $coupon->id)->where('status', OrderStatus::Paid)->exists(),
-            'Anda sudah menggunakan kod promosi ini.',
+            __('Anda sudah menggunakan kod promosi ini.'),
         );
     }
 

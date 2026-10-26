@@ -37,14 +37,14 @@ class ChipPaymentController extends Controller
         }
 
         if (! $this->chip->isConfigured()) {
-            return $backToOrder->withErrors(['payment' => 'Bayaran dalam talian belum dibuka. Sila cuba sebentar lagi.']);
+            return $backToOrder->withErrors(['payment' => __('Bayaran dalam talian belum dibuka. Sila cuba sebentar lagi.')]);
         }
 
         // The buyer picks FPX, e-wallet or card here, so the fee is known up front.
         $method = ChipMethod::tryFrom((string) $request->input('kaedah'));
 
         if (! $method || ! in_array($method, $this->chip->offeredMethods(), true)) {
-            return $backToOrder->withErrors(['payment' => 'Sila pilih kaedah bayaran.']);
+            return $backToOrder->withErrors(['payment' => __('Sila pilih kaedah bayaran.')]);
         }
 
         $fee = $fees->for($method, $order->amount_sen);
@@ -77,7 +77,7 @@ class ChipPaymentController extends Controller
         } catch (RequestException $e) {
             Log::warning('CHIP purchase request failed', ['order' => $order->reference, 'status' => $e->response?->status()]);
 
-            return $backToOrder->withErrors(['payment' => 'Maaf, kami tidak dapat menghubungi sistem bayaran. Sila cuba lagi.']);
+            return $backToOrder->withErrors(['payment' => __('Maaf, kami tidak dapat menghubungi sistem bayaran. Sila cuba lagi.')]);
         }
 
         $order->update(['chip_purchase_id' => $purchase['id']]);
@@ -96,7 +96,7 @@ class ChipPaymentController extends Controller
         $redirect = redirect()->route('preorder.pay', $order);
 
         if ($request->query('result') === 'failed') {
-            return $redirect->withErrors(['payment' => 'Bayaran tidak berjaya. Anda boleh cuba sekali lagi.']);
+            return $redirect->withErrors(['payment' => __('Bayaran tidak berjaya. Anda boleh cuba sekali lagi.')]);
         }
 
         return $redirect->with('payment_checking', ! $order->isPaid());

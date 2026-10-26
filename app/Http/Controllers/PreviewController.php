@@ -39,7 +39,7 @@ class PreviewController extends Controller
                     range(1, $pages),
                 ),
             ],
-            'watermark' => 'Pratonton · ASUH Digital',
+            'watermark' => __('Pratonton').' · ASUH Digital',
             'preview' => [
                 'pages' => $pages,
                 'total' => $file->page_count ?? $file->page_images,

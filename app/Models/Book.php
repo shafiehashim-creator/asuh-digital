@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 #[Fillable([
-    'title', 'slug', 'author', 'synopsis', 'age_group', 'single_price_sen', 'royalty_single_percent',
+    'title', 'title_en', 'slug', 'author', 'synopsis', 'synopsis_en', 'age_group', 'single_price_sen', 'royalty_single_percent',
     'is_enhanced_edition', 'cover_path', 'status', 'published_at',
 ])]
 class Book extends Model
@@ -158,6 +158,17 @@ class Book extends Model
     public function videos(): HasMany
     {
         return $this->hasMany(Video::class);
+    }
+
+    /** The title in the visitor's language (English when given, else BM). */
+    public function localTitle(): string
+    {
+        return app()->getLocale() === 'en' && filled($this->title_en) ? $this->title_en : $this->title;
+    }
+
+    public function localSynopsis(): ?string
+    {
+        return app()->getLocale() === 'en' && filled($this->synopsis_en) ? $this->synopsis_en : $this->synopsis;
     }
 
     /** Royalty payees and their share (%) of this book's royalty. */

@@ -13,17 +13,18 @@
         <label class="flex cursor-pointer gap-3">
             <input type="checkbox" name="pdpa_consent" value="1" @checked(old('pdpa_consent')) class="mt-0.5 size-5 shrink-0 rounded border-2 border-ink/30 text-biru" required>
             <span class="text-sm">
-                Saya bersetuju dengan <a href="{{ route('terms') }}" class="pautan" target="_blank">terma dan syarat</a>
-                serta membenarkan data saya dan maklumat anak yang saya masukkan diproses oleh ASUH (Galeri Ilmu Media Group),
-                seperti dalam <a href="{{ route('privacy') }}" class="pautan" target="_blank">notis privasi</a>.
+                {!! __('Saya bersetuju dengan :terms serta membenarkan data saya dan maklumat anak yang saya masukkan diproses oleh ASUH (Galeri Ilmu Media Group), seperti dalam :privacy.', [
+                    'terms' => '<a href="'.route('terms').'" class="pautan" target="_blank">'.e(__('terma dan syarat')).'</a>',
+                    'privacy' => '<a href="'.route('privacy').'" class="pautan" target="_blank">'.e(__('notis privasi')).'</a>',
+                ]) !!}
             </span>
         </label>
         @error('pdpa_consent') <p class="text-sm font-semibold text-magenta">{{ $message }}</p> @enderror
 
-        <button type="submit" class="btn-utama w-full">Daftar</button>
+        <button type="submit" class="btn-utama w-full">{{ __('Daftar') }}</button>
     </form>
 
     <p class="mt-6 text-center text-sm text-ink/80">
-        Sudah ada akaun? <a href="{{ route('login') }}" class="pautan">Log masuk</a>
+        {{ __('Sudah ada akaun?') }} <a href="{{ route('login') }}" class="pautan">{{ __('Log masuk') }}</a>
     </p>
 </x-auth-card>
