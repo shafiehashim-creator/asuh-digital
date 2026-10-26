@@ -63,6 +63,7 @@ class Settings extends Page
         'catalog_open', 'preview_pages', 'whatsapp_number', 'videos_open',
         'chip_fee_fpx_fixed', 'chip_fee_fpx_percent', 'chip_fee_ewallet_fixed', 'chip_fee_ewallet_percent',
         'affiliates_open', 'affiliate_commission_percent', 'affiliate_hold_days', 'affiliate_cookie_days',
+        'royalty_pool_percent', 'royalty_plus_ebook_share', 'royalty_min_minutes', 'royalty_single_percent',
     ];
 
     /** @var array<string, mixed> */
@@ -197,6 +198,21 @@ class Settings extends Page
                     TextInput::make('affiliate_cookie_days')->label('Tempoh pautan diingati (hari)')
                         ->helperText('Pembelian dalam tempoh ini selepas membuka pautan ?ref= dikira untuk affiliate.')
                         ->integer()->minValue(1)->maxValue(365)->required(),
+                ]),
+
+            Section::make('Royalti')
+                ->description('Kadar lalai untuk Kandungan → Royalti. Kolam boleh diubah semasa melihat laporan. Pastikan kadar ini sepadan dengan kontrak penulis.')
+                ->columns(2)
+                ->schema([
+                    TextInput::make('royalty_pool_percent')->label('Kolam royalti (% pendapatan langganan)')
+                        ->numeric()->minValue(0)->maxValue(100)->step(0.5)->suffix('%')->required(),
+                    TextInput::make('royalty_plus_ebook_share')->label('Bahagian e-book dalam Langganan Plus')
+                        ->helperText('Selebihnya untuk animasi dan tidak masuk kolam e-book.')
+                        ->numeric()->minValue(0)->maxValue(100)->suffix('%')->required(),
+                    TextInput::make('royalty_min_minutes')->label('Minit minimum untuk satu bacaan')
+                        ->integer()->minValue(1)->maxValue(60)->required(),
+                    TextInput::make('royalty_single_percent')->label('Royalti jualan e-book single')
+                        ->numeric()->minValue(0)->maxValue(100)->step(0.5)->suffix('%')->required(),
                 ]),
 
             Section::make('Pindahan bank')

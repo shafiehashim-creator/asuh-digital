@@ -19,4 +19,12 @@ class Money
     {
         return $sen % 100 === 0 ? 'RM'.number_format($sen / 100) : static::format($sen);
     }
+
+    /**
+     * Plain number for spreadsheets, e.g. 123456 => "1234.56".
+     */
+    public static function plain(int $sen): string
+    {
+        return number_format($sen / 100, 2, '.', '');
+    }
 }

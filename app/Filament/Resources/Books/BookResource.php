@@ -10,6 +10,7 @@ use App\Filament\Resources\Books\Pages\CreateBook;
 use App\Filament\Resources\Books\Pages\EditBook;
 use App\Filament\Resources\Books\Pages\ListBooks;
 use App\Filament\Resources\Books\Pages\PreparePages;
+use App\Filament\Resources\Books\RelationManagers\ContributorsRelationManager;
 use App\Filament\Resources\Books\RelationManagers\ReviewsRelationManager;
 use App\Models\Book;
 use App\Models\BookFile;
@@ -167,6 +168,7 @@ class BookResource extends Resource
     {
         return [
             ReviewsRelationManager::class,
+            ContributorsRelationManager::class,
         ];
     }
 

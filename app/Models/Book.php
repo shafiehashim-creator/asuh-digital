@@ -159,6 +159,12 @@ class Book extends Model
         return $this->hasMany(Video::class);
     }
 
+    /** Royalty payees and their share (%) of this book's royalty. */
+    public function contributors(): BelongsToMany
+    {
+        return $this->belongsToMany(Contributor::class)->withPivot(['role', 'share_percent'])->withTimestamps();
+    }
+
     public function quiz(): HasOne
     {
         return $this->hasOne(Quiz::class);

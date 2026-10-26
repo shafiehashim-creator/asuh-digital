@@ -43,6 +43,13 @@ return [
         'affiliate_commission_percent' => 10,
         'affiliate_hold_days' => 14,
         'affiliate_cookie_days' => 30,
+        // Royalty report defaults: share of recognised subscription revenue paid out,
+        // the e-book share of Langganan Plus, the minutes that count as a read,
+        // and the royalty on single e-book sales.
+        'royalty_pool_percent' => 30,
+        'royalty_plus_ebook_share' => 60,
+        'royalty_min_minutes' => 5,
+        'royalty_single_percent' => 10,
 
         // Landing page copy
         'landing_headline' => 'Rak buku Islamik digital untuk anak 6–13 tahun',
