@@ -10,6 +10,7 @@ use App\Filament\Resources\Videos\Pages\CreateVideo;
 use App\Filament\Resources\Videos\Pages\EditVideo;
 use App\Filament\Resources\Videos\Pages\ListVideos;
 use App\Models\Book;
+use App\Models\Category;
 use App\Models\User;
 use App\Models\Video;
 use App\Support\VideoId;
@@ -120,4 +121,54 @@ it('switches a video to free straight from the list', function () {
         ->call('updateTableColumnState', 'is_free_sample', (string) $video->getKey(), true);
 
     expect($video->fresh()->is_free_sample)->toBeTrue();
+});
+
+it('moves several videos through review and publishing at once, skipping those that do not fit', function () {
+    $admin = User::factory()->admin()->create();
+    $this->actingAs($admin);
+    $drafts = Video::factory()->count(2)->create();
+    $published = Video::factory()->published()->create(['title' => 'Sudah Terbit']);
+
+    Livewire::test(ListVideos::class)
+        ->callTableBulkAction('submit', [...$drafts, $published])
+        ->callTableBulkAction('approve', $drafts)
+        ->callTableBulkAction('publish', [...$drafts, $published], ['published_at' => now()->toDateTimeString()])
+        ->assertNotified();
+
+    foreach ($drafts as $video) {
+        expect($video->fresh())->status->toBe(BookStatus::Published)
+            ->and($video->fresh()->latestReview->status)->toBe(ReviewStatus::Approved)
+            ->and($video->fresh()->latestReview->reviewer_id)->toBe($admin->id);
+    }
+
+    Livewire::test(ListVideos::class)->callTableBulkAction('unpublish', [...$drafts]);
+    expect($drafts->map(fn ($v) => $v->fresh()->status)->unique()->all())->toBe([BookStatus::Draft]);
+});
+
+it('never publishes a video in bulk without a passed review', function () {
+    $this->actingAs(User::factory()->admin()->create());
+    $video = Video::factory()->create();
+
+    Livewire::test(ListVideos::class)
+        ->callTableBulkAction('publish', [$video], ['published_at' => now()->toDateTimeString()]);
+
+    expect($video->fresh()->status)->toBe(BookStatus::Draft);
+});
+
+it('marks free, adds categories and sets the age for several videos at once', function () {
+    $this->actingAs(User::factory()->admin()->create());
+    $videos = Video::factory()->count(2)->create(['age_group' => AgeGroup::SixToNine]);
+    $category = Category::query()->first();
+
+    Livewire::test(ListVideos::class)
+        ->callTableBulkAction('makeFree', $videos)
+        ->callTableBulkAction('categories', $videos, ['categories' => [$category->id]])
+        ->callTableBulkAction('age', $videos, ['age_group' => AgeGroup::TenToThirteen->value]);
+
+    foreach ($videos as $video) {
+        $video = $video->fresh();
+        expect($video->is_free_sample)->toBeTrue()
+            ->and($video->age_group)->toBe(AgeGroup::TenToThirteen)
+            ->and($video->categories->pluck('id')->all())->toBe([$category->id]);
+    }
 });
