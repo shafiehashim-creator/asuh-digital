@@ -60,7 +60,7 @@ it('does not offer the upgrade to yearly families while Plus is not sold', funct
     $user = waitlistYearlyFamily();
 
     $this->actingAs($user)->get(route('account'))->assertOk()->assertDontSee('Naik taraf ·');
-    $this->actingAs($user)->get(route('video.index'))->assertOk()->assertSee('Beritahu saya bila Plus dibuka');
+    $this->actingAs($user)->get(route('videos.index'))->assertOk()->assertSee('Beritahu saya bila Plus dibuka');
 
     Setting::set('plus_sales_open', true);
     $this->actingAs($user)->get(route('account'))->assertOk()->assertSee('Naik taraf ·');
@@ -100,7 +100,7 @@ it('e-mails the waiting list once when the admin opens Plus sales', function () 
 it('sends subscription buttons to the sales page before the checkout', function () {
     $book = Book::factory()->published()->create(['single_price_sen' => 1500]);
 
-    $this->get(route('landing'))->assertOk()->assertSee('href="'.route('pass.show').'"', false);
+    $this->get(route('home'))->assertOk()->assertSee('href="'.route('pass.show').'"', false);
     $this->get(route('catalog.show', $book))->assertOk()
         ->assertSee('href="'.route('pass.show').'" class="btn-gelap mt-3 w-full"', false);
     $this->actingAs(User::factory()->create())->get(route('account'))->assertOk()
