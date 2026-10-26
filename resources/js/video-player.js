@@ -123,17 +123,40 @@ function initVideoPlayer(root) {
     pausedScreen?.addEventListener('click', toggle);
     seek?.addEventListener('change', () => player?.seekTo(parseInt(seek.value, 10)));
     replayButton?.addEventListener('click', () => { show(endScreen, false); player?.seekTo(0); player?.play(); });
+    // Full screen: the browser's own where allowed. iPhone (Safari and the
+    // installed app) has no full screen for page elements, so there the
+    // player fills the screen itself instead (.video-filled in app.css).
+    const fullTarget = wrap === document ? root : wrap;
+    let filled = false;
+    const fill = (on) => {
+        filled = on;
+        fullTarget.classList.toggle('video-filled', on);
+        document.documentElement.classList.toggle('overflow-hidden', on);
+    };
     fullscreenButton?.addEventListener('click', async () => {
-        try {
-            if (document.fullscreenElement) {
-                await document.exitFullscreen();
-            } else {
-                await (wrap === document ? root : wrap).requestFullscreen();
+        if (filled) {
+            fill(false);
+
+            return;
+        }
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+            await (document.exitFullscreen ?? document.webkitExitFullscreen)?.call(document)?.catch?.(() => {});
+
+            return;
+        }
+        const request = fullTarget.requestFullscreen ?? fullTarget.webkitRequestFullscreen;
+        if (request && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) {
+            try {
+                await request.call(fullTarget);
                 // Phones: turn sideways for the 16:9 picture where the browser allows it.
                 await screen.orientation?.lock?.('landscape').catch(() => {});
-            }
-        } catch { /* fullscreen not allowed */ }
+
+                return;
+            } catch { /* not allowed here: fill the screen instead */ }
+        }
+        fill(true);
     });
+    document.addEventListener('keydown', (event) => { if (filled && event.key === 'Escape') fill(false); });
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') { player?.pause(); send(); }
     });

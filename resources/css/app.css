@@ -51,3 +51,25 @@ html {
 [x-cloak] {
     display: none !important;
 }
+
+/*
+ * Video player filling the screen: the browser's full screen, or on iPhone
+ * (no full screen for page elements) the player covering the page itself.
+ * The 16:9 picture is as large as fits, with the controls below it.
+ */
+.video-filled {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--color-lavender);
+    padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+}
+
+.video-filled :is([data-video-player], [data-controls]),
+[data-video-wrap]:fullscreen :is([data-video-player], [data-controls]) {
+    width: min(100%, calc((100dvh - 6rem) * 16 / 9));
+    margin-inline: auto;
+}
