@@ -133,7 +133,7 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
     public function canWatchVideos(): bool
     {
         return $this->isStaff()
-            || $this->passes()->active()->whereHas('plan', fn ($q) => $q->where('code', Plan::PAS_PLUS))->exists();
+            || $this->passes()->active()->whereHas('plan', fn ($q) => $q->whereIn('code', Plan::PLUS_CODES))->exists();
     }
 
     public function isStaff(): bool

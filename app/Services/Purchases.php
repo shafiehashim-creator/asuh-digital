@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Actions\Fortify\CreateNewUser;
+use App\Enums\BillingPeriod;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PromoProduct;
@@ -26,6 +27,7 @@ class Purchases
         private CreateNewUser $createNewUser,
         private PlusOffer $plusOffer,
         private PromoCodes $promoCodes,
+        private SubscriptionPlans $plans,
     ) {}
 
     /**
@@ -50,9 +52,12 @@ class Purchases
      */
     public function buyPass(?User $user, array $input): Order
     {
-        $plan = $this->regularPlan() ?? throw new InvalidArgumentException(__('Langganan Tahunan tidak dijual buat masa ini.'));
+        $period = BillingPeriod::fromRequest($input['tempoh'] ?? null);
+        $plan = $this->plans->pass($period) ?? throw new InvalidArgumentException(
+            $period === BillingPeriod::Monthly ? __('Langganan Bulanan tidak dijual buat masa ini.') : __('Langganan Tahunan tidak dijual buat masa ini.'),
+        );
 
-        return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen, PromoProduct::Pass);
+        return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen, $plan->isMonthly() ? PromoProduct::Monthly : PromoProduct::Pass);
     }
 
     /**
@@ -63,7 +68,7 @@ class Purchases
      */
     public function buyPlus(?User $user, array $input): Order
     {
-        $plan = $this->plusOffer->available() ? $this->plusOffer->plan() : null;
+        $plan = $this->plans->plus(BillingPeriod::fromRequest($input['tempoh'] ?? null));
 
         if (! $plan) {
             throw new InvalidArgumentException(__('Langganan Plus tidak dijual buat masa ini.'));
@@ -73,7 +78,7 @@ class Purchases
             throw new InvalidArgumentException(__('Anda sudah ada Langganan Tahunan. Naik taraf ke Langganan Plus dengan membayar bezanya sahaja.'));
         }
 
-        return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen, PromoProduct::Plus);
+        return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen, $plan->isMonthly() ? PromoProduct::Monthly : PromoProduct::Plus);
     }
 
     /**

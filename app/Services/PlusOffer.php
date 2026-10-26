@@ -31,7 +31,8 @@ class PlusOffer
     {
         $pass = $user->activePass() ?? $user->passes()->whereNull('starts_at')->latest()->first();
 
-        return $pass && ! $pass->isPlus() ? $pass : null;
+        // Monthly subscribers buy Plus instead: upgrades are for yearly subscriptions.
+        return $pass && ! $pass->isPlus() && ! $pass->plan?->isMonthly() ? $pass : null;
     }
 
     /**

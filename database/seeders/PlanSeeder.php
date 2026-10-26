@@ -17,6 +17,9 @@ class PlanSeeder extends Seeder
             ['code' => Plan::PAS_TAHUNAN, 'name' => 'Langganan Tahunan', 'price_sen' => 9900, 'duration_months' => 12, 'is_active' => true],
             ['code' => Plan::PAS_TAHUNAN_EARLY, 'name' => 'Langganan Tahunan (Early Bird)', 'price_sen' => 7900, 'duration_months' => 12, 'is_active' => true],
             ['code' => Plan::PAS_PLUS, 'name' => 'Langganan Plus', 'price_sen' => 0, 'duration_months' => 12, 'is_active' => true],
+            ['code' => Plan::PAS_BULANAN, 'name' => 'Langganan Bulanan', 'price_sen' => 1490, 'duration_months' => 1, 'is_active' => true],
+            // 0 until the admin sets a price: not on sale.
+            ['code' => Plan::PAS_PLUS_BULANAN, 'name' => 'Langganan Plus Bulanan', 'price_sen' => 0, 'duration_months' => 1, 'is_active' => true],
         ];
 
         foreach ($plans as $plan) {

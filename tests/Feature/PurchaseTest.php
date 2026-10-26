@@ -3,6 +3,7 @@
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PreorderStatus;
+use App\Filament\Resources\Orders\OrderResource;
 use App\Mail\OrderReceipt;
 use App\Models\Book;
 use App\Models\Entitlement;
@@ -57,7 +58,7 @@ it('sends buyers to the early bird pre-order while slots remain', function () {
 it('sells the regular pass at full price once the early bird is sold out', function () {
     sellOutEarlyBird();
 
-    $this->get(route('purchase.pass'))->assertOk()->assertSee('Beli Langganan Tahunan')->assertSee('RM99');
+    $this->get(route('purchase.pass'))->assertOk()->assertSee('Beli Langganan')->assertSee('RM99')->assertSee('Paling berbaloi');
 
     $this->post(route('purchase.pass.store'), guestBuyer())->assertRedirect();
 
@@ -139,7 +140,7 @@ it('lets the admin confirm a regular pass bank transfer and finds it in the awai
     app(BankTransfers::class)->uploadReceipt($order, UploadedFile::fake()->create('resit.jpg', 50, 'image/jpeg'));
 
     expect($order->fresh()->isAwaitingConfirmation())->toBeTrue()
-        ->and(App\Filament\Resources\Orders\OrderResource::awaitingConfirmationQuery(Order::query())->pluck('id')->all())->toBe([$order->id]);
+        ->and(OrderResource::awaitingConfirmationQuery(Order::query())->pluck('id')->all())->toBe([$order->id]);
 
     app(BankTransfers::class)->confirm($order->fresh(), User::factory()->admin()->create());
 

@@ -15,6 +15,15 @@ class Plan extends Model
 
     public const PAS_PLUS = 'pas_plus';
 
+    // Monthly versions (user decision 2026-10-26): paid by hand each month,
+    // priced so that the yearly plans are the better deal.
+    public const PAS_BULANAN = 'pas_bulanan';
+
+    public const PAS_PLUS_BULANAN = 'pas_plus_bulanan';
+
+    /** Plans that include the animated videos (Phase 2). */
+    public const PLUS_CODES = [self::PAS_PLUS, self::PAS_PLUS_BULANAN];
+
     protected function casts(): array
     {
         return [
@@ -27,6 +36,16 @@ class Plan extends Model
     public static function findByCode(string $code): ?self
     {
         return static::query()->where('code', $code)->first();
+    }
+
+    public function isPlus(): bool
+    {
+        return in_array($this->code, self::PLUS_CODES, true);
+    }
+
+    public function isMonthly(): bool
+    {
+        return $this->duration_months === 1;
     }
 
     public function orders(): HasMany

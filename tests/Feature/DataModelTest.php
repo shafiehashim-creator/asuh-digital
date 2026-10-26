@@ -24,7 +24,7 @@ it('does not overwrite a price the admin has changed when re-seeded', function (
     $this->seed(PlanSeeder::class);
 
     expect(Plan::findByCode(Plan::PAS_TAHUNAN_EARLY)->price_sen)->toBe(6900)
-        ->and(Plan::query()->count())->toBe(3);
+        ->and(Plan::query()->count())->toBe(5);
 });
 
 it('gives every order a unique reference', function () {

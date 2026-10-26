@@ -1,6 +1,6 @@
 @php
     $hasAccess = $activePass !== null || $ownedCount > 0;
-    $planName = $activePass?->isPlus() ? 'Langganan Plus' : 'Langganan Tahunan';
+    $planName = $activePass?->plan?->name ?? 'Langganan Tahunan';
 
     $status = array_filter([
         match (true) {

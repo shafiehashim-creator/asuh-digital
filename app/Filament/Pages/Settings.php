@@ -88,6 +88,8 @@ class Settings extends Page
             'early_bird_price' => $this->priceInRinggit(Plan::PAS_TAHUNAN_EARLY),
             'regular_price' => $this->priceInRinggit(Plan::PAS_TAHUNAN),
             'plus_price' => $this->priceInRinggit(Plan::PAS_PLUS),
+            'monthly_price' => $this->priceInRinggit(Plan::PAS_BULANAN),
+            'plus_monthly_price' => $this->priceInRinggit(Plan::PAS_PLUS_BULANAN),
         ]);
     }
 
@@ -119,6 +121,9 @@ class Settings extends Page
                         ->columnSpanFull(),
                     TextInput::make('plus_price')->label('Harga Langganan Plus setahun (RM)')
                         ->helperText('0 bermaksud belum dijual. Pelanggan Langganan Tahunan membayar beza harga untuk baki hari mereka.')
+                        ->numeric()->minValue(0)->step(0.01)->prefix('RM')->required(),
+                    TextInput::make('plus_monthly_price')->label('Harga Langganan Plus Bulanan (RM)')
+                        ->helperText('0 bermaksud tiada pilihan bulanan untuk Plus. Tetapkan cukup tinggi supaya tahunan nampak lebih berbaloi.')
                         ->numeric()->minValue(0)->step(0.01)->prefix('RM')->required(),
                     TextInput::make('plus_trailer_url')->label('Treler himpunan animasi (pautan YouTube, pilihan)')
                         ->helperText('Klip pendek babak terbaik semua animasi, dipaparkan di atas halaman Video animasi (/video). Tandakan juga 1–3 video sebagai "Percuma untuk ditonton" di menu Video animasi.')
@@ -160,6 +165,9 @@ class Settings extends Page
                     TextInput::make('regular_price')->label('Harga biasa (RM)')
                         ->helperText('Dipaparkan dipotong di sebelah harga early bird.')
                         ->numeric()->minValue(1)->step(0.01)->prefix('RM')->required(),
+                    TextInput::make('monthly_price')->label('Harga Langganan Bulanan (RM)')
+                        ->helperText('Dijual selepas early bird tamat, bayar manual setiap bulan. 0 untuk tiada pilihan bulanan. Tahunan dipaparkan dengan "Jimat %" berbanding 12 × harga ini.')
+                        ->numeric()->minValue(0)->step(0.01)->prefix('RM')->required(),
                     TextInput::make('preorder_slot_limit')->label('Had slot early bird')
                         ->integer()->minValue(0)->maxValue(100000)->required(),
                     TextInput::make('preorder_reservation_minutes')->label('Tempoh tempahan CHIP (minit)')
@@ -318,6 +326,8 @@ class Settings extends Page
             $this->setPrice(Plan::PAS_TAHUNAN_EARLY, $data['early_bird_price']);
             $this->setPrice(Plan::PAS_TAHUNAN, $data['regular_price']);
             $this->setPrice(Plan::PAS_PLUS, $data['plus_price']);
+            $this->setPrice(Plan::PAS_BULANAN, $data['monthly_price']);
+            $this->setPrice(Plan::PAS_PLUS_BULANAN, $data['plus_monthly_price']);
         });
 
         $scheduled = $payments->scheduleWaitingPasses();

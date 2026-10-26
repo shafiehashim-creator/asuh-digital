@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\BillingPeriod;
 use App\Http\Requests\PurchaseRequest;
 use App\Models\Book;
 use App\Models\Order;
+use App\Models\Plan;
 use App\Services\PlusOffer;
 use App\Services\Purchases;
+use App\Services\SubscriptionPlans;
 use App\Support\Money;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,7 +19,7 @@ use InvalidArgumentException;
 
 class PurchaseController extends Controller
 {
-    public function __construct(private Purchases $purchases) {}
+    public function __construct(private Purchases $purchases, private SubscriptionPlans $plans) {}
 
     public function pass(Request $request): View|RedirectResponse
     {
@@ -25,16 +28,15 @@ class PurchaseController extends Controller
             return redirect()->route('preorder.create');
         }
 
-        $plan = $this->purchases->regularPlan();
-        abort_unless($plan, 404);
+        $plans = $this->plans->periods('pass');
+        abort_unless($plans, 404);
 
         $this->rememberForLogin($request, route('purchase.pass'));
 
         return view('purchase.create', [
-            'title' => __('Beli Langganan Tahunan'),
-            'item' => __($plan->name),
-            'price' => Money::short($plan->price_sen),
-            'details' => [__('Semua e-book ASUH Digital selama 12 bulan'), __('Sehingga 4 profil anak'), __('Sekali bayar, tiada caj automatik')],
+            'title' => __('Beli Langganan'),
+            'periods' => $this->periodChoices($plans),
+            'details' => [__('Semua e-book ASUH Digital'), __('Sehingga 4 profil anak'), __('Tiada caj automatik')],
             'note' => $request->user()?->activePass()
                 ? __('Anda masih ada langganan aktif. Langganan baharu bermula sebaik langganan semasa tamat, jadi tiada hari yang hilang.')
                 : null,
@@ -61,6 +63,8 @@ class PurchaseController extends Controller
         abort_unless($offer->available() || ($request->user()?->isStaff() && $offer->plan()), 404);
 
         $plan = $offer->plan();
+        // Staff preview Plus before the videos open: the yearly plan only.
+        $plusPeriods = $this->plans->periods('plus') ?: [BillingPeriod::Yearly->value => $plan];
         $user = $request->user();
         $upgrade = $user ? $offer->upgradablePass($user) : null;
         $upgradePrice = $upgrade ? $offer->upgradePriceSen($upgrade) : null;
@@ -86,9 +90,8 @@ class PurchaseController extends Controller
 
         return view('purchase.create', [
             'title' => __('Beli Langganan Plus'),
-            'item' => __($plan->name),
-            'price' => Money::short($plan->price_sen),
-            'details' => [__('Semua e-book dan video animasi ASUH Digital selama 12 bulan'), __('Sehingga 4 profil anak'), __('Sekali bayar, tiada caj automatik')],
+            'periods' => $this->periodChoices($plusPeriods),
+            'details' => [__('Semua e-book dan video animasi ASUH Digital'), __('Sehingga 4 profil anak'), __('Tiada caj automatik')],
             'note' => $user?->activePass()?->isPlus()
                 ? __('Anda masih ada Langganan Plus aktif. Langganan baharu bermula sebaik langganan semasa tamat, jadi tiada hari yang hilang.')
                 : null,
@@ -160,5 +163,36 @@ class PurchaseController extends Controller
         if (! $request->user()) {
             $request->session()->put('url.intended', $url);
         }
+    }
+
+    /**
+     * The yearly and monthly choices for the checkout, yearly first and
+     * marked as the better deal.
+     *
+     * @param  array<string, Plan>  $plans  keyed by BillingPeriod value
+     * @return list<array{value: string, label: string, price: string, line: string, badge: ?string}>
+     */
+    private function periodChoices(array $plans): array
+    {
+        $yearly = $plans[BillingPeriod::Yearly->value] ?? null;
+        $monthly = $plans[BillingPeriod::Monthly->value] ?? null;
+        $saving = $yearly && $monthly ? SubscriptionPlans::yearlySavingPercent($yearly, $monthly) : 0;
+
+        return array_values(array_filter([
+            $yearly ? [
+                'value' => BillingPeriod::Yearly->value,
+                'label' => __('Tahunan'),
+                'price' => Money::short($yearly->price_sen),
+                'line' => __(':price sebulan · bayar sekali untuk 12 bulan', ['price' => Money::format(intdiv($yearly->price_sen, 12))]),
+                'badge' => $saving > 0 ? __('Paling berbaloi · Jimat :percent%', ['percent' => $saving]) : __('Paling berbaloi'),
+            ] : null,
+            $monthly ? [
+                'value' => BillingPeriod::Monthly->value,
+                'label' => __('Bulanan'),
+                'price' => Money::short($monthly->price_sen),
+                'line' => __('Bayar setiap bulan, berhenti bila-bila masa'),
+                'badge' => null,
+            ] : null,
+        ]));
     }
 }

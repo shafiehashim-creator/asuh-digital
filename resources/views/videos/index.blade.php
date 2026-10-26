@@ -28,6 +28,9 @@
                         <p class="font-semibold text-white/90">{{ __(':price setahun, e-book dan animasi', ['price' => Money::short($plan->price_sen)]) }}</p>
                     @endif
                 </div>
+                @unless (auth()->user()?->canWatchVideos())
+                    <x-monthly-option product="plus" dark align="left" class="mt-3" />
+                @endunless
             </div>
 
             @if ($trailerId)

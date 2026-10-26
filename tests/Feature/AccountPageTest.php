@@ -25,7 +25,7 @@ it('shows an empty account with a call to get the pass', function () {
 
     $this->get('/akaun/langganan')
         ->assertOk()
-        ->assertSee('Anda belum mempunyai Langganan Tahunan yang aktif.')
+        ->assertSee('Anda belum mempunyai langganan yang aktif.')
         ->assertSee('Tiada pesanan lagi.');
 });
 
