@@ -22,6 +22,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 /**
  * Institutions and their licences (Phase D). Licences are set up by hand once
@@ -35,13 +36,17 @@ class InstitutionResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static string|UnitEnum|null $navigationGroup = 'Keluarga dan institusi';
+
+    protected static ?string $navigationLabel = 'Institusi dan lesen';
+
+    protected static ?int $navigationSort = 21;
+
     protected static ?string $modelLabel = 'institusi';
 
     protected static ?string $pluralModelLabel = 'Institusi dan lesen';
 
     protected static ?string $slug = 'institusi';
-
-    protected static ?int $navigationSort = 30;
 
     /** Licences are sales: Super Admin only. */
     public static function canAccess(): bool

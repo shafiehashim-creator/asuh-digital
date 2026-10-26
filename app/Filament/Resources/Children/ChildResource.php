@@ -12,6 +12,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use UnitEnum;
 
 /**
  * Read-only (CLAUDE.md): profiles belong to the parents, who add and delete them.
@@ -22,13 +23,17 @@ class ChildResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFaceSmile;
 
+    protected static string|UnitEnum|null $navigationGroup = 'Keluarga dan institusi';
+
+    protected static ?string $navigationLabel = 'Profil anak';
+
+    protected static ?int $navigationSort = 20;
+
     protected static ?string $modelLabel = 'profil anak';
 
     protected static ?string $pluralModelLabel = 'Profil anak';
 
     protected static ?string $slug = 'profil-anak';
-
-    protected static ?int $navigationSort = 13;
 
     /** Children's data: Super Admin only. */
     public static function canAccess(): bool

@@ -18,6 +18,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use UnitEnum;
 
 /**
  * What the institution submitted stays as sent; the admin only moves the
@@ -31,13 +32,17 @@ class PilotRequestResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'institution_name';
 
+    protected static string|UnitEnum|null $navigationGroup = 'Keluarga dan institusi';
+
+    protected static ?string $navigationLabel = 'Permohonan pilot';
+
+    protected static ?int $navigationSort = 22;
+
     protected static ?string $modelLabel = 'permohonan pilot';
 
     protected static ?string $pluralModelLabel = 'Permohonan pilot';
 
     protected static ?string $slug = 'permohonan-pilot';
-
-    protected static ?int $navigationSort = 30;
 
     /** Sales data: Super Admin only, not editors (CLAUDE.md). */
     public static function canAccess(): bool

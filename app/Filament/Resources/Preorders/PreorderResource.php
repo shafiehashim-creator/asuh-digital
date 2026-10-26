@@ -13,6 +13,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use UnitEnum;
 
 /**
  * Read-only list for the demand test. Status changes happen through
@@ -26,13 +27,17 @@ class PreorderResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static string|UnitEnum|null $navigationGroup = 'Jualan';
+
+    protected static ?string $navigationLabel = 'Pre-order';
+
+    protected static ?int $navigationSort = 13;
+
     protected static ?string $modelLabel = 'pre-order';
 
     protected static ?string $pluralModelLabel = 'Pre-order';
 
     protected static ?string $slug = 'pre-order';
-
-    protected static ?int $navigationSort = 20;
 
     /** Contains buyers' personal data and payments: Super Admin only. */
     public static function canAccess(): bool

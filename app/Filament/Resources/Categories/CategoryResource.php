@@ -15,6 +15,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use UnitEnum;
 
 class CategoryResource extends Resource
 {
@@ -24,13 +25,17 @@ class CategoryResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static string|UnitEnum|null $navigationGroup = 'Kandungan';
+
+    protected static ?string $navigationLabel = 'Kategori';
+
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $modelLabel = 'kategori';
 
     protected static ?string $pluralModelLabel = 'Kategori';
 
     protected static ?string $slug = 'kategori';
-
-    protected static ?int $navigationSort = 2;
 
     public static function canAccess(): bool
     {

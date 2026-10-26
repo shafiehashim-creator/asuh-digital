@@ -20,6 +20,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 /**
  * Orders are financial records: read-only here. They change only through
@@ -33,11 +34,15 @@ class OrderResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'reference';
 
+    protected static string|UnitEnum|null $navigationGroup = 'Jualan';
+
+    protected static ?string $navigationLabel = 'Pesanan';
+
+    protected static ?int $navigationSort = 10;
+
     protected static ?string $modelLabel = 'pesanan';
 
     protected static ?string $pluralModelLabel = 'Pesanan';
-
-    protected static ?int $navigationSort = 10;
 
     protected static ?string $slug = 'pesanan';
 

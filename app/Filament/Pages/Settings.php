@@ -29,6 +29,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
+use UnitEnum;
 
 /**
  * Everything the business said it may "change later": prices, slot limit,
@@ -40,6 +41,8 @@ use Illuminate\Support\HtmlString;
 class Settings extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Sistem';
 
     protected static ?string $navigationLabel = 'Tetapan';
 
