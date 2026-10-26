@@ -24,6 +24,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use UnitEnum;
@@ -143,8 +144,9 @@ class VideoResource extends Resource
                 TextColumn::make('provider')->label('Penyedia')->badge()->color('gray'),
                 TextColumn::make('duration_seconds')->label('Tempoh')->state(fn (Video $record) => $record->durationLabel())->placeholder('-'),
                 TextColumn::make('status')->label('Status')->badge(),
-                TextColumn::make('is_free_sample')->label('Percuma')->badge()
-                    ->state(fn (Video $record) => $record->is_free_sample ? 'Percuma' : null)->color('warning')->placeholder('-'),
+                // Switch straight from the list, no need to open the video.
+                ToggleColumn::make('is_free_sample')->label('Percuma')
+                    ->tooltip('Percuma untuk ditonton di halaman awam'),
                 TextColumn::make('latestReview.status')->label('Semakan syariah')->badge()->placeholder('Belum dihantar'),
             ])
             ->filters([
