@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\VideoProvider;
 use App\Models\Book;
+use App\Models\Category;
 use App\Models\Setting;
 use App\Models\User;
 use App\Models\Video;
@@ -30,8 +31,29 @@ class VideoShowcase
     /** @return Collection<int, Video> */
     public function videos(): Collection
     {
-        return Video::query()->published()->with('book')
+        return Video::query()->published()->with(['book', 'categories'])
             ->orderByDesc('is_free_sample')->latest('published_at')->get();
+    }
+
+    /**
+     * The videos grouped by category, in the categories' admin order, with
+     * free samples first in each; a video in two categories shows in both,
+     * and videos with no category come last (category null).
+     *
+     * @param  Collection<int, Video>  $videos
+     * @return list<array{category: ?Category, videos: \Illuminate\Support\Collection<int, Video>}>
+     */
+    public function byCategory(Collection $videos): array
+    {
+        $groups = $videos->flatMap(fn (Video $video) => $video->categories->isEmpty()
+            ? [[null, $video]]
+            : $video->categories->map(fn ($category) => [$category, $video]))
+            ->groupBy(fn (array $pair) => $pair[0]?->id ?? 0)
+            ->map(fn ($pairs) => ['category' => $pairs[0][0], 'videos' => $pairs->pluck(1)->values()])
+            ->sortBy(fn (array $group) => $group['category'] ? [0, $group['category']->sort_order, $group['category']->name] : [1, 0, ''])
+            ->values();
+
+        return $groups->all();
     }
 
     /** @return Collection<int, Video> */
