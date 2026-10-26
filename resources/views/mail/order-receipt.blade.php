@@ -12,7 +12,7 @@ Bayaran anda telah diterima. Ini resit untuk rekod anda.
 | **Item** | {{ $order->itemName() }} |
 | **Kaedah bayaran** | {{ $order->chip_method?->label() ?? $order->payment_method->getLabel() }} |
 @if ($order->discount_sen > 0)
-| **Diskaun kod sekolah** | −{{ Money::format($order->discount_sen) }} |
+| **{{ $order->discountLabel() }}** | −{{ Money::format($order->discount_sen) }} |
 @endif
 @if ($order->processing_fee_sen > 0)
 | **Harga** | {{ Money::format($order->amount_sen) }} |

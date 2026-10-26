@@ -62,6 +62,7 @@ class Settings extends Page
         'admin_notification_emails',
         'catalog_open', 'preview_pages', 'whatsapp_number', 'videos_open',
         'chip_fee_fpx_fixed', 'chip_fee_fpx_percent', 'chip_fee_ewallet_fixed', 'chip_fee_ewallet_percent',
+        'affiliates_open', 'affiliate_commission_percent', 'affiliate_hold_days', 'affiliate_cookie_days',
     ];
 
     /** @var array<string, mixed> */
@@ -178,6 +179,24 @@ class Settings extends Page
                         ->numeric()->minValue(0)->maxValue(10)->step(0.01)->prefix('RM')->required(),
                     TextInput::make('chip_fee_ewallet_percent')->label('E-wallet: peratus')
                         ->numeric()->minValue(0)->maxValue(5)->step(0.01)->suffix('%')->required(),
+                ]),
+
+            Section::make('Affiliate')
+                ->description('Pemegang akaun memohon di Akaun saya → Affiliate dan admin meluluskan di Jualan → Affiliate. Komisen dikira daripada harga selepas diskaun, tanpa caj pemprosesan.')
+                ->columns(2)
+                ->schema([
+                    Toggle::make('affiliates_open')->label('Buka permohonan affiliate')
+                        ->helperText('Semasa ditutup, menu Affiliate tersembunyi bagi yang belum memohon. Affiliate sedia ada tetap aktif.')
+                        ->columnSpanFull(),
+                    TextInput::make('affiliate_commission_percent')->label('Komisen lalai (%)')
+                        ->helperText('Boleh diubah untuk setiap affiliate.')
+                        ->numeric()->minValue(0)->maxValue(50)->step(0.5)->suffix('%')->required(),
+                    TextInput::make('affiliate_hold_days')->label('Tempoh sebelum komisen boleh dibayar (hari)')
+                        ->helperText('Selepas bayaran pembeli; ikut tempoh bayaran balik.')
+                        ->integer()->minValue(0)->maxValue(90)->required(),
+                    TextInput::make('affiliate_cookie_days')->label('Tempoh pautan diingati (hari)')
+                        ->helperText('Pembelian dalam tempoh ini selepas membuka pautan ?ref= dikira untuk affiliate.')
+                        ->integer()->minValue(1)->maxValue(365)->required(),
                 ]),
 
             Section::make('Pindahan bank')

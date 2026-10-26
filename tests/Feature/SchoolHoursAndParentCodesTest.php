@@ -114,7 +114,7 @@ it('takes the school discount off a Langganan Tahunan and records the school', f
     $institution = Institution::factory()->create(['parent_code' => 'TADIKA-ILMU', 'parent_discount_percent' => 20]);
     $user = User::factory()->create();
 
-    $this->actingAs($user)->get('/beli/langganan')->assertOk()->assertSee('Ada kod sekolah?');
+    $this->actingAs($user)->get('/beli/langganan')->assertOk()->assertSee('Ada kod promosi atau kod sekolah?');
     $this->actingAs($user)->post('/beli/langganan', ['payment_method' => 'chip', 'school_code' => 'tadika-ilmu'])->assertRedirect();
 
     $order = Order::query()->sole();
@@ -132,8 +132,8 @@ it('rejects an unknown school code', function () {
     Setting::set('preorder_slot_limit', 0);
 
     $this->actingAs(User::factory()->create())
-        ->post('/beli/langganan', ['payment_method' => 'chip', 'school_code' => 'TIADA'])
-        ->assertSessionHasErrors('school_code');
+        ->post('/beli/langganan', ['payment_method' => 'chip', 'promo_code' => 'TIADA'])
+        ->assertSessionHasErrors('promo_code');
     expect(Order::query()->count())->toBe(0);
 });
 
@@ -142,9 +142,10 @@ it('does not discount single books', function () {
     $book = Book::factory()->published()->create(['single_price_sen' => 1500]);
 
     $this->actingAs(User::factory()->create())
-        ->post("/beli/buku/{$book->slug}", ['payment_method' => 'chip', 'school_code' => 'TADIKA-ILMU']);
+        ->post("/beli/buku/{$book->slug}", ['payment_method' => 'chip', 'promo_code' => 'TADIKA-ILMU'])
+        ->assertSessionHasErrors(['promo_code' => 'Kod sekolah hanya untuk Langganan Tahunan dan Langganan Plus baharu.']);
 
-    expect(Order::query()->sole()->amount_sen)->toBe(1500);
+    expect(Order::query()->count())->toBe(0);
 });
 
 it('counts family sales per school for the admin', function () {

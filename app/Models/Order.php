@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ChipMethod;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Services\PromoCodes;
 use App\Services\VisitTracker;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +18,7 @@ use Illuminate\Support\Str;
     'reference', 'user_id', 'plan_id', 'book_id', 'amount_sen', 'currency',
     'payment_method', 'status', 'chip_purchase_id', 'bank_receipt_path',
     'confirmed_by', 'confirmed_at', 'paid_at', 'upgrades_pass_id', 'admin_note', 'referral_institution_id', 'discount_sen', 'source', 'medium', 'campaign',
-    'processing_fee_sen', 'chip_method',
+    'processing_fee_sen', 'chip_method', 'coupon_id', 'affiliate_id',
 ])]
 class Order extends Model
 {
@@ -44,6 +45,11 @@ class Order extends Model
             // Sales channel report: where the buyer's visit first came from.
             if ($order->source === null && $order->payment_method !== PaymentMethod::Manual) {
                 $order->fill(app(VisitTracker::class)->attribution());
+            }
+
+            // Affiliate whose ?ref= link brought the buyer (a typed affiliate code is set already).
+            if ($order->affiliate_id === null && $order->payment_method !== PaymentMethod::Manual) {
+                $order->affiliate_id = app(PromoCodes::class)->referredAffiliateId($order->user_id);
             }
         });
     }
@@ -102,6 +108,26 @@ class Order extends Model
     }
 
     /** The school whose parent code gave this order its discount. */
+    public function coupon(): BelongsTo
+    {
+        return $this->belongsTo(Coupon::class);
+    }
+
+    public function affiliate(): BelongsTo
+    {
+        return $this->belongsTo(Affiliate::class);
+    }
+
+    /** "Diskaun SEKOLAH" / "Diskaun RAYA20", for pay pages and receipts. */
+    public function discountLabel(): string
+    {
+        return match (true) {
+            $this->coupon_id !== null => 'Diskaun kod '.$this->coupon?->code,
+            $this->referral_institution_id !== null => 'Diskaun '.($this->referralInstitution?->name ?? 'sekolah'),
+            default => 'Diskaun',
+        };
+    }
+
     public function referralInstitution(): BelongsTo
     {
         return $this->belongsTo(Institution::class, 'referral_institution_id');

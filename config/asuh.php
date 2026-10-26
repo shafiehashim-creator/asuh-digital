@@ -37,6 +37,12 @@ return [
         'chip_fee_fpx_percent' => 0,
         'chip_fee_ewallet_fixed' => 0,
         'chip_fee_ewallet_percent' => 0,
+        // Affiliates: open for applications, default commission, refund window
+        // before a commission is due, and how long a ?ref= link is remembered.
+        'affiliates_open' => false,
+        'affiliate_commission_percent' => 10,
+        'affiliate_hold_days' => 14,
+        'affiliate_cookie_days' => 30,
 
         // Landing page copy
         'landing_headline' => 'Rak buku Islamik digital untuk anak 6–13 tahun',

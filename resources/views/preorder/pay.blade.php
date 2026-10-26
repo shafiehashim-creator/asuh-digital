@@ -55,7 +55,7 @@
                 <div class="flex justify-between gap-4"><dt class="text-ink/80">Item</dt><dd class="font-bold">{{ $order->itemName() }}</dd></div>
                 <div class="flex justify-between gap-4"><dt class="text-ink/80">Kaedah</dt><dd class="font-bold">{{ $order->payment_method->getLabel() }}</dd></div>
                 @if ($order->discount_sen > 0)
-                    <div class="flex justify-between gap-4"><dt class="text-ink/70">Diskaun {{ $order->referralInstitution?->name ?? 'sekolah' }}</dt><dd class="font-semibold text-biru">−{{ Money::format($order->discount_sen) }}</dd></div>
+                    <div class="flex justify-between gap-4"><dt class="text-ink/70">{{ $order->discountLabel() }}</dt><dd class="font-semibold text-biru">−{{ Money::format($order->discount_sen) }}</dd></div>
                 @endif
                 @if ($order->processing_fee_sen > 0)
                     <div class="flex justify-between gap-4"><dt class="text-ink/70">Caj pemprosesan ({{ $order->chip_method?->label() }})</dt><dd class="font-semibold">{{ Money::format($order->processing_fee_sen) }}</dd></div>

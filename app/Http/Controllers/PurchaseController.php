@@ -39,7 +39,7 @@ class PurchaseController extends Controller
                 ? 'Anda masih ada langganan aktif. Langganan baharu bermula sebaik langganan semasa tamat, jadi tiada hari yang hilang.'
                 : null,
             'action' => route('purchase.pass.store'),
-            'schoolCode' => true,
+            'promoCode' => true,
         ]);
     }
 
@@ -93,7 +93,7 @@ class PurchaseController extends Controller
                 ? 'Anda masih ada Langganan Plus aktif. Langganan baharu bermula sebaik langganan semasa tamat, jadi tiada hari yang hilang.'
                 : null,
             'action' => route('purchase.plus.store'),
-            'schoolCode' => true,
+            'promoCode' => true,
         ]);
     }
 
@@ -123,6 +123,7 @@ class PurchaseController extends Controller
             'details' => ['Baca dalam pelayar, di telefon atau tablet', 'Kekal dalam akaun anda selama-lamanya'],
             'note' => null,
             'action' => route('purchase.book.store', $book),
+            'promoCode' => true,
         ]);
     }
 

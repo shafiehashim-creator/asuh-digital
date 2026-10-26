@@ -133,6 +133,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/akaun', [AccountController::class, 'show'])->name('account');
     Route::get('/akaun/langganan', [AccountController::class, 'billing'])->name('account.billing');
     Route::get('/akaun/profil', [AccountController::class, 'profile'])->name('account.profile');
+    Route::get('/akaun/affiliate', [AccountController::class, 'affiliate'])->name('account.affiliate');
+    Route::post('/akaun/affiliate', [AccountController::class, 'applyAffiliate'])->middleware('throttle:10,1')->name('account.affiliate.store');
 
     // Phase C: child profiles are only useful with the catalogue, so they open with it.
     Route::middleware(EnsureCatalogOpen::class)->prefix('/akaun/anak')->name('children.')->controller(ChildController::class)->group(function () {

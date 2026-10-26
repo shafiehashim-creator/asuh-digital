@@ -54,13 +54,13 @@
                 @endif
             </section>
 
-            @if ($schoolCode)
-                {{-- Parents of pupils at a licensed school get its discount. --}}
-                <details class="{{ $cardClass }}" @if (old('school_code') || $errors->has('school_code')) open @endif>
-                    <summary class="cursor-pointer font-display text-lg font-bold text-plum">Ada kod sekolah? Dapatkan diskaun</summary>
+            @if ($promoCode ?? false)
+                {{-- One code per order: a coupon, a school's parent code or an affiliate code. --}}
+                <details class="{{ $cardClass }}" @if (old('promo_code') || $errors->has('promo_code')) open @endif>
+                    <summary class="cursor-pointer font-display text-lg font-bold text-plum">Ada kod promosi atau kod sekolah?</summary>
                     <div class="mt-4">
-                        <x-field name="school_code" label="Kod sekolah" autocomplete="off" class="uppercase"
-                            hint="Diberi oleh tadika atau sekolah anak anda yang menggunakan ASUH Digital. Diskaun dikira pada halaman bayaran." />
+                        <x-field name="promo_code" label="Kod promosi" autocomplete="off" class="uppercase" :value="old('promo_code', request('kod'))"
+                            hint="Kod kupon, kod sekolah daripada tadika atau sekolah anak anda, atau kod rakan affiliate. Satu kod setiap pesanan. Diskaun dikira pada halaman bayaran." />
                     </div>
                 </details>
             @endif

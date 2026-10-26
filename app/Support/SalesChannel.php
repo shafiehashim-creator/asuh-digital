@@ -24,6 +24,10 @@ class SalesChannel
 
     public const SCHOOL = 'Kod sekolah';
 
+    public const AFFILIATE = 'Affiliate';
+
+    public const COUPON = 'Kupon promosi';
+
     public const MANUAL = 'Manual (booth / admin)';
 
     private const SOCIAL_HOSTS = ['facebook', 'fb.', 'instagram', 'tiktok', 'whatsapp', 'wa.me', 't.co', 'x.com', 'twitter', 'youtube', 'youtu.be', 'telegram', 'threads', 'linkedin', 'pinterest'];

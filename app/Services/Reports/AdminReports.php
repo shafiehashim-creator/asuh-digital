@@ -112,6 +112,8 @@ class AdminReports
         return match (true) {
             $order->payment_method === PaymentMethod::Manual => SalesChannel::MANUAL,
             (bool) $order->referral_institution_id => SalesChannel::SCHOOL,
+            (bool) $order->affiliate_id => SalesChannel::AFFILIATE,
+            (bool) $order->coupon_id => SalesChannel::COUPON,
             default => SalesChannel::from($order->source, $order->medium),
         };
     }
