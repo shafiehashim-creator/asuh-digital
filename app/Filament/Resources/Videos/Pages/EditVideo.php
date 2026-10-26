@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Videos\Pages;
 
 use App\Enums\BookStatus;
 use App\Enums\ReviewStatus;
+use App\Enums\VideoProvider;
 use App\Exceptions\BookNotApproved;
 use App\Filament\Resources\Videos\VideoResource;
 use App\Models\Video;
@@ -28,6 +29,20 @@ use InvalidArgumentException;
 class EditVideo extends EditRecord
 {
     protected static string $resource = VideoResource::class;
+
+    /**
+     * The provider id is hidden from serialisation (it must never reach a
+     * public page), so put it back for the editor, as a full YouTube link.
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $id = $this->record->provider_video_id;
+        $data['provider_video_id'] = $this->record->provider === VideoProvider::YouTube
+            ? 'https://www.youtube.com/watch?v='.$id
+            : $id;
+
+        return $data;
+    }
 
     protected function getHeaderActions(): array
     {

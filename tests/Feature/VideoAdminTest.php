@@ -8,6 +8,7 @@ use App\Enums\VideoProvider;
 use App\Exceptions\BookNotApproved;
 use App\Filament\Resources\Videos\Pages\CreateVideo;
 use App\Filament\Resources\Videos\Pages\EditVideo;
+use App\Filament\Resources\Videos\Pages\ListVideos;
 use App\Models\Book;
 use App\Models\User;
 use App\Models\Video;
@@ -96,4 +97,27 @@ it('keeps the provider id out of serialised data', function () {
 
 it('keeps parents out of the video admin', function () {
     $this->actingAs(User::factory()->create())->get('/admin/video')->assertKeptOut();
+});
+
+it('shows the saved YouTube link when editing, so it need not be pasted again', function () {
+    $this->actingAs(User::factory()->admin()->create());
+    $video = Video::factory()->create(['provider' => VideoProvider::YouTube, 'provider_video_id' => 'dQw4w9WgXcQ', 'title' => 'Lama']);
+
+    Livewire::test(EditVideo::class, ['record' => $video->slug])
+        ->assertSchemaStateSet(['provider_video_id' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'])
+        ->fillForm(['title' => 'Baharu'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($video->fresh())->title->toBe('Baharu')->provider_video_id->toBe('dQw4w9WgXcQ');
+});
+
+it('switches a video to free straight from the list', function () {
+    $this->actingAs(User::factory()->admin()->create());
+    $video = Video::factory()->create();
+
+    Livewire::test(ListVideos::class)
+        ->call('updateTableColumnState', 'is_free_sample', (string) $video->getKey(), true);
+
+    expect($video->fresh()->is_free_sample)->toBeTrue();
 });
