@@ -70,6 +70,9 @@
         </div>
     </section>
 
+    {{-- Install as an app (only where the device can) --}}
+    <x-install-app banner class="mx-auto max-w-3xl px-4 pt-6" />
+
     {{-- Numbers --}}
     @if ($statItems)
         <section aria-label="{{ __('ASUH Digital dalam angka') }}" class="border-y-2 border-ink bg-plum text-white">

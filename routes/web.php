@@ -13,6 +13,7 @@ use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\ManifestController;
 use App\Http\Controllers\ParentPinController;
 use App\Http\Controllers\PassPageController;
 use App\Http\Controllers\PilotRequestController;
@@ -35,6 +36,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', LandingController::class)->name('home');
 Route::get('/bahasa/{locale}', [LocaleController::class, 'switch'])->name('locale.switch');
 Route::get('/tentang-kami', [LegalController::class, 'about'])->name('about');
+// Installable app: the manifest (per language, with shortcuts) and how to install it.
+Route::get('/manifest.webmanifest', ManifestController::class)->name('manifest');
+Route::view('/pasang', 'install')->name('install');
 // Phase 2: the animated videos for everyone, with free samples (hidden until the videos open).
 Route::get('/video', VideoPageController::class)->name('videos.index');
 Route::get('/privasi', [LegalController::class, 'privacy'])->name('privacy');

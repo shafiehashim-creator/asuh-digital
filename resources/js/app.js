@@ -4,8 +4,11 @@
 export const images = import.meta.glob(['../images/**/*.webp']);
 
 // Alpine.js for small interactive bits on public pages (CLAUDE.md stack):
-// the music video's play button and the affiliate copy buttons.
+// the music video's play button, the affiliate copy buttons and the
+// "Pasang app" buttons.
 import Alpine from 'alpinejs';
+import { installApp } from './install';
 
 window.Alpine = Alpine;
+Alpine.data('installApp', installApp);
 Alpine.start();

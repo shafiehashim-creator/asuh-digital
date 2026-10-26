@@ -928,6 +928,7 @@ class ComposerStaticInitdd831e7fdde172bdfa9c4bc1ead60323
         'App\\Http\\Controllers\\LandingController' => __DIR__ . '/../..' . '/app/Http/Controllers/LandingController.php',
         'App\\Http\\Controllers\\LegalController' => __DIR__ . '/../..' . '/app/Http/Controllers/LegalController.php',
         'App\\Http\\Controllers\\LocaleController' => __DIR__ . '/../..' . '/app/Http/Controllers/LocaleController.php',
+        'App\\Http\\Controllers\\ManifestController' => __DIR__ . '/../..' . '/app/Http/Controllers/ManifestController.php',
         'App\\Http\\Controllers\\ParentPinController' => __DIR__ . '/../..' . '/app/Http/Controllers/ParentPinController.php',
         'App\\Http\\Controllers\\PassPageController' => __DIR__ . '/../..' . '/app/Http/Controllers/PassPageController.php',
         'App\\Http\\Controllers\\PilotRequestController' => __DIR__ . '/../..' . '/app/Http/Controllers/PilotRequestController.php',

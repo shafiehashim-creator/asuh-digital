@@ -138,6 +138,7 @@ return array(
     'App\\Http\\Controllers\\LandingController' => $baseDir . '/app/Http/Controllers/LandingController.php',
     'App\\Http\\Controllers\\LegalController' => $baseDir . '/app/Http/Controllers/LegalController.php',
     'App\\Http\\Controllers\\LocaleController' => $baseDir . '/app/Http/Controllers/LocaleController.php',
+    'App\\Http\\Controllers\\ManifestController' => $baseDir . '/app/Http/Controllers/ManifestController.php',
     'App\\Http\\Controllers\\ParentPinController' => $baseDir . '/app/Http/Controllers/ParentPinController.php',
     'App\\Http\\Controllers\\PassPageController' => $baseDir . '/app/Http/Controllers/PassPageController.php',
     'App\\Http\\Controllers\\PilotRequestController' => $baseDir . '/app/Http/Controllers/PilotRequestController.php',

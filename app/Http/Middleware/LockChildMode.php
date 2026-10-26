@@ -15,7 +15,8 @@ use Symfony\Component\HttpFoundation\Response;
 class LockChildMode
 {
     /** Route names a child may use. */
-    private const ALLOWED = ['child-mode.*', 'reader.*', 'pupil.*'];
+    // The app manifest is not a page: the installed app needs it in Mod Anak too.
+    private const ALLOWED = ['child-mode.*', 'reader.*', 'pupil.*', 'manifest'];
 
     public function __construct(private ChildMode $childMode) {}
 
