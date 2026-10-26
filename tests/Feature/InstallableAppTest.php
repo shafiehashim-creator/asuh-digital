@@ -79,7 +79,7 @@ it('has a phone menu drawer with the public, family and school links', function 
         ->assertSee(route('pilot.create'))
         ->assertSee('Daftar percuma')
         ->assertDontSee('Keluarga saya')
-        ->assertDontSee(route('purchase.plus'));
+        ->assertDontSee(route('plus.show'));
 
     Setting::set('catalog_open', true);
     Setting::set('videos_open', true);
@@ -89,7 +89,7 @@ it('has a phone menu drawer with the public, family and school links', function 
     $this->get('/')
         ->assertSee('Keluarga saya')
         ->assertSee(route('account.children'))
-        ->assertSee(route('purchase.plus'))
+        ->assertSee(route('plus.show'))
         ->assertSee(route('videos.index'))
         ->assertDontSee('Daftar percuma');
 });

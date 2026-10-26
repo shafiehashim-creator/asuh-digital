@@ -16,7 +16,7 @@
             : null,
         // Phase 2: only once the animated videos are open.
         $videosOpen
-            ? [__('Video'), route('videos.index'), request()->routeIs('videos.*', 'purchase.plus*'), 'M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1m6 4v6l5-3z']
+            ? [__('Video'), route('videos.index'), request()->routeIs('videos.*', 'plus.show', 'purchase.plus*'), 'M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1m6 4v6l5-3z']
             : null,
         auth()->check()
             ? [$isTeacher ? __('Guru') : __('Keluarga'), $isTeacher ? route('teacher.home') : route('account'), request()->routeIs('account', 'account.*', 'children.*', 'preorder.pay', 'preorder.receipt', 'teacher.*'), 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8m-7 9a7 7 0 0 1 14 0']

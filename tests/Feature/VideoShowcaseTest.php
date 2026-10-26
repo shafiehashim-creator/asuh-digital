@@ -58,7 +58,7 @@ it('plays free samples in full but never sends a locked video\'s id', function (
         ->assertDontSee($draft->provider_video_id)
         ->assertSee('Suka? Ada 1 lagi animasi dalam Langganan Plus.')
         ->assertSee('Langgan Plus sekarang')
-        ->assertSee(route('purchase.plus'));
+        ->assertSee('href="'.route('plus.show').'"', false);
 });
 
 it('shows the trailer set by the admin', function () {

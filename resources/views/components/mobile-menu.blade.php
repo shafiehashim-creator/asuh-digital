@@ -17,7 +17,7 @@
             $catalogOpen ? [__('Buku'), route('catalog.index'), request()->routeIs('catalog.*')] : null,
             $videosOpen ? [__('Video animasi'), route('videos.index'), request()->routeIs('videos.*')] : null,
             [__('Langganan Tahunan'), route('pass.show'), request()->routeIs('pass.*')],
-            $plusOpen ? [__('Langganan Plus'), route('purchase.plus'), request()->routeIs('purchase.plus*')] : null,
+            $plusOpen ? [__('Langganan Plus'), route('plus.show'), request()->routeIs('plus.show', 'purchase.plus*')] : null,
             [__('Tentang ASUH'), route('about'), request()->routeIs('about')],
             [__('Soalan lazim'), url('/').'#soalan', false],
             [__('Pasang app'), route('install'), request()->routeIs('install')],
