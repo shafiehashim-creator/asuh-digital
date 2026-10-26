@@ -60,6 +60,15 @@ it('saves a pilot request as new and thanks the institution', function () {
     $this->get(route('pilot.thanks'))->assertSee('Tadika Al-Amin');
 });
 
+it('lets national schools (SK) apply for a pilot', function () {
+    $this->get('/pilot')->assertSee('value="sk"', false)->assertSee('Sekolah Kebangsaan (SK)');
+
+    $this->post('/pilot', pilotForm(['institution_name' => 'SK Taman Melati', 'institution_type' => 'sk']))
+        ->assertRedirect(route('pilot.thanks'));
+
+    expect(PilotRequest::query()->sole()->institution_type)->toBe(InstitutionType::Sk);
+});
+
 it('accepts mobile and office numbers but rejects junk', function (string $phone, bool $valid) {
     $response = $this->post('/pilot', pilotForm(['phone' => $phone]));
 

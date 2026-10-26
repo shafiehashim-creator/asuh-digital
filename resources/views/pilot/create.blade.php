@@ -9,7 +9,7 @@
     <div class="mx-auto max-w-2xl px-4 py-10">
         <h1 class="font-display text-3xl font-extrabold text-magenta sm:text-4xl">{{ __('Mohon pilot percuma untuk institusi anda') }}</h1>
         <p class="mt-3 text-ink/80">
-            {!! __('Untuk tadika, sekolah rendah agama, KAFA dan tahfiz. Cuba ASUH Digital bersama murid anda secara percuma selama :days. Isi borang ini dan pasukan kami akan menghubungi anda.', ['days' => '<strong>'.e(__(':count hari', ['count' => $pilotDays])).'</strong>']) !!}
+            {!! __('Untuk tadika, sekolah kebangsaan (SK), sekolah rendah agama, KAFA dan tahfiz. Cuba ASUH Digital bersama murid anda secara percuma selama :days. Isi borang ini dan pasukan kami akan menghubungi anda.', ['days' => '<strong>'.e(__(':count hari', ['count' => $pilotDays])).'</strong>']) !!}
         </p>
 
         <form method="POST" action="{{ route('pilot.store') }}" class="mt-8 space-y-8" novalidate>

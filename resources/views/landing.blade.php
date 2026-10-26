@@ -253,7 +253,7 @@
     <section class="bg-plum text-white">
         <div class="mx-auto flex max-w-6xl flex-col items-start gap-6 px-4 py-14 md:flex-row md:items-center md:justify-between">
             <div class="max-w-2xl">
-                <h2 class="font-display text-3xl font-extrabold">{{ __('Untuk tadika, SRA, KAFA dan tahfiz') }}</h2>
+                <h2 class="font-display text-3xl font-extrabold">{{ __('Untuk tadika, SK, SRA, KAFA dan tahfiz') }}</h2>
                 <p class="mt-3 text-white/90">
                     {!! __('Cuba ASUH Digital bersama murid anda secara percuma selama :days melalui program pilot institusi.', ['days' => '<strong class="text-kuning">'.e(__(':count hari', ['count' => $pilotDays])).'</strong>']) !!}
                 </p>
