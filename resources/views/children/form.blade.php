@@ -66,7 +66,7 @@
                     <label class="mt-4 flex min-h-11 cursor-pointer items-start gap-3">
                         <input type="hidden" name="read_before_watch" value="0">
                         <input type="checkbox" name="read_before_watch" value="1" class="mt-1 size-5 rounded text-biru" @checked(old('read_before_watch', $child->read_before_watch))>
-                        <span><strong>Baca dulu, tonton kemudian.</strong> Animasi sesuatu buku hanya terbuka selepas {{ $editing ? $child->nickname : 'anak' }} membaca buku itu.</span>
+                        <span><strong>Baca dulu, tonton kemudian</strong> (pilihan). Animasi sesuatu buku hanya terbuka selepas {{ $editing ? $child->nickname : 'anak' }} membaca buku itu.</span>
                     </label>
                 </fieldset>
             @endif

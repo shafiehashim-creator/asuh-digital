@@ -111,7 +111,7 @@
                     __('Semua e-book ASUH, ditambah semua video animasi'),
                     __('Disemak syariah sebelum diterbitkan'),
                     __('Had tonton harian yang ibu bapa tetapkan'),
-                    __('"Baca dulu, tonton kemudian": video dibuka selepas anak membaca bukunya'),
+                    __('Pilihan ibu bapa "Baca dulu, tonton kemudian": video dibuka selepas anak membaca bukunya'),
                     __('Tiada iklan dan tiada pautan keluar ke YouTube'),
                     __('Sehingga 4 profil anak, sekali bayar setahun'),
                 ] as $point)

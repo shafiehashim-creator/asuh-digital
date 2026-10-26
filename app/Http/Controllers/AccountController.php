@@ -7,6 +7,7 @@ use App\Enums\Badge;
 use App\Http\Middleware\EnsureCatalogOpen;
 use App\Models\Book;
 use App\Models\ChildBadge;
+use App\Models\ReadingSession;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\Affiliates;
@@ -80,6 +81,20 @@ class AccountController extends Controller
             'from' => $from,
             'weeks' => $user->children()->with('badges')->get()->map(fn ($child) => $this->progress->between($child, $from, $to)),
             'allBadges' => Badge::cases(),
+        ]);
+    }
+
+    /** The how-to for parents: a picture of each step and the family's own checklist. */
+    public function guide(Request $request): View
+    {
+        $user = $request->user();
+        $children = $user->children()->get();
+
+        return $this->page('account.guide', $user, [
+            'children' => $children,
+            'hasPin' => $user->hasParentPin(),
+            'hasRead' => $children->isNotEmpty() && ReadingSession::query()->whereIn('child_id', $children->modelKeys())->exists(),
+            'videosOpen' => $this->plus->available(),
         ]);
     }
 
