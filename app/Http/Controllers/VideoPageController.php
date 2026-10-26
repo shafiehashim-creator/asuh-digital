@@ -19,6 +19,7 @@ class VideoPageController extends Controller
 
         return view('videos.index', [
             'videos' => $videos,
+            'groups' => $showcase->byCategory($videos),
             'lockedCount' => $videos->where('is_free_sample', false)->count(),
             'trailerId' => $showcase->trailerId(),
             'cta' => $showcase->cta($user),

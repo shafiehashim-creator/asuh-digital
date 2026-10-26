@@ -1,4 +1,4 @@
-@props(['embed' => null, 'title', 'thumb' => null, 'duration' => null, 'endCta' => null])
+@props(['embed' => null, 'title', 'thumb' => null, 'duration' => null, 'endCta' => null, 'free' => false])
 
 {{--
     One animated video on a public page (Phase 2). A free sample (or the
@@ -23,6 +23,9 @@
                 <img src="{{ $cover }}" alt="" loading="lazy" class="absolute inset-0 h-full w-full object-cover">
             @endif
             <span class="absolute inset-0 bg-gradient-to-t from-plum/90 via-plum/30 to-transparent" aria-hidden="true"></span>
+            @if ($free)
+                <span class="absolute top-3 left-3 rounded-full border-2 border-ink bg-white px-2 py-0.5 text-xs font-extrabold text-biru">▶ {{ __('Percuma') }}</span>
+            @endif
             <span class="relative flex size-16 items-center justify-center rounded-full border-4 border-ink bg-kuning text-3xl text-ink shadow-[0_4px_0_var(--color-ink)] transition group-hover:scale-105" aria-hidden="true">▶</span>
             <span class="sr-only">{{ __('Mainkan video') }}: {{ $title }}</span>
             @if ($duration)

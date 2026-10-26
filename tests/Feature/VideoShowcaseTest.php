@@ -3,6 +3,7 @@
 use App\Enums\AgeGroup;
 use App\Enums\Role;
 use App\Models\Book;
+use App\Models\Category;
 use App\Models\Order;
 use App\Models\Pass;
 use App\Models\Plan;
@@ -106,4 +107,24 @@ it('lets the admin mark a video as a free sample', function () {
     expect($video->fresh()->is_free_sample)->toBeFalse();
     $video->update(['is_free_sample' => true]);
     expect(Video::query()->freeSample()->pluck('id')->all())->toBe([$video->id]);
+});
+
+it('groups the videos by category, free and Plus together', function () {
+    $prophets = Category::query()->where('slug', 'kisah-nabi')->sole();
+    $manners = Category::query()->where('slug', 'akhlak')->sole();
+    $prophets->update(['sort_order' => 1]);
+    $manners->update(['sort_order' => 2]);
+
+    $free = Video::factory()->published()->create(['title' => 'Nabi Percuma', 'is_free_sample' => true]);
+    $free->categories()->attach($prophets);
+    $locked = Video::factory()->published()->create(['title' => 'Nabi Berkunci']);
+    $locked->categories()->attach($prophets);
+    Video::factory()->published()->create(['title' => 'Akhlak Berkunci'])->categories()->attach($manners);
+    Video::factory()->published()->create(['title' => 'Tanpa Kategori']);
+
+    $this->get('/video')->assertOk()
+        ->assertSee('href="#kategori-kisah-nabi"', false)
+        ->assertSeeInOrder(['id="kategori-kisah-nabi"', 'Nabi Percuma', 'Nabi Berkunci', 'id="kategori-akhlak"', 'Akhlak Berkunci', 'id="kategori-lain"', 'Tanpa Kategori'], false)
+        ->assertSee('1 percuma · 1 dalam Langganan Plus')
+        ->assertDontSee($locked->provider_video_id);
 });
