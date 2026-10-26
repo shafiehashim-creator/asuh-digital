@@ -144,6 +144,7 @@ return array(
     'App\\Http\\Controllers\\ParentPinController' => $baseDir . '/app/Http/Controllers/ParentPinController.php',
     'App\\Http\\Controllers\\PassPageController' => $baseDir . '/app/Http/Controllers/PassPageController.php',
     'App\\Http\\Controllers\\PilotRequestController' => $baseDir . '/app/Http/Controllers/PilotRequestController.php',
+    'App\\Http\\Controllers\\PlusPageController' => $baseDir . '/app/Http/Controllers/PlusPageController.php',
     'App\\Http\\Controllers\\PreorderController' => $baseDir . '/app/Http/Controllers/PreorderController.php',
     'App\\Http\\Controllers\\PreviewController' => $baseDir . '/app/Http/Controllers/PreviewController.php',
     'App\\Http\\Controllers\\PupilAccessController' => $baseDir . '/app/Http/Controllers/PupilAccessController.php',

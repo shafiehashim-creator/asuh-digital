@@ -90,7 +90,7 @@ class VideoShowcase
 
         return [
             'label' => $user && $this->offer->upgradablePass($user) ? __('Naik taraf ke Langganan Plus') : __('Langgan Plus sekarang'),
-            'url' => route('purchase.plus'),
+            'url' => route('plus.show'),
         ];
     }
 }

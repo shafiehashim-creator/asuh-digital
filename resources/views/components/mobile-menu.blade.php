@@ -17,7 +17,7 @@
             $catalogOpen ? [__('Buku'), route('catalog.index'), request()->routeIs('catalog.*')] : null,
             $videosOpen ? [__('Video animasi'), route('videos.index'), request()->routeIs('videos.*')] : null,
             [__('Langganan Tahunan'), route('pass.show'), request()->routeIs('pass.*')],
-            $plusOpen ? [__('Langganan Plus'), route('purchase.plus'), request()->routeIs('purchase.plus*')] : null,
+            $plusOpen ? [__('Langganan Plus'), route('plus.show'), request()->routeIs('plus.show', 'purchase.plus*')] : null,
             [__('Tentang ASUH'), route('about'), request()->routeIs('about')],
             [__('Soalan lazim'), url('/').'#soalan', false],
             [__('Pasang app'), route('install'), request()->routeIs('install')],
@@ -35,7 +35,7 @@
     ]);
 @endphp
 
-<div x-data="{ open: false }" x-on:open-menu.window="open = true" x-on:keydown.escape.window="open = false" class="md:hidden">
+<div x-data="{ open: false }" x-on:open-menu.window="open = true" x-on:keydown.escape.window="open = false" class="lg:hidden">
     <div x-show="open" x-cloak x-transition.opacity class="fixed inset-0 z-50 bg-ink/50 backdrop-blur-sm" @click="open = false" aria-hidden="true"></div>
 
     <aside x-show="open" x-cloak

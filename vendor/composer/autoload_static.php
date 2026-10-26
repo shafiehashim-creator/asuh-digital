@@ -934,6 +934,7 @@ class ComposerStaticInitdd831e7fdde172bdfa9c4bc1ead60323
         'App\\Http\\Controllers\\ParentPinController' => __DIR__ . '/../..' . '/app/Http/Controllers/ParentPinController.php',
         'App\\Http\\Controllers\\PassPageController' => __DIR__ . '/../..' . '/app/Http/Controllers/PassPageController.php',
         'App\\Http\\Controllers\\PilotRequestController' => __DIR__ . '/../..' . '/app/Http/Controllers/PilotRequestController.php',
+        'App\\Http\\Controllers\\PlusPageController' => __DIR__ . '/../..' . '/app/Http/Controllers/PlusPageController.php',
         'App\\Http\\Controllers\\PreorderController' => __DIR__ . '/../..' . '/app/Http/Controllers/PreorderController.php',
         'App\\Http\\Controllers\\PreviewController' => __DIR__ . '/../..' . '/app/Http/Controllers/PreviewController.php',
         'App\\Http\\Controllers\\PupilAccessController' => __DIR__ . '/../..' . '/app/Http/Controllers/PupilAccessController.php',

@@ -300,7 +300,7 @@ class AdminReports
     {
         $visits = $this->visits($period);
         $visitors = (clone $visits)->distinct()->count('visitor');
-        $sawOffer = (clone $visits)->where(fn ($q) => $q->whereIn('route', ['pass.show', 'catalog.show', 'purchase.pass', 'purchase.plus', 'purchase.book', 'preorder.create']))
+        $sawOffer = (clone $visits)->where(fn ($q) => $q->whereIn('route', ['pass.show', 'plus.show', 'catalog.show', 'purchase.pass', 'purchase.plus', 'purchase.book', 'preorder.create']))
             ->distinct()->count('visitor');
         $checkout = Order::query()->whereBetween('created_at', $period->range())->where('payment_method', '!=', PaymentMethod::Manual)->distinct()->count('user_id');
         $paid = $this->paid($period)->where('payment_method', '!=', PaymentMethod::Manual)->distinct()->count('user_id');
