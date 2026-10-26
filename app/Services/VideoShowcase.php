@@ -78,7 +78,7 @@ class VideoShowcase
 
     /**
      * The next step for this visitor: watch in Mod Anak with Plus, upgrade a
-     * Langganan Tahunan, or subscribe.
+     * Langganan Tahunan, or subscribe (or sign up to hear when Plus opens).
      *
      * @return array{label: string, url: string}
      */
@@ -86,6 +86,10 @@ class VideoShowcase
     {
         if ($user?->canWatchVideos()) {
             return ['label' => __('Tonton dalam Mod Anak'), 'url' => route('account.children')];
+        }
+
+        if (! $this->offer->onSale()) {
+            return ['label' => __('Beritahu saya bila Plus dibuka'), 'url' => route('plus.show').'#beritahu'];
         }
 
         return [

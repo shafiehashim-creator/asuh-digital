@@ -6,7 +6,8 @@
     // Early bird first; once its slots are gone the regular pass is sold instead.
     $earlyBird = $offer->earlyBird();
     $onSale = $offer->available();
-    $checkoutUrl = $offer->checkoutUrl();
+    // Buttons lead to the sales page first; checkout starts from there.
+    $checkoutUrl = route('pass.show');
     $ctaLabel = $offer->ctaLabel();
     $pilotUrl = Route::has('pilot.create') ? route('pilot.create') : null;
 

@@ -32,7 +32,7 @@
         $monthlyPass !== null && $monthlyPass->ends_at->lessThan(now()->addDays(7)) => ['Langganan bulanan hampir tamat', 'Perbaharui untuk sebulan lagi, atau pilih tahunan untuk lebih jimat.', $monthlyPass->isPlus() ? route('purchase.plus') : route('purchase.pass'), 'Perbaharui'],
         $monthlyPass !== null => null,
         $plusUpgradePrice !== null => ['Baharu: video animasi', 'Naik taraf ke Langganan Plus. Bayar beza harga untuk baki langganan sahaja.', route('purchase.plus'), 'Naik taraf · '.Money::short($plusUpgradePrice)],
-        $activePass === null && $pendingPass === null => ['Buka semua buku', 'Langganan Tahunan membuka semua e-book ASUH untuk semua anak anda.', route('purchase.pass'), 'Lihat langganan'],
+        $activePass === null && $pendingPass === null => ['Buka semua buku', 'Langganan Tahunan membuka semua e-book ASUH untuk semua anak anda.', route('pass.show'), 'Lihat langganan'],
         $activePass !== null && $activePass->ends_at->lessThan(now()->addDays(60)) => ['Langganan hampir tamat', 'Perbaharui sekarang. Langganan baharu bermula sebaik langganan semasa tamat.', route('purchase.pass'), 'Perbaharui'],
         default => null,
     };

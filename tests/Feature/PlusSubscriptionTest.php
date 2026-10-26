@@ -27,6 +27,7 @@ beforeEach(function () {
 function openPlus(int $priceSen = 15900): Plan
 {
     Setting::set('videos_open', true);
+    Setting::set('plus_sales_open', true);
     $plan = Plan::findByCode(Plan::PAS_PLUS);
     $plan->update(['price_sen' => $priceSen]);
 
@@ -60,6 +61,7 @@ it('keeps Langganan Plus off sale until the videos open and it has a price', fun
     $this->get('/beli/langganan-plus')->assertNotFound();
 
     Setting::set('videos_open', true);
+    Setting::set('plus_sales_open', true);
     $this->get('/beli/langganan-plus')->assertNotFound(); // still no price
 
     Setting::set('videos_open', false);

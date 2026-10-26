@@ -91,7 +91,7 @@ class Purchases
      */
     public function upgradeToPlus(User $user, array $input): Order
     {
-        $plan = $this->plusOffer->available() ? $this->plusOffer->plan() : null;
+        $plan = $this->plusOffer->onSale() ? $this->plusOffer->plan() : null;
         $pass = $this->plusOffer->upgradablePass($user);
         $price = $pass ? $this->plusOffer->upgradePriceSen($pass) : null;
 

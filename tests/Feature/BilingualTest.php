@@ -119,7 +119,7 @@ it('has an English line for every text on the public pages', function () {
         'components/layouts/app', 'components/book-card', 'components/shelf-book', 'components/book-cover',
         'components/catalog-preview-notice', 'components/slot-counter', 'components/brand-video',
         'components/video-player', 'components/locale-switch', 'mail/order-receipt',
-        'videos/index', 'components/showcase-video', 'install', 'components/install-app', 'components/mobile-menu', 'components/monthly-option', 'mail/renewal-reminder', 'plus/show', 'components/campaign-bar', 'components/campaign-banner',
+        'videos/index', 'components/showcase-video', 'install', 'components/install-app', 'components/mobile-menu', 'components/monthly-option', 'mail/renewal-reminder', 'plus/show', 'components/campaign-bar', 'components/campaign-banner', 'components/plus-waitlist', 'mail/plus-now-open',
     ])->map(fn ($view) => resource_path("views/{$view}.blade.php"))
         ->merge([
             app_path('Http/Controllers/PurchaseController.php'),
@@ -134,6 +134,8 @@ it('has an English line for every text on the public pages', function () {
             app_path('Mail/RenewalReminder.php'),
             app_path('Enums/BillingPeriod.php'),
             app_path('Http/Controllers/PlusPageController.php'),
+            app_path('Http/Controllers/PlusWaitlistController.php'),
+            app_path('Mail/PlusNowOpen.php'),
         ]);
 
     $missing = [];

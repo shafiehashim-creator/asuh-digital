@@ -13,6 +13,7 @@ beforeEach(function () {
     $this->seed(PlanSeeder::class);
     Setting::set('catalog_open', true);
     Setting::set('videos_open', true);
+    Setting::set('plus_sales_open', true);
     Plan::findByCode(Plan::PAS_PLUS)->update(['price_sen' => 14900]);
 });
 

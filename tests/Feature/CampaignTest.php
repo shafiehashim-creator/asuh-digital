@@ -137,6 +137,7 @@ it('sells the early bird only inside an early bird campaign, the normal price be
 it('sells Langganan Plus at the campaign price while it runs, for new and upgrading families', function () {
     Setting::set('catalog_open', true);
     Setting::set('videos_open', true);
+    Setting::set('plus_sales_open', true);
     Plan::findByCode(Plan::PAS_PLUS)->update(['price_sen' => 14900]);
     campaign(['title' => 'Promosi Plus', 'offer' => CampaignOffer::PlusPromo, 'promo_price_sen' => 12900, 'ends_at' => now()->addDays(5)]);
 

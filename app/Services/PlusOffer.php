@@ -6,6 +6,7 @@ use App\Models\Pass;
 use App\Models\Plan;
 use App\Models\Setting;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 
 /**
  * Langganan Plus (Phase 2): e-books and the animated videos. On sale once
@@ -40,9 +41,27 @@ class PlusOffer
         return $plan && $this->priceSen() < $plan->price_sen ? $plan->price_sen : null;
     }
 
+    /** Shown to the public: the videos are open and Plus has a price. */
     public function available(): bool
     {
         return (bool) Setting::get('videos_open') && $this->plan() !== null;
+    }
+
+    /**
+     * Sold, not only shown. While the admin holds sales back, the sales page
+     * takes "Beritahu saya" sign-ups and points families to the yearly plan.
+     */
+    public function onSale(): bool
+    {
+        return $this->available() && (bool) Setting::get('plus_sales_open');
+    }
+
+    /** The opening date announced on the sales page while Plus is not sold yet. */
+    public function opensOn(): ?CarbonImmutable
+    {
+        $date = Setting::get('plus_opens_on');
+
+        return filled($date) ? CarbonImmutable::parse($date)->startOfDay() : null;
     }
 
     /** The subscription a family would upgrade: the current one, or one waiting for the launch date. */

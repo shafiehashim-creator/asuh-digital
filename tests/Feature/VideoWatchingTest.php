@@ -21,6 +21,7 @@ beforeEach(function () {
     $this->seed(PlanSeeder::class);
     Setting::set('catalog_open', true);
     Setting::set('videos_open', true);
+    Setting::set('plus_sales_open', true);
 });
 
 function childWithPlan(string $code = Plan::PAS_PLUS, array $child = []): Child

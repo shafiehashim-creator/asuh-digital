@@ -41,6 +41,7 @@ it('explains the video controls once the videos open, with read first as an opti
     $this->get(route('account.guide'))->assertDontSee('Video animasi dan kawalan menonton');
 
     Setting::set('videos_open', true);
+    Setting::set('plus_sales_open', true);
     Plan::findByCode(Plan::PAS_PLUS)->update(['price_sen' => 14900]);
 
     $this->get(route('account.guide'))

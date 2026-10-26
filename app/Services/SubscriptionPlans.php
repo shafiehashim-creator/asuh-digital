@@ -21,7 +21,7 @@ class SubscriptionPlans
 
     public function plus(BillingPeriod $period): ?Plan
     {
-        if (! Setting::get('videos_open')) {
+        if (! Setting::get('videos_open') || ! Setting::get('plus_sales_open')) {
             return null;
         }
 
