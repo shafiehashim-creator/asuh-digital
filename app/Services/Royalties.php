@@ -23,7 +23,8 @@ use Illuminate\Support\Collection;
  * - The pool is a percentage of that revenue, split between books by reads.
  *   A read is one family child reading a book for at least N minutes in the
  *   month, counted once (pupils on school licences are not in the pool).
- * - Single e-book sales earn their own percentage of the price.
+ * - Single e-book sales earn a percentage of the price: the book's own
+ *   rate when its contract differs, else the default in settings.
  * - Each book's royalty goes to its contributors by their share (%).
  */
 class Royalties
@@ -31,7 +32,7 @@ class Royalties
     /**
      * @return array{
      *     month: Carbon, pool_percent: float, revenue_sen: int, pool_sen: int, reads: int,
-     *     books: Collection<int, array{book: Book, reads: int, share: float, pool_sen: int, single_sales_sen: int, single_sen: int, total_sen: int, shares_ok: bool}>,
+     *     books: Collection<int, array{book: Book, reads: int, share: float, pool_sen: int, single_sales_sen: int, single_sen: int, single_rate: float, total_sen: int, shares_ok: bool}>,
      *     contributors: Collection<int, array{name: string, role: string, bank: string, books: int, total_sen: int}>,
      * }
      */
@@ -58,7 +59,8 @@ class Royalties
                 $share = $totalReads ? $bookReads / $totalReads : 0;
                 $fromPool = (int) round($pool * $share);
                 $singleSales = (int) ($singles[$book->id] ?? 0);
-                $fromSingles = (int) round($singleSales * $singlePercent / 100);
+                $rate = $book->royalty_single_percent ?? $singlePercent;
+                $fromSingles = (int) round($singleSales * $rate / 100);
 
                 return [
                     'book' => $book,
@@ -67,6 +69,7 @@ class Royalties
                     'pool_sen' => $fromPool,
                     'single_sales_sen' => $singleSales,
                     'single_sen' => $fromSingles,
+                    'single_rate' => $rate,
                     'total_sen' => $fromPool + $fromSingles,
                     // Shares should add up to 100%, or part of the royalty has no payee.
                     'shares_ok' => abs($book->contributors->sum('pivot.share_percent') - 100) < 0.01,

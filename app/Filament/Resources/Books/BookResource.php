@@ -14,6 +14,7 @@ use App\Filament\Resources\Books\RelationManagers\ContributorsRelationManager;
 use App\Filament\Resources\Books\RelationManagers\ReviewsRelationManager;
 use App\Models\Book;
 use App\Models\BookFile;
+use App\Models\Setting;
 use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
@@ -96,6 +97,11 @@ class BookResource extends Resource
                             ->numeric()->minValue(0)->step(0.01)->prefix('RM')
                             ->formatStateUsing(fn ($state) => filled($state) ? number_format($state / 100, 2, '.', '') : null)
                             ->dehydrateStateUsing(fn ($state) => filled($state) ? (int) round(((float) $state) * 100) : null),
+                        // Contracts are financial: Super Admin only.
+                        TextInput::make('royalty_single_percent')->label('Kadar royalti khas jualan single (%)')
+                            ->helperText(fn () => 'Kosongkan untuk guna kadar lalai ('.rtrim(rtrim(number_format((float) Setting::get('royalty_single_percent'), 2), '0'), '.').'%) di Tetapan → Royalti.')
+                            ->numeric()->minValue(0)->maxValue(100)->step(0.5)->suffix('%')
+                            ->visible(fn () => auth()->user()?->isAdmin() ?? false),
                         Textarea::make('synopsis')->label('Sinopsis')->required()->rows(5)->maxLength(3000)->columnSpanFull(),
                     ]),
 

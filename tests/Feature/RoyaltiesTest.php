@@ -102,6 +102,23 @@ it('splits the pool by reads, adds single sales and pays contributors by share',
         ->and($people['Penulis A']['role'])->toBe('Penulis');
 });
 
+it('uses a book\'s own single royalty rate when its contract differs', function () {
+    $special = Book::factory()->published()->create(['royalty_single_percent' => 25]);
+    $normal = Book::factory()->published()->create();
+    foreach ([$special, $normal] as $book) {
+        Order::factory()->create(['book_id' => $book->id, 'plan_id' => null, 'amount_sen' => 990, 'status' => OrderStatus::Paid, 'paid_at' => '2027-03-05']);
+    }
+
+    $rows = app(Royalties::class)->forMonth($this->month)['books']->keyBy(fn ($r) => $r['book']->id);
+
+    expect($rows[$special->id]['single_sen'])->toBe(248) // 25% of RM9.90
+        ->and($rows[$normal->id]['single_sen'])->toBe(99); // the 10% default
+
+    // Only Super Admins see and set the rate on the book form.
+    $this->actingAs(User::factory()->admin()->create())->get("/admin/buku/{$special->slug}/edit")->assertSee('Kadar royalti khas jualan single');
+    $this->actingAs(User::factory()->role(Role::Editor)->create())->get("/admin/buku/{$special->slug}/edit")->assertDontSee('Kadar royalti khas jualan single');
+});
+
 it('shows the report and downloads CSV for Super Admins only', function () {
     paidPass(Plan::PAS_TAHUNAN, 9900, now()->subMonths(2)->toDateString());
     $book = Book::factory()->published()->create(['title' => 'Kisah Semut']);

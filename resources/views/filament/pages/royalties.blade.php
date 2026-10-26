@@ -31,7 +31,7 @@
         <p style="margin-top: .75rem; font-size: .8125rem; opacity: .75; max-width: 60rem;">
             Pendapatan langganan diagihkan ikut hari: RM99 setahun dikira lebih kurang RM8.25 sebulan, bukan RM99 pada bulan dibayar. Untuk Langganan Plus, hanya bahagian e-book dikira.
             Satu bacaan = seorang anak keluarga membaca buku itu sekurang-kurangnya {{ App\Models\Setting::get('royalty_min_minutes') }} minit dalam bulan tersebut (murid lesen sekolah tidak dikira).
-            Jualan e-book single: {{ rtrim(rtrim(number_format((float) App\Models\Setting::get('royalty_single_percent'), 2), '0'), '.') }}% daripada harga. Kadar lalai diubah di Tetapan → Royalti.
+            Jualan e-book single: {{ rtrim(rtrim(number_format((float) App\Models\Setting::get('royalty_single_percent'), 2), '0'), '.') }}% daripada harga. Kadar lalai diubah di Tetapan → Royalti; kadar khas setiap buku di halaman buku.
         </p>
     </x-filament::section>
 
@@ -86,7 +86,12 @@
                                 <td style="{{ $num }}">{{ number_format($row['share'], 1) }}%</td>
                                 <td style="{{ $num }}">{{ Money::format($row['pool_sen']) }}</td>
                                 <td style="{{ $num }}">{{ Money::format($row['single_sales_sen']) }}</td>
-                                <td style="{{ $num }}">{{ Money::format($row['single_sen']) }}</td>
+                                <td style="{{ $num }}">
+                                    {{ Money::format($row['single_sen']) }}
+                                    @if ($row['single_sales_sen'] > 0)
+                                        <div style="font-size: .75rem; opacity: .7;">{{ rtrim(rtrim(number_format($row['single_rate'], 2), '0'), '.') }}%@if ($row['book']->royalty_single_percent !== null) (khas)@endif</div>
+                                    @endif
+                                </td>
                                 <td style="{{ $num }} font-weight: 700;">{{ Money::format($row['total_sen']) }}</td>
                             </tr>
                         @endforeach

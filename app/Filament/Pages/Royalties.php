@@ -70,10 +70,10 @@ class Royalties extends Page
     {
         return [
             Action::make('csvBooks')->label('CSV ikut buku')->icon(Heroicon::OutlinedArrowDownTray)->color('gray')
-                ->action(fn () => $this->csv('buku', ['Buku', 'Penulis', 'Bacaan', 'Bahagian (%)', 'Royalti langganan (RM)', 'Jualan single (RM)', 'Royalti single (RM)', 'Jumlah royalti (RM)'],
+                ->action(fn () => $this->csv('buku', ['Buku', 'Penulis', 'Bacaan', 'Bahagian (%)', 'Royalti langganan (RM)', 'Jualan single (RM)', 'Kadar single (%)', 'Royalti single (RM)', 'Jumlah royalti (RM)'],
                     fn (array $r) => $r['books']->map(fn ($b) => [
                         $b['book']->title, $b['book']->author, $b['reads'], number_format($b['share'], 2),
-                        Money::plain($b['pool_sen']), Money::plain($b['single_sales_sen']), Money::plain($b['single_sen']), Money::plain($b['total_sen']),
+                        Money::plain($b['pool_sen']), Money::plain($b['single_sales_sen']), $b['single_rate'], Money::plain($b['single_sen']), Money::plain($b['total_sen']),
                     ]))),
             Action::make('csvContributors')->label('CSV ikut penerima')->icon(Heroicon::OutlinedArrowDownTray)
                 ->action(fn () => $this->csv('penerima', ['Nama', 'Peranan', 'Akaun bank', 'Bilangan buku', 'Royalti (RM)'],
