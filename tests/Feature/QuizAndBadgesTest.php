@@ -258,7 +258,7 @@ it('shows earned and locked badges to the child', function () {
     ChildBadge::query()->create(['child_id' => $child->id, 'badge' => Badge::FirstQuiz, 'awarded_at' => now()]);
     startChildMode($child);
 
-    $this->get('/mod-anak')->assertSee('Lencana saya')->assertSee('1 / 6');
+    $this->get('/mod-anak')->assertSee('Lencana saya')->assertSee('1 / 7');
     $this->get('/mod-anak/lencana')->assertOk()
         ->assertSee('Kuiz Pertama')
         ->assertSee('Diperoleh')

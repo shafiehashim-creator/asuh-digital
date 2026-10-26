@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Services\Affiliates;
 use App\Services\FamilyProgress;
 use App\Services\PlusOffer;
+use App\Services\RewardPromises;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -79,7 +80,8 @@ class AccountController extends Controller
 
         return $this->page('account.progress', $user, [
             'from' => $from,
-            'weeks' => $user->children()->with('badges')->get()->map(fn ($child) => $this->progress->between($child, $from, $to)),
+            'weeks' => $user->children()->with('badges', 'rewardPromises')->get()->map(fn ($child) => $this->progress->between($child, $from, $to)),
+            'promises' => app(RewardPromises::class),
             'allBadges' => Badge::cases(),
         ]);
     }

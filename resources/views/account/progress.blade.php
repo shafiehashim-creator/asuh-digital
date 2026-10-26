@@ -1,4 +1,8 @@
 <x-layouts.account title="Pencapaian" heading="Pencapaian" :intro="'Bacaan minggu ini (sejak Isnin, '.$from->translatedFormat('j M').') dan lencana setiap anak.'" :$activePass :$pendingPass :$shelfOpen :$plusUpgradePrice>
+    @if ($message = ['promise-saved' => 'Janji ganjaran disimpan.', 'promise-fulfilled' => 'Alhamdulillah, janji ditunaikan.', 'promise-deleted' => 'Janji dipadam.'][session('status')] ?? null)
+        <p role="status" class="rounded-2xl bg-biru/10 px-4 py-3 text-sm font-bold text-biru">{{ $message }}</p>
+    @endif
+
     @forelse ($weeks as $week)
         @php
             $child = $week['child'];
@@ -44,6 +48,68 @@
                     </li>
                 @endforeach
             </ul>
+
+            {{-- Reward promises: the parent's own deal with the child --}}
+            @php($bag = 'promise'.$child->id)
+            @php($choices = $promises->promisable($child))
+            <div class="mt-5 rounded-2xl border-2 border-dashed border-oren bg-oren/5 p-4">
+                <h3 class="font-display font-bold">🎁 Janji ganjaran</h3>
+                <p class="text-sm text-ink/75">Janjikan sesuatu kepada {{ $child->nickname }} jika dia mendapat lencana tertentu. Contoh: lencana Seminggu Membaca → aiskrim. {{ $child->nickname }} nampak janji ini dalam Mod Anak, dan kami e-mel anda bila ia tercapai.</p>
+
+                @if ($child->rewardPromises->isNotEmpty())
+                    <ul class="mt-3 space-y-2">
+                        @foreach ($child->rewardPromises->sortBy('fulfilled_at') as $promise)
+                            <li class="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3">
+                                <span class="text-2xl" aria-hidden="true">{{ $promise->badge->emoji() }}</span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block text-sm font-bold">{{ $promise->badge->label() }} → {{ $promise->reward }}</span>
+                                    <span @class(['block text-xs font-bold', 'text-ink/60' => ! $promise->isAchieved(), 'text-magenta' => $promise->isAchieved() && ! $promise->isFulfilled(), 'text-biru' => $promise->isFulfilled()])>
+                                        @if ($promise->isFulfilled())
+                                            ✓ Ditunaikan {{ $promise->fulfilled_at->translatedFormat('j M Y') }}
+                                        @elseif ($promise->isAchieved())
+                                            🎉 Tercapai {{ $promise->achieved_at->translatedFormat('j M Y') }}! Tunaikan janji anda.
+                                        @else
+                                            Dalam usaha: {{ $promise->badge->description() }}
+                                        @endif
+                                    </span>
+                                </span>
+                                @if ($promise->isAchieved() && ! $promise->isFulfilled())
+                                    <form method="POST" action="{{ route('reward-promises.fulfil', $promise) }}">
+                                        @csrf @method('PATCH')
+                                        <button type="submit" class="btn-utama min-h-10 px-4 text-sm">Sudah ditunaikan</button>
+                                    </form>
+                                @endif
+                                @unless ($promise->isFulfilled())
+                                    <form method="POST" action="{{ route('reward-promises.destroy', $promise) }}" onsubmit="return confirm('Padam janji ini?')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="min-h-10 rounded-full px-3 text-sm font-bold text-ink/60 hover:text-magenta">Padam</button>
+                                    </form>
+                                @endunless
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+
+                @if ($choices && $promises->canAddMore($child))
+                    <form method="POST" action="{{ route('reward-promises.store', $child) }}" class="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+                        @csrf
+                        <label class="block text-sm font-bold">Jika {{ $child->nickname }} dapat lencana
+                            <select name="badge" class="input mt-1" required>
+                                @foreach ($choices as $badge)
+                                    <option value="{{ $badge->value }}" @selected(old('badge') === $badge->value)>{{ $badge->emoji() }} {{ $badge->label() }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+                        <label class="block text-sm font-bold">Ganjaran daripada ibu ayah
+                            <input type="text" name="reward" maxlength="120" required placeholder="Contoh: aiskrim, ke taman, buku baharu" value="{{ old('reward') }}" class="input mt-1">
+                        </label>
+                        <button type="submit" class="btn-gelap min-h-11 text-sm">Simpan janji</button>
+                    </form>
+                    @if ($errors->{$bag}->any())
+                        <p class="mt-2 text-sm font-semibold text-magenta">{{ $errors->{$bag}->first() }}</p>
+                    @endif
+                @endif
+            </div>
         </section>
     @empty
         <section class="rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)]">

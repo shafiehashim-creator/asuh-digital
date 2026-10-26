@@ -45,6 +45,11 @@ class Child extends Model
         return $this->hasMany(QuizAttempt::class);
     }
 
+    public function rewardPromises(): HasMany
+    {
+        return $this->hasMany(RewardPromise::class);
+    }
+
     public function badges(): HasMany
     {
         return $this->hasMany(ChildBadge::class)->orderBy('awarded_at');

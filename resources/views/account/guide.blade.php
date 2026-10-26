@@ -150,6 +150,8 @@
                 <li>Anak dapat <strong>lencana</strong> untuk kuiz yang lulus dan membaca beberapa hari berturut-turut, bukan kerana menyelak halaman laju-laju.</li>
             </ul>
             <p class="{{ $tip }}">⭐ Contoh lencana: <strong>Kuiz Pertama</strong>, <strong>Pembaca Rajin</strong> (3 hari berturut-turut) dan <strong>Seminggu Membaca</strong>.</p>
+            <p class="{{ $tip }}">🎁 <strong>Janji ganjaran:</strong> di <strong>Pencapaian</strong>, janjikan hadiah anda sendiri untuk sesuatu lencana (contoh: Seminggu Membaca → aiskrim). Anak nampak janji itu dalam Mod Anak, dan kami e-mel anda bila ia tercapai.</p>
+            <p class="{{ $tip }}">👑 <strong>Pembaca Terbaik ASUH:</strong> setiap bulan, 5 pembaca terbaik bagi umur 6–9 dan 10–13 mendapat ganjaran daripada ASUH. Mata dikira daripada minit membaca (maksimum 60 sehari), hari membaca dan kuiz yang lulus.</p>
         </div>
         <x-guide.phone>
             <p class="font-display text-sm font-bold text-plum">Kuiz: Celak Ajaib</p>
