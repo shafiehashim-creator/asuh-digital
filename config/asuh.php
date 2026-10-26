@@ -54,6 +54,8 @@ return [
         'brand_video_url' => null,
         'brand_video_title' => 'Lagu ASUH: Jom Jadi Baik!',
         'brand_video_places' => ['home', 'about', 'account', 'child_mode'],
+        // Optional YouTube trailer (a montage of the animations) on the public video page.
+        'plus_trailer_url' => null,
 
         // Landing page copy
         'landing_headline' => 'Rak buku Islamik digital untuk anak 6–13 tahun',

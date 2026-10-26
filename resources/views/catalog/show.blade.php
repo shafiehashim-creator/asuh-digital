@@ -100,6 +100,38 @@
             </div>
         </div>
 
+        {{-- Phase 2: the book's animated version (free sample plays, others locked) --}}
+        @if ($videos->isNotEmpty())
+            @php
+                $video = $videos->first();
+                $cta = $showcase->cta(auth()->user());
+                $canWatch = auth()->user()?->canWatchVideos() ?? false;
+            @endphp
+            <section class="mt-12 grid items-center gap-6 rounded-3xl border-2 border-ink bg-lavender p-5 shadow-[0_4px_0_var(--color-ink)] sm:p-8 md:grid-cols-2" aria-labelledby="animation-heading">
+                <x-showcase-video :embed="$showcase->embed($video)" :title="$video->title"
+                    :thumb="$video->thumbnail_path ? Storage::disk('public')->url($video->thumbnail_path) : null"
+                    :duration="$video->durationLabel()"
+                    :end-cta="['text' => __('Suka? Tonton semua animasi ASUH dengan Langganan Plus.'), ...$cta]" />
+                <div class="min-w-0">
+                    <p class="text-sm font-extrabold tracking-wide text-biru uppercase">🎬 {{ __('Ada versi animasi!') }}</p>
+                    <h2 id="animation-heading" class="mt-1 font-display text-2xl font-extrabold text-plum">{{ $video->title }}</h2>
+                    <p class="mt-2 text-ink/80">
+                        @if ($canWatch)
+                            {{ __('Termasuk dalam Langganan Plus anda. Anak boleh menontonnya dalam Mod Anak.') }}
+                        @elseif ($video->is_free_sample)
+                            {{ __('Tonton percuma bersama anak. Animasi lain untuk buku ASUH ada dalam Langganan Plus.') }}
+                        @else
+                            {{ __('Kisah buku ini dalam bentuk animasi, dalam Langganan Plus bersama semua e-book ASUH.') }}
+                        @endif
+                    </p>
+                    <div class="mt-4 flex flex-wrap gap-3">
+                        <a href="{{ $cta['url'] }}" class="btn-utama">{{ $cta['label'] }}</a>
+                        <a href="{{ route('videos.index') }}" class="inline-flex min-h-11 items-center rounded-full border-2 border-ink/20 bg-white px-4 font-bold hover:border-ink">{{ __('Semua video animasi') }}</a>
+                    </div>
+                </div>
+            </section>
+        @endif
+
         @if ($recommended->isNotEmpty())
             <section class="mt-16" aria-labelledby="recommended-heading">
                 <div class="flex flex-wrap items-end justify-between gap-2">

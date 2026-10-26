@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Services\BookRecommendations;
 use App\Services\CatalogStats;
 use App\Services\PassOffer;
+use App\Services\VideoShowcase;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -43,7 +44,7 @@ class CatalogController extends Controller
         ]);
     }
 
-    public function show(Request $request, Book $book, BookRecommendations $recommendations, PassOffer $offer, CatalogStats $stats): View
+    public function show(Request $request, Book $book, BookRecommendations $recommendations, PassOffer $offer, CatalogStats $stats, VideoShowcase $showcase): View
     {
         $user = $request->user();
 
@@ -60,6 +61,9 @@ class CatalogController extends Controller
             'offer' => $offer,
             'bookCount' => $stats->summary()['books'],
             'previewPages' => $book->previewPageCount(),
+            // Phase 2: the book's animated version, once the videos open.
+            'videos' => $showcase->isOpenFor($user) ? $showcase->forBook($book) : collect(),
+            'showcase' => $showcase,
         ]);
     }
 }

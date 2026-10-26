@@ -17,6 +17,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -87,6 +88,9 @@ class VideoResource extends Resource
                             ->relationship('categories', 'name', fn ($query) => $query->orderBy('sort_order'))
                             ->multiple()->preload()->native(false)->columnSpanFull(),
                         Textarea::make('synopsis')->label('Sinopsis')->rows(4)->maxLength(2000)->columnSpanFull(),
+                        Toggle::make('is_free_sample')->label('Percuma untuk ditonton')
+                            ->helperText('Sesiapa boleh menonton video ini sepenuhnya di halaman Video animasi dan halaman buku, untuk menarik ibu bapa melanggan Langganan Plus. Pilih 1–3 video terbaik; video lain kekal dikunci.')
+                            ->columnSpanFull(),
                     ]),
 
                 Section::make('Gambar kecil')
@@ -139,6 +143,8 @@ class VideoResource extends Resource
                 TextColumn::make('provider')->label('Penyedia')->badge()->color('gray'),
                 TextColumn::make('duration_seconds')->label('Tempoh')->state(fn (Video $record) => $record->durationLabel())->placeholder('-'),
                 TextColumn::make('status')->label('Status')->badge(),
+                TextColumn::make('is_free_sample')->label('Percuma')->badge()
+                    ->state(fn (Video $record) => $record->is_free_sample ? 'Percuma' : null)->color('warning')->placeholder('-'),
                 TextColumn::make('latestReview.status')->label('Semakan syariah')->badge()->placeholder('Belum dihantar'),
             ])
             ->filters([
