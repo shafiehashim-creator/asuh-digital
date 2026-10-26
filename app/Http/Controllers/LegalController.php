@@ -22,6 +22,13 @@ class LegalController extends Controller
         ]);
     }
 
+    public function about(): View
+    {
+        return view('about', $this->company() + [
+            'whatsapp' => Setting::get('whatsapp_number'),
+        ]);
+    }
+
     public function refund(): View
     {
         return view('legal.refund', $this->company() + [

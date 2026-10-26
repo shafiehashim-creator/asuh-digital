@@ -31,6 +31,7 @@ use App\Http\Middleware\EnsureInstitutionStaff;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', LandingController::class)->name('home');
+Route::get('/tentang-kami', [LegalController::class, 'about'])->name('about');
 Route::get('/privasi', [LegalController::class, 'privacy'])->name('privacy');
 Route::get('/terma', [LegalController::class, 'terms'])->name('terms');
 Route::get('/polisi-bayaran-balik', [LegalController::class, 'refund'])->name('refund');

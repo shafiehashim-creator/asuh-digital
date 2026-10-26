@@ -64,6 +64,7 @@
             <div class="mx-auto max-w-6xl px-4 py-6 text-sm text-ink/70 md:py-8">
                 <p class="hidden font-display text-base font-bold text-plum md:block">Jom Jadi Baik!</p>
                 <nav aria-label="Maklumat" class="flex flex-wrap gap-x-4 md:my-2">
+                    <a href="{{ route('about') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">Tentang kami</a>
                     <a href="{{ route('privacy') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">Notis privasi</a>
                     <a href="{{ route('terms') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">Terma dan syarat</a>
                     <a href="{{ route('refund') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">Polisi bayaran balik</a>

@@ -96,3 +96,19 @@ it('links both policies from every page footer', function () {
         ->assertSee(route('refund'), false)
         ->assertSee(route('delivery'), false);
 });
+
+it('introduces ASUH with the company details from settings', function () {
+    Setting::set('company_name', 'Galeri Ilmu Sdn. Bhd.');
+    Setting::set('contact_email', 'bantuan@contoh.my');
+    Setting::set('whatsapp_number', '60123456789');
+
+    $this->get('/tentang-kami')
+        ->assertOk()
+        ->assertSee('Tentang kami · ASUH Digital', false)
+        ->assertSee('Galeri Ilmu Sdn. Bhd.')
+        ->assertSee('bantuan@contoh.my')
+        ->assertSee('wa.me/60123456789', false)
+        ->assertSee(route('pilot.create'), false);
+
+    $this->get('/')->assertSee(route('about'), false);
+});
