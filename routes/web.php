@@ -12,6 +12,7 @@ use App\Http\Controllers\ChipPaymentController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LegalController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ParentPinController;
 use App\Http\Controllers\PassPageController;
 use App\Http\Controllers\PilotRequestController;
@@ -31,6 +32,7 @@ use App\Http\Middleware\EnsureInstitutionStaff;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', LandingController::class)->name('home');
+Route::get('/bahasa/{locale}', [LocaleController::class, 'switch'])->name('locale.switch');
 Route::get('/tentang-kami', [LegalController::class, 'about'])->name('about');
 Route::get('/privasi', [LegalController::class, 'privacy'])->name('privacy');
 Route::get('/terma', [LegalController::class, 'terms'])->name('terms');

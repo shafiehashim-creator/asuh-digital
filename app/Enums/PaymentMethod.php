@@ -20,9 +20,9 @@ enum PaymentMethod: string implements HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::Chip => 'FPX / kad / e-wallet (CHIP)',
-            self::BankTransfer => 'Pindahan bank',
-            self::Manual => 'Manual (oleh ASUH)',
+            self::Chip => __('FPX / kad / e-wallet (CHIP)'),
+            self::BankTransfer => __('Pindahan bank'),
+            self::Manual => __('Manual (oleh ASUH)'),
         };
     }
 }

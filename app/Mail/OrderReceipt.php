@@ -25,7 +25,7 @@ class OrderReceipt extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Resit pembayaran '.$this->order->reference.' · ASUH Digital',
+            subject: __('Resit pembayaran :reference', ['reference' => $this->order->reference]).' · ASUH Digital',
             replyTo: array_filter([
                 Setting::get('contact_email') ? new Address(Setting::get('contact_email')) : null,
             ]),

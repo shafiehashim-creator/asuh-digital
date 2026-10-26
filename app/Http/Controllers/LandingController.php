@@ -19,10 +19,10 @@ class LandingController extends Controller
         $catalogOpen = EnsureCatalogOpen::isOpenFor($request->user());
 
         return view('landing', [
-            'headline' => Setting::get('landing_headline'),
-            'subheadline' => Setting::get('landing_subheadline'),
-            'faq' => Setting::get('landing_faq'),
-            'refundPolicy' => Setting::get('refund_policy'),
+            'headline' => Setting::localized('landing_headline'),
+            'subheadline' => Setting::localized('landing_subheadline'),
+            'faq' => Setting::localized('landing_faq'),
+            'refundPolicy' => Setting::localized('refund_policy'),
             'pilotDays' => (int) Setting::get('pilot_duration_days'),
             'passStartRule' => PassStartRule::tryFrom(Setting::get('pass_start_rule')) ?? PassStartRule::OnPayment,
             'offer' => $offer,

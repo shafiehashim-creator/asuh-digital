@@ -4,6 +4,6 @@
 
         <x-field name="password" label="Kata laluan" type="password" autocomplete="current-password" required autofocus />
 
-        <button type="submit" class="btn-utama w-full">Sahkan</button>
+        <button type="submit" class="btn-utama w-full">{{ __('Sahkan') }}</button>
     </form>
 </x-auth-card>

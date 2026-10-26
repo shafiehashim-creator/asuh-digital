@@ -8,50 +8,51 @@
     class="relative aspect-video w-full overflow-hidden rounded-3xl border-2 border-ink bg-ink shadow-[0_4px_0_var(--color-ink)] select-none"
     data-provider="{{ $embed['provider'] }}" data-video-id="{{ $embed['id'] }}" data-embed-url="{{ $embed['url'] }}"
     data-progress-url="{{ $progressUrl }}" data-csrf="{{ csrf_token() }}"
-    data-start="{{ $startAt }}" data-seconds-left="{{ $secondsLeft }}">
+    data-start="{{ $startAt }}" data-seconds-left="{{ $secondsLeft }}"
+    data-label-play="{{ __('Main') }}" data-label-pause="{{ __('Jeda') }}">
 
     <div data-frame class="absolute inset-0 [&_iframe]:h-full [&_iframe]:w-full"></div>
 
     {{-- Taps land here, never on YouTube's own links. --}}
     <div data-cover class="absolute inset-0 cursor-pointer" aria-hidden="true"></div>
 
-    <div data-loading class="absolute inset-0 flex items-center justify-center font-bold text-white">Memuatkan video…</div>
+    <div data-loading class="absolute inset-0 flex items-center justify-center font-bold text-white">{{ __('Memuatkan video…') }}</div>
 
     <button type="button" data-paused hidden class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-plum/90 text-white">
         <span class="flex size-24 items-center justify-center rounded-full border-4 border-ink bg-kuning text-5xl text-ink shadow-[0_4px_0_var(--color-ink)]" aria-hidden="true">▶</span>
-        <span class="font-display text-2xl font-extrabold">Tekan untuk menonton</span>
+        <span class="font-display text-2xl font-extrabold">{{ __('Tekan untuk menonton') }}</span>
     </button>
 
     <div data-ended hidden class="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-plum p-6 text-center text-white">
         <p class="text-5xl" aria-hidden="true">🌟</p>
-        <p class="font-display text-2xl font-extrabold">Tamat! Jom Jadi Baik!</p>
+        <p class="font-display text-2xl font-extrabold">{{ __('Tamat! Jom Jadi Baik!') }}</p>
         <div class="flex flex-wrap justify-center gap-3">
-            <button type="button" data-replay class="btn-utama">Tonton semula</button>
+            <button type="button" data-replay class="btn-utama">{{ __('Tonton semula') }}</button>
             @if ($video?->book && $video->book->isPublished())
-                <a href="{{ route('reader.show', $video->book) }}" class="btn-utama">Baca bukunya</a>
+                <a href="{{ route('reader.show', $video->book) }}" class="btn-utama">{{ __('Baca bukunya') }}</a>
             @endif
             @if ($homeUrl)
-                <a href="{{ $homeUrl }}" class="inline-flex min-h-11 items-center rounded-full border-2 border-white px-5 font-bold">Kembali ke rak</a>
+                <a href="{{ $homeUrl }}" class="inline-flex min-h-11 items-center rounded-full border-2 border-white px-5 font-bold">{{ __('Kembali ke rak') }}</a>
             @endif
         </div>
     </div>
 
     <div data-limit hidden class="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-plum p-6 text-center text-white">
         <p class="text-5xl" aria-hidden="true">⏰</p>
-        <p class="font-display text-2xl font-extrabold">Masa menonton hari ini sudah habis.</p>
-        <p>Jom baca buku pula!</p>
+        <p class="font-display text-2xl font-extrabold">{{ __('Masa menonton hari ini sudah habis.') }}</p>
+        <p>{{ __('Jom baca buku pula!') }}</p>
         @if ($homeUrl)
-            <a href="{{ $homeUrl }}" class="btn-utama">Ke rak buku</a>
+            <a href="{{ $homeUrl }}" class="btn-utama">{{ __('Ke rak buku') }}</a>
         @endif
     </div>
 </div>
 
 <div data-controls class="mt-3 flex items-center gap-3 rounded-full border-2 border-ink bg-white px-3 py-2">
-    <button type="button" data-play class="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-kuning text-xl font-bold shadow-[0_2px_0_var(--color-ink)]" aria-label="Main">▶</button>
-    <label class="sr-only" for="{{ $seekId }}">Kedudukan video</label>
+    <button type="button" data-play class="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-kuning text-xl font-bold shadow-[0_2px_0_var(--color-ink)]" aria-label="{{ __('Main') }}">▶</button>
+    <label class="sr-only" for="{{ $seekId }}">{{ __('Kedudukan video') }}</label>
     <input id="{{ $seekId }}" data-seek type="range" min="0" max="0" value="0" class="h-3 min-w-0 flex-1 accent-biru">
     <span data-time class="shrink-0 font-mono text-sm font-bold">0:00</span>
-    <button type="button" data-fullscreen class="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-ink text-xl" aria-label="Skrin penuh">⛶</button>
+    <button type="button" data-fullscreen class="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-ink text-xl" aria-label="{{ __('Skrin penuh') }}">⛶</button>
 </div>
 </div>
 

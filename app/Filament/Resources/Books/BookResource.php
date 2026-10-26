@@ -86,6 +86,8 @@ class BookResource extends Resource
                     ->columns(2)
                     ->schema([
                         TextInput::make('title')->label('Tajuk')->required()->maxLength(200)->columnSpanFull(),
+                        TextInput::make('title_en')->label('Tajuk (English, pilihan)')->maxLength(200)->columnSpanFull()
+                            ->helperText('Dipaparkan apabila pelawat memilih EN. Kosongkan untuk memaparkan tajuk BM.'),
                         TextInput::make('author')->label('Penulis')->required()->maxLength(150),
                         Select::make('categories')->label('Kategori')
                             ->relationship('categories', 'name', fn ($query) => $query->orderBy('sort_order'))
@@ -103,6 +105,7 @@ class BookResource extends Resource
                             ->numeric()->minValue(0)->maxValue(100)->step(0.5)->suffix('%')
                             ->visible(fn () => auth()->user()?->isAdmin() ?? false),
                         Textarea::make('synopsis')->label('Sinopsis')->required()->rows(5)->maxLength(3000)->columnSpanFull(),
+                        Textarea::make('synopsis_en')->label('Sinopsis (English, pilihan)')->rows(4)->maxLength(3000)->columnSpanFull(),
                     ]),
 
                 Section::make('Kaver')

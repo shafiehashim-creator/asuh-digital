@@ -10,7 +10,7 @@ Rujukan skrin: prototaip ASUH Digital di claude.ai (7 skrin: utama, katalog, hal
 - Jangan push ke `main`, deploy ke server, atau jalankan migrasi di production tanpa pengesahan saya dalam chat.
 - Jangan sesekali commit rahsia (kata laluan, API key, kredensial cPanel, kunci CHIP). Semua dalam `.env`, dan `.env` mesti ada dalam `.gitignore`.
 - Sebelum mula kerja baru, baca semula fail ini dan nyatakan fasa yang sedang dibina.
-- Semua teks yang dilihat pengguna dalam Bahasa Melayu. Kod, nama jadual dan komen dalam Bahasa Inggeris.
+- Semua teks yang dilihat pengguna ditulis dalam Bahasa Melayu dahulu, dibungkus `__('Ayat BM')`, dan terjemahan Inggerisnya dalam `lang/en.json` (lihat **Dwi bahasa**). Kod, nama jadual dan komen dalam Bahasa Inggeris.
 - Setiap fasa mesti ada ujian (Pest atau PHPUnit) untuk aliran bayaran, akses e-book dan pintu ibu bapa.
 
 ## Stack
@@ -42,6 +42,14 @@ Rujukan skrin: prototaip ASUH Digital di claude.ai (7 skrin: utama, katalog, hal
 - Laravel dipasang ke dalam folder ini yang sudah ada `README.md`, `CLAUDE.md` dan `_brand/`. Pasang ke folder sementara, kemudian pindahkan fail ke sini tanpa menimpa `CLAUDE.md`.
 - Sasaran kontras teks 4.5:1 dan saiz butang sentuh sekurang-kurangnya 44px.
 - **Istilah (keputusan pengguna 2026-10-25):** produk tahunan dipanggil **Langganan Tahunan** (dan **Langganan Plus** untuk Fasa 2), bukan "Pas", kerana "Pas" berbunyi seperti nama parti politik. Hanya teks yang dilihat pengguna ditukar; nama dalam kod kekal (`Pass`, `passes`, `pas_tahunan`). URL kini `/langganan` dan `/beli/langganan`, dan `/pas` serta `/beli/pas` dialihkan (301).
+
+## Dwi bahasa (BM / English, keputusan pengguna 2026-10-26)
+
+- Terjemahan sebenar (bukan auto-terjemah), dibina berperingkat. **Peringkat 1 (siap):** laman awam (utama, langganan, katalog, halaman buku, tentang kami, polisi, log masuk/daftar, checkout, bayaran, muat naik resit, pilot) dan e-mel resit. **Peringkat 2 (belum):** akaun ibu bapa dan Mod Anak. Panel admin dan portal guru kekal BM.
+- Kunci terjemahan ialah ayat BM itu sendiri: `__('Ayat BM')`; locale `ms` memaparkan kunci, `lang/en.json` memetakan ke Inggeris. Komponen `x-field` (label, hint), `x-auth-card`, `x-layouts.app` (title) dan `x-legal-page` menterjemah teks yang dihantar. Ujian `BilingualTest` gagal jika ada `__()` atau label/tajuk dalam fail Peringkat 1 tanpa baris `en.json`; tambah fail baharu ke senarai itu.
+- Suis **BM | EN** di header (`/bahasa/{locale}`, `LocaleController`) menyimpan pilihan dalam sesi, kuki `asuh_lang` (1 tahun) dan `users.locale`; middleware `SetLocale` (`App\Support\Locale`). `User` melaksanakan `HasLocalePreference`, jadi e-mel ikut bahasa pengguna.
+- Teks Tetapan: `Setting::localized($key)` guna `{$key}_en` jika diisi (headline, subheadline, FAQ, polisi bayaran balik; seksyen "Teks landing page (English)"), jika tidak teks BM. Buku: `title_en`, `synopsis_en` pilihan (`Book::localTitle()`, `localSynopsis()`). Polisi undang-undang Inggeris di `resources/views/legal/en/` dan menyatakan versi BM yang terpakai.
+- Nama produk dalam English: Yearly Subscription, Plus Subscription.
 
 ## Model data (jadual utama)
 

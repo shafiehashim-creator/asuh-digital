@@ -8,11 +8,11 @@ class PreorderUnavailable extends RuntimeException
 {
     public static function soldOut(): self
     {
-        return new self('Maaf, semua slot early bird telah ditempah.');
+        return new self(__('Maaf, semua slot early bird telah ditempah.'));
     }
 
     public static function closed(): self
     {
-        return new self('Pre-order tidak dibuka buat masa ini.');
+        return new self(__('Pre-order tidak dibuka buat masa ini.'));
     }
 }

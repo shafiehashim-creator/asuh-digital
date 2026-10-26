@@ -50,7 +50,7 @@ class Purchases
      */
     public function buyPass(?User $user, array $input): Order
     {
-        $plan = $this->regularPlan() ?? throw new InvalidArgumentException('Langganan Tahunan tidak dijual buat masa ini.');
+        $plan = $this->regularPlan() ?? throw new InvalidArgumentException(__('Langganan Tahunan tidak dijual buat masa ini.'));
 
         return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen, PromoProduct::Pass);
     }
@@ -66,11 +66,11 @@ class Purchases
         $plan = $this->plusOffer->available() ? $this->plusOffer->plan() : null;
 
         if (! $plan) {
-            throw new InvalidArgumentException('Langganan Plus tidak dijual buat masa ini.');
+            throw new InvalidArgumentException(__('Langganan Plus tidak dijual buat masa ini.'));
         }
 
         if ($user && $this->plusOffer->upgradablePass($user)) {
-            throw new InvalidArgumentException('Anda sudah ada Langganan Tahunan. Naik taraf ke Langganan Plus dengan membayar bezanya sahaja.');
+            throw new InvalidArgumentException(__('Anda sudah ada Langganan Tahunan. Naik taraf ke Langganan Plus dengan membayar bezanya sahaja.'));
         }
 
         return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen, PromoProduct::Plus);
@@ -86,7 +86,7 @@ class Purchases
         $price = $pass ? $this->plusOffer->upgradePriceSen($pass) : null;
 
         if (! $plan || ! $pass || ! $price) {
-            throw new InvalidArgumentException('Tiada langganan untuk dinaik taraf.');
+            throw new InvalidArgumentException(__('Tiada langganan untuk dinaik taraf.'));
         }
 
         return $this->order($user, $input, ['plan_id' => $plan->id, 'upgrades_pass_id' => $pass->id], $price, PromoProduct::Upgrade);
@@ -98,11 +98,11 @@ class Purchases
     public function buyBook(?User $user, Book $book, array $input): Order
     {
         if (! $book->isPublished() || ! $book->single_price_sen) {
-            throw new InvalidArgumentException('Buku ini tidak dijual secara single.');
+            throw new InvalidArgumentException(__('Buku ini tidak dijual secara single.'));
         }
 
         if ($user?->canReadBook($book)) {
-            throw new InvalidArgumentException('Anda sudah boleh membaca buku ini.');
+            throw new InvalidArgumentException(__('Anda sudah boleh membaca buku ini.'));
         }
 
         return $this->order($user, $input, ['book_id' => $book->id], $book->single_price_sen, PromoProduct::Book);

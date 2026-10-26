@@ -181,8 +181,14 @@ return [
     */
 
     'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
+        'email' => [
+            'unique' => 'This email is already used by another account. If it is yours, please log in.',
+        ],
+        'phone' => [
+            'regex' => 'Please enter a valid Malaysian mobile number, for example 012-345 6789.',
+        ],
+        'pdpa_consent' => [
+            'accepted' => 'You need to agree to the privacy notice to continue.',
         ],
     ],
 
@@ -197,6 +203,28 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'name' => 'name',
+        'email' => 'email',
+        'phone' => 'phone number',
+        'password' => 'password',
+        'current_password' => 'current password',
+        'password_confirmation' => 'password confirmation',
+        'pdpa_consent' => 'privacy notice',
+        'state' => 'state',
+        'district' => 'district',
+        'children_count' => 'number of children',
+        'children_age_group' => "children's age group",
+        'institution_name' => 'institution name',
+        'institution_type' => 'institution type',
+        'contact_name' => 'contact name',
+        'contact_position' => 'position',
+        'student_count' => 'estimated number of pupils',
+        'age_group' => 'age group',
+        'notes' => 'notes',
+        'receipt' => 'receipt',
+        'promo_code' => 'promo code',
+        'payment_method' => 'payment method',
+    ],
 
 ];

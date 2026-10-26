@@ -59,7 +59,7 @@ class PreorderController extends Controller
                 ->withErrors(['preorder' => $e->getMessage()]);
         } catch (LockTimeoutException) {
             return back()->withInput($request->except('password', 'password_confirmation'))
-                ->withErrors(['preorder' => 'Terlalu ramai pembeli serentak. Sila cuba sekali lagi.']);
+                ->withErrors(['preorder' => __('Terlalu ramai pembeli serentak. Sila cuba sekali lagi.')]);
         }
 
         if (! $user) {

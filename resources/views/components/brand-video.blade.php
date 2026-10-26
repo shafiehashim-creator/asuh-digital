@@ -20,7 +20,7 @@
             <span class="absolute inset-0 bg-gradient-to-t from-plum/90 via-plum/30 to-transparent" aria-hidden="true"></span>
             <span class="relative flex size-20 items-center justify-center rounded-full border-4 border-ink bg-kuning text-4xl text-ink shadow-[0_4px_0_var(--color-ink)] transition group-hover:scale-105" aria-hidden="true">▶</span>
             <span class="relative font-display text-xl font-extrabold drop-shadow sm:text-2xl">{{ App\Support\BrandVideo::title() }}</span>
-            <span class="sr-only">Mainkan video</span>
+            <span class="sr-only">{{ __('Mainkan video') }}</span>
         </button>
     </div>
 @endif

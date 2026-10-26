@@ -15,9 +15,9 @@ enum ChipMethod: string
     public function label(): string
     {
         return match ($this) {
-            self::Fpx => 'FPX (perbankan dalam talian)',
-            self::Ewallet => 'E-wallet dan DuitNow QR',
-            self::Card => 'Kad debit atau kredit',
+            self::Fpx => __('FPX (perbankan dalam talian)'),
+            self::Ewallet => __('E-wallet dan DuitNow QR'),
+            self::Card => __('Kad debit atau kredit'),
         };
     }
 

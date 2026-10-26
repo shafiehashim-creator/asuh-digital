@@ -25,8 +25,8 @@ class PassPageController extends Controller
             'stats' => $stats->summary(),
             'books' => $catalogOpen ? $stats->newest(12) : collect(),
             'catalogOpen' => $catalogOpen,
-            'faq' => Setting::get('landing_faq'),
-            'refundPolicy' => Setting::get('refund_policy'),
+            'faq' => Setting::localized('landing_faq'),
+            'refundPolicy' => Setting::localized('refund_policy'),
             'passStartRule' => PassStartRule::tryFrom(Setting::get('pass_start_rule')) ?? PassStartRule::OnPayment,
         ]);
     }

@@ -84,6 +84,8 @@ return [
         'age_group' => 'kumpulan umur',
         'notes' => 'catatan',
         'receipt' => 'resit',
+        'promo_code' => 'kod promosi',
+        'payment_method' => 'kaedah bayaran',
     ],
 
 ];

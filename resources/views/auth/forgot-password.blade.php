@@ -4,10 +4,10 @@
 
         <x-field name="email" label="E-mel" type="email" autocomplete="email" required autofocus />
 
-        <button type="submit" class="btn-utama w-full">Hantar pautan</button>
+        <button type="submit" class="btn-utama w-full">{{ __('Hantar pautan') }}</button>
     </form>
 
     <p class="mt-6 text-center text-sm">
-        <a href="{{ route('login') }}" class="pautan">Kembali ke log masuk</a>
+        <a href="{{ route('login') }}" class="pautan">{{ __('Kembali ke log masuk') }}</a>
     </p>
 </x-auth-card>

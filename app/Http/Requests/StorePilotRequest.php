@@ -49,8 +49,8 @@ class StorePilotRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'phone.regex' => 'Sila masukkan no. telefon Malaysia yang sah, contohnya 012-345 6789 atau 03-6123 4567.',
-            'pdpa_consent.accepted' => 'Anda perlu bersetuju untuk kami menghubungi anda tentang program pilot.',
+            'phone.regex' => __('Sila masukkan no. telefon Malaysia yang sah, contohnya 012-345 6789 atau 03-6123 4567.'),
+            'pdpa_consent.accepted' => __('Anda perlu bersetuju untuk kami menghubungi anda tentang program pilot.'),
         ];
     }
 }

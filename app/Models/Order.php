@@ -97,14 +97,15 @@ class Order extends Model
     public function itemName(): string
     {
         if ($this->book_id) {
-            return 'E-book: '.($this->book?->title ?? 'ASUH Digital');
+            return 'E-book: '.($this->book?->localTitle() ?? 'ASUH Digital');
         }
 
         if ($this->upgrades_pass_id) {
-            return 'Naik taraf ke '.($this->plan?->name ?? 'Langganan Plus');
+            return __('Naik taraf ke :plan', ['plan' => __($this->plan?->name ?? 'Langganan Plus')]);
         }
 
-        return $this->plan?->name ?? 'ASUH Digital';
+        // Plan names are fixed (PlanSeeder), so lang/en.json translates them.
+        return __($this->plan?->name ?? 'ASUH Digital');
     }
 
     /** The school whose parent code gave this order its discount. */
@@ -122,9 +123,9 @@ class Order extends Model
     public function discountLabel(): string
     {
         return match (true) {
-            $this->coupon_id !== null => 'Diskaun kod '.$this->coupon?->code,
-            $this->referral_institution_id !== null => 'Diskaun '.($this->referralInstitution?->name ?? 'sekolah'),
-            default => 'Diskaun',
+            $this->coupon_id !== null => __('Diskaun kod :code', ['code' => $this->coupon?->code]),
+            $this->referral_institution_id !== null => __('Diskaun :school', ['school' => $this->referralInstitution?->name ?? __('sekolah')]),
+            default => __('Diskaun'),
         };
     }
 

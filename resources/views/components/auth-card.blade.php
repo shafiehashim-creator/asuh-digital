@@ -1,12 +1,12 @@
 @props(['title', 'intro' => null])
 
-<x-layouts.app :title="$title">
+<x-layouts.app :title="__($title)">
     <div class="mx-auto max-w-md px-4 py-12">
         <div class="rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)] sm:p-8">
-            <h1 class="font-display text-3xl font-extrabold text-magenta">{{ $title }}</h1>
+            <h1 class="font-display text-3xl font-extrabold text-magenta">{{ __($title) }}</h1>
 
             @if ($intro)
-                <p class="mt-2 text-ink/80">{{ $intro }}</p>
+                <p class="mt-2 text-ink/80">{{ __($intro) }}</p>
             @endif
 
             {{-- Fortify also flashes machine codes like "verification-link-sent"; only show sentences. --}}

@@ -8,6 +8,6 @@
             hint="Sekurang-kurangnya 8 aksara, dengan huruf dan nombor." />
         <x-field name="password_confirmation" label="Taip semula kata laluan" type="password" autocomplete="new-password" required />
 
-        <button type="submit" class="btn-utama w-full">Simpan kata laluan</button>
+        <button type="submit" class="btn-utama w-full">{{ __('Simpan kata laluan') }}</button>
     </form>
 </x-auth-card>

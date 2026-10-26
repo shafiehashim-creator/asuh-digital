@@ -50,6 +50,19 @@ class Setting extends Model
         return $stored[$key] ?? $defaults[$key] ?? $default;
     }
 
+    /**
+     * Admin-written text in the visitor's language: the "{$key}_en" setting
+     * on the English site when it is filled in, else the BM text.
+     */
+    public static function localized(string $key): mixed
+    {
+        if (app()->getLocale() === 'en' && filled($english = static::get($key.'_en'))) {
+            return $english;
+        }
+
+        return static::get($key);
+    }
+
     public static function set(string $key, mixed $value): void
     {
         if (! array_key_exists($key, config('asuh.settings'))) {

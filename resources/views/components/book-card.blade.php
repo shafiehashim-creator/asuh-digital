@@ -10,14 +10,14 @@
             </span>
         @endif
     </div>
-    <p class="mt-2 font-display leading-tight font-bold group-hover:text-plum">{{ $book->title }}</p>
+    <p class="mt-2 font-display leading-tight font-bold group-hover:text-plum">{{ $book->localTitle() }}</p>
     <p class="text-sm text-ink/70">{{ $book->author }}</p>
     <p class="mt-1 text-xs font-bold">
         @if ($book->single_price_sen)
             <span class="text-magenta">{{ App\Support\Money::short($book->single_price_sen) }}</span>
-            <span class="text-ink/60">atau dalam langganan</span>
+            <span class="text-ink/60">{{ __('atau dalam langganan') }}</span>
         @else
-            <span class="text-biru">Dalam Langganan Tahunan</span>
+            <span class="text-biru">{{ __('Dalam Langganan Tahunan') }}</span>
         @endif
     </p>
 </a>

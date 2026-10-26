@@ -46,6 +46,8 @@ class CreateNewUser implements CreatesNewUsers
             'email' => $input['email'],
             'phone' => $input['phone'],
             'password' => $input['password'],
+            // The language they signed up in, for their e-mails.
+            'locale' => app()->getLocale(),
         ]);
     }
 }

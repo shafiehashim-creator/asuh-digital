@@ -31,12 +31,12 @@ class PurchaseController extends Controller
         $this->rememberForLogin($request, route('purchase.pass'));
 
         return view('purchase.create', [
-            'title' => 'Beli Langganan Tahunan',
-            'item' => $plan->name,
+            'title' => __('Beli Langganan Tahunan'),
+            'item' => __($plan->name),
             'price' => Money::short($plan->price_sen),
-            'details' => ['Semua e-book ASUH Digital selama 12 bulan', 'Sehingga 4 profil anak', 'Sekali bayar, tiada caj automatik'],
+            'details' => [__('Semua e-book ASUH Digital selama 12 bulan'), __('Sehingga 4 profil anak'), __('Sekali bayar, tiada caj automatik')],
             'note' => $request->user()?->activePass()
-                ? 'Anda masih ada langganan aktif. Langganan baharu bermula sebaik langganan semasa tamat, jadi tiada hari yang hilang.'
+                ? __('Anda masih ada langganan aktif. Langganan baharu bermula sebaik langganan semasa tamat, jadi tiada hari yang hilang.')
                 : null,
             'action' => route('purchase.pass.store'),
             'promoCode' => true,
@@ -69,15 +69,15 @@ class PurchaseController extends Controller
 
         if ($upgrade && $upgradePrice) {
             return view('purchase.create', [
-                'title' => 'Naik taraf ke Langganan Plus',
-                'item' => 'Naik taraf ke '.$plan->name,
+                'title' => __('Naik taraf ke Langganan Plus'),
+                'item' => __('Naik taraf ke :plan', ['plan' => __($plan->name)]),
                 'price' => Money::short($upgradePrice),
                 'details' => [
-                    'Semua video animasi ASUH, ditambah e-book yang sedia ada',
+                    __('Semua video animasi ASUH, ditambah e-book yang sedia ada'),
                     $upgrade->ends_at
-                        ? 'Untuk baki langganan anda, hingga '.$upgrade->ends_at->translatedFormat('j F Y')
-                        : 'Untuk seluruh tempoh langganan anda',
-                    'Anda hanya membayar beza harga untuk hari yang berbaki',
+                        ? __('Untuk baki langganan anda, hingga :date', ['date' => $upgrade->ends_at->translatedFormat('j F Y')])
+                        : __('Untuk seluruh tempoh langganan anda'),
+                    __('Anda hanya membayar beza harga untuk hari yang berbaki'),
                 ],
                 'note' => null,
                 'action' => route('purchase.plus.store'),
@@ -85,12 +85,12 @@ class PurchaseController extends Controller
         }
 
         return view('purchase.create', [
-            'title' => 'Beli Langganan Plus',
-            'item' => $plan->name,
+            'title' => __('Beli Langganan Plus'),
+            'item' => __($plan->name),
             'price' => Money::short($plan->price_sen),
-            'details' => ['Semua e-book dan video animasi ASUH Digital selama 12 bulan', 'Sehingga 4 profil anak', 'Sekali bayar, tiada caj automatik'],
+            'details' => [__('Semua e-book dan video animasi ASUH Digital selama 12 bulan'), __('Sehingga 4 profil anak'), __('Sekali bayar, tiada caj automatik')],
             'note' => $user?->activePass()?->isPlus()
-                ? 'Anda masih ada Langganan Plus aktif. Langganan baharu bermula sebaik langganan semasa tamat, jadi tiada hari yang hilang.'
+                ? __('Anda masih ada Langganan Plus aktif. Langganan baharu bermula sebaik langganan semasa tamat, jadi tiada hari yang hilang.')
                 : null,
             'action' => route('purchase.plus.store'),
             'promoCode' => true,
@@ -117,10 +117,10 @@ class PurchaseController extends Controller
         $this->rememberForLogin($request, route('purchase.book', $book));
 
         return view('purchase.create', [
-            'title' => 'Beli e-book',
-            'item' => $book->title,
+            'title' => __('Beli e-book'),
+            'item' => $book->localTitle(),
             'price' => Money::short($book->single_price_sen),
-            'details' => ['Baca dalam pelayar, di telefon atau tablet', 'Kekal dalam akaun anda selama-lamanya'],
+            'details' => [__('Baca dalam pelayar, di telefon atau tablet'), __('Kekal dalam akaun anda selama-lamanya')],
             'note' => null,
             'action' => route('purchase.book.store', $book),
             'promoCode' => true,
