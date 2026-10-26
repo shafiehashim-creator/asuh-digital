@@ -18,6 +18,10 @@ const loadYouTubeApi = () => {
     return youTubeApi;
 };
 
+// Every player on the page: only one plays at a time, so starting video B
+// pauses video A (the music video, a free sample, the trailer...).
+const players = new Set();
+
 function initVideoPlayer(root) {
     if (root.dataset.started) return;
     root.dataset.started = '1';
@@ -110,8 +114,12 @@ function initVideoPlayer(root) {
         if (isBig() && playing) hideTimer = setTimeout(() => fullTarget.classList.add('controls-hidden'), 3000);
     };
 
+    const handle = { pause: () => player?.pause(), isPlaying: () => playing };
+    players.add(handle);
+
     const setPlaying = (value) => {
         playing = value;
+        if (value) players.forEach((other) => other !== handle && other.isPlaying() && other.pause());
         lastTick = Date.now();
         if (playButton) {
             playButton.textContent = value ? '❚❚' : '▶';

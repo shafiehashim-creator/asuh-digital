@@ -55,14 +55,20 @@
     </div>
 </div>
 
-<div data-controls class="mt-3 flex items-center gap-3 rounded-full border-2 border-ink bg-white px-3 py-2">
+<div data-controls class="mt-3 flex items-center gap-3 rounded-full border-2 border-ink bg-white px-3 py-2 text-ink">
     <button type="button" data-play class="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-kuning text-xl font-bold shadow-[0_2px_0_var(--color-ink)]" aria-label="{{ __('Main') }}">▶</button>
     <label class="sr-only" for="{{ $seekId }}">{{ __('Kedudukan video') }}</label>
     <input id="{{ $seekId }}" data-seek type="range" min="0" max="0" value="0" class="h-3 min-w-0 flex-1 accent-biru">
     <span data-time class="shrink-0 font-mono text-sm font-bold">0:00</span>
     {{-- Only on a big screen (app.css): fill it completely, cutting the top and bottom a little. --}}
-    <button type="button" data-zoom aria-pressed="false" class="size-12 shrink-0 items-center justify-center rounded-full border-2 border-ink text-xl" aria-label="{{ __('Penuhkan skrin') }}">⤢</button>
-    <button type="button" data-fullscreen class="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-ink text-xl" aria-label="{{ __('Skrin penuh') }}">⛶</button>
+    <button type="button" data-zoom aria-pressed="false" class="size-12 shrink-0 items-center justify-center rounded-full border-2 border-ink" aria-label="{{ __('Penuhkan skrin') }}">
+        {{-- Icons as SVG: symbol characters are missing from many phone fonts. --}}
+        <svg viewBox="0 0 24 24" class="size-6" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>
+    </button>
+    <button type="button" data-fullscreen class="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-ink" aria-label="{{ __('Skrin penuh') }}">
+        <svg viewBox="0 0 24 24" class="size-6 [.video-big_&]:hidden" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" /></svg>
+        <svg viewBox="0 0 24 24" class="hidden size-6 [.video-big_&]:block" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" /></svg>
+    </button>
 </div>
 </div>
 
