@@ -240,6 +240,7 @@ return array(
     'App\\Services\\VideoWatching' => $baseDir . '/app/Services/VideoWatching.php',
     'App\\Services\\VisitTracker' => $baseDir . '/app/Services/VisitTracker.php',
     'App\\Services\\WeeklyReport' => $baseDir . '/app/Services/WeeklyReport.php',
+    'App\\Support\\BrandVideo' => $baseDir . '/app/Support/BrandVideo.php',
     'App\\Support\\DemoPdf' => $baseDir . '/app/Support/DemoPdf.php',
     'App\\Support\\MarkdownText' => $baseDir . '/app/Support/MarkdownText.php',
     'App\\Support\\Money' => $baseDir . '/app/Support/Money.php',

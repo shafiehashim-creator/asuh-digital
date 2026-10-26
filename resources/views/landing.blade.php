@@ -143,6 +143,15 @@
         </section>
     @endif
 
+    {{-- The ASUH music video (admin setting) --}}
+    @if (App\Support\BrandVideo::shownOn('home'))
+        <section class="mx-auto max-w-4xl px-4 pt-16" aria-labelledby="song-heading">
+            <p class="text-center text-sm font-extrabold tracking-wide text-oren uppercase">Lagu ASUH</p>
+            <h2 id="song-heading" class="mt-1 text-center font-display text-3xl font-extrabold text-plum sm:text-4xl">Jom nyanyi bersama Anis dan Anas</h2>
+            <x-brand-video place="home" class="mt-8" />
+        </section>
+    @endif
+
     {{-- Why ASUH --}}
     <section class="mx-auto max-w-6xl px-4 py-16">
         <p class="text-center text-sm font-extrabold tracking-wide text-oren uppercase">Kenapa ASUH Digital</p>

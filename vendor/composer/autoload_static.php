@@ -1030,6 +1030,7 @@ class ComposerStaticInitdd831e7fdde172bdfa9c4bc1ead60323
         'App\\Services\\VideoWatching' => __DIR__ . '/../..' . '/app/Services/VideoWatching.php',
         'App\\Services\\VisitTracker' => __DIR__ . '/../..' . '/app/Services/VisitTracker.php',
         'App\\Services\\WeeklyReport' => __DIR__ . '/../..' . '/app/Services/WeeklyReport.php',
+        'App\\Support\\BrandVideo' => __DIR__ . '/../..' . '/app/Support/BrandVideo.php',
         'App\\Support\\DemoPdf' => __DIR__ . '/../..' . '/app/Support/DemoPdf.php',
         'App\\Support\\MarkdownText' => __DIR__ . '/../..' . '/app/Support/MarkdownText.php',
         'App\\Support\\Money' => __DIR__ . '/../..' . '/app/Support/Money.php',

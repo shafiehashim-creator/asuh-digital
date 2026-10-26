@@ -3,13 +3,17 @@
 namespace App\Filament\Pages;
 
 use App\Enums\PassStartRule;
+use App\Enums\VideoProvider;
 use App\Models\Plan;
 use App\Models\Setting;
 use App\Services\CatalogReadiness;
 use App\Services\Chip\ChipClient;
 use App\Services\PaymentProcessor;
+use App\Support\BrandVideo;
+use App\Support\VideoId;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -64,6 +68,7 @@ class Settings extends Page
         'chip_fee_fpx_fixed', 'chip_fee_fpx_percent', 'chip_fee_ewallet_fixed', 'chip_fee_ewallet_percent',
         'affiliates_open', 'affiliate_commission_percent', 'affiliate_hold_days', 'affiliate_cookie_days',
         'royalty_pool_percent', 'royalty_plus_ebook_share', 'royalty_min_minutes', 'royalty_single_percent',
+        'brand_video_url', 'brand_video_title', 'brand_video_places',
     ];
 
     /** @var array<string, mixed> */
@@ -114,6 +119,21 @@ class Settings extends Page
                     TextInput::make('plus_price')->label('Harga Langganan Plus setahun (RM)')
                         ->helperText('0 bermaksud belum dijual. Pelanggan Langganan Tahunan membayar beza harga untuk baki hari mereka.')
                         ->numeric()->minValue(0)->step(0.01)->prefix('RM')->required(),
+                ]),
+
+            Section::make('Video lagu ASUH')
+                ->columns(2)
+                ->schema([
+                    TextInput::make('brand_video_url')->label('Pautan YouTube')
+                        ->helperText('Tampal pautan video (awam atau unlisted). Kosongkan untuk menyembunyikan video.')
+                        ->url()->maxLength(255)
+                        ->rule(fn () => function (string $attribute, $value, \Closure $fail) {
+                            if (filled($value) && ! VideoId::isValid(VideoProvider::YouTube, VideoId::normalise(VideoProvider::YouTube, $value))) {
+                                $fail('Pautan YouTube tidak dikenali.');
+                            }
+                        }),
+                    TextInput::make('brand_video_title')->label('Tajuk')->maxLength(100),
+                    CheckboxList::make('brand_video_places')->label('Paparkan di')->options(BrandVideo::PLACES)->columns(2)->columnSpanFull(),
                 ]),
 
             Section::make('WhatsApp')
@@ -266,7 +286,7 @@ class Settings extends Page
         DB::transaction(function () use ($data) {
             foreach (self::KEYS as $key) {
                 $value = $data[$key] ?? null;
-                Setting::set($key, $key === 'landing_faq' ? array_values($value ?? []) : $value);
+                Setting::set($key, in_array($key, ['landing_faq', 'brand_video_places'], true) ? array_values($value ?? []) : $value);
             }
 
             $this->setPrice(Plan::PAS_TAHUNAN_EARLY, $data['early_bird_price']);

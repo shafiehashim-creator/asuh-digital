@@ -20,6 +20,12 @@
         </div>
     </section>
 
+    @if (App\Support\BrandVideo::shownOn('about'))
+        <section class="mx-auto max-w-4xl px-4 pb-12 md:pb-16" aria-label="{{ App\Support\BrandVideo::title() }}">
+            <x-brand-video place="about" />
+        </section>
+    @endif
+
     {{-- What we stand for --}}
     <section class="bg-white py-12 md:py-16">
         <div class="mx-auto max-w-6xl px-4">

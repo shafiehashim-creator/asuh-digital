@@ -1,4 +1,4 @@
-@props(['video', 'embed', 'progressUrl' => null, 'startAt' => 0, 'secondsLeft' => null, 'homeUrl'])
+@props(['video' => null, 'embed', 'progressUrl' => null, 'startAt' => 0, 'secondsLeft' => null, 'homeUrl'])
 
 {{-- The animated video player (Phase 2); see resources/js/video-player.js. --}}
 <div id="video-wrap" class="flex flex-col justify-center bg-lavender [&:fullscreen]:p-3">
@@ -25,7 +25,7 @@
         <p class="font-display text-2xl font-extrabold">Tamat! Jom Jadi Baik!</p>
         <div class="flex flex-wrap justify-center gap-3">
             <button type="button" data-replay class="btn-utama">Tonton semula</button>
-            @if ($video->book && $video->book->isPublished())
+            @if ($video?->book && $video->book->isPublished())
                 <a href="{{ route('reader.show', $video->book) }}" class="btn-utama">Baca bukunya</a>
             @endif
             <a href="{{ $homeUrl }}" class="inline-flex min-h-11 items-center rounded-full border-2 border-white px-5 font-bold">Kembali ke rak</a>
