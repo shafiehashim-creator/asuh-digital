@@ -12,10 +12,14 @@
     $tabs = array_values(array_filter([
         [__('Utama'), url('/'), request()->routeIs('home'), 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z'],
         $catalogOpen
-            ? [__('Katalog'), route('catalog.index'), request()->routeIs('catalog.*', 'purchase.book*'), 'M4 4h5a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zm16 0h-5a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h6z']
+            ? [__('Buku'), route('catalog.index'), request()->routeIs('catalog.*', 'purchase.book*'), 'M4 4h5a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zm16 0h-5a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h6z']
+            : null,
+        // Phase 2: only once the animated videos are open.
+        $videosOpen
+            ? [__('Video'), route('videos.index'), request()->routeIs('videos.*', 'purchase.plus*'), 'M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1m6 4v6l5-3z']
             : null,
         auth()->check()
-            ? [$isTeacher ? __('Guru') : __('Akaun'), $isTeacher ? route('teacher.home') : route('account'), request()->routeIs('account', 'account.*', 'children.*', 'preorder.pay', 'preorder.receipt', 'teacher.*'), 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8m-7 9a7 7 0 0 1 14 0']
+            ? [$isTeacher ? __('Guru') : __('Keluarga'), $isTeacher ? route('teacher.home') : route('account'), request()->routeIs('account', 'account.*', 'children.*', 'preorder.pay', 'preorder.receipt', 'teacher.*'), 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8m-7 9a7 7 0 0 1 14 0']
             : [__('Log masuk'), route('login'), request()->routeIs('login', 'password.*'), 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8m-7 9a7 7 0 0 1 14 0'],
     ]));
 @endphp
@@ -73,6 +77,7 @@
                 <p class="hidden font-display text-base font-bold text-plum md:block">Jom Jadi Baik!</p>
                 <nav aria-label="{{ __('Maklumat') }}" class="flex flex-wrap gap-x-4 md:my-2">
                     <a href="{{ route('about') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">{{ __('Tentang kami') }}</a>
+                    <a href="{{ route('install') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">{{ __('Pasang app') }}</a>
                     @if ($videosOpen)
                         <a href="{{ route('videos.index') }}" class="inline-flex min-h-11 items-center font-semibold hover:text-plum">{{ __('Video animasi') }}</a>
                     @endif

@@ -27,6 +27,8 @@
 @endphp
 
 <x-layouts.account title="Akaun saya" :$activePass :$pendingPass :$shelfOpen :$plusUpgradePrice>
+    <x-install-app banner />
+
     {{-- Greeting with the one next step that matters most --}}
     <section class="rounded-3xl border-2 border-ink bg-plum p-6 text-white shadow-[0_4px_0_var(--color-ink)] sm:flex sm:items-center sm:justify-between sm:gap-6">
         <div class="min-w-0">

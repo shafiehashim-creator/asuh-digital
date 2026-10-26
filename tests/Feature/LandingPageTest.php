@@ -98,11 +98,11 @@ it('shows the institution pilot length from settings', function () {
 
 it('can be installed on a phone and shows an app-style tab bar', function () {
     $this->get('/')
-        ->assertSee('<link rel="manifest" href="/manifest.webmanifest">', false)
+        ->assertSee('<link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">', false)
         ->assertSee('aria-label="Menu utama"', false)
         ->assertSeeInOrder(['Utama', 'Log masuk']);
 
-    $manifest = json_decode(file_get_contents(public_path('manifest.webmanifest')), true);
+    $manifest = $this->get('/manifest.webmanifest')->json();
 
     expect($manifest['display'])->toBe('standalone')
         ->and($manifest['start_url'])->toBe('/');
