@@ -93,3 +93,29 @@ it('has a phone menu drawer with the public, family and school links', function 
         ->assertSee(route('videos.index'))
         ->assertDontSee('Daftar percuma');
 });
+
+it('keeps the app tab bar on phones and tablets and gives computers the full menu', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    // The tab bar, the drawer and the slim header stop at 1024px (lg), not 768px.
+    expect($html)->toContain('pb-[env(safe-area-inset-bottom)] lg:hidden')
+        ->toContain('class="hidden items-center gap-1 text-sm font-bold lg:flex"');
+
+    // Before the videos open: Langganan is a plain link, Sekolah a dropdown.
+    $this->get('/')
+        ->assertSee('href="'.route('pass.show').'"', false)
+        ->assertSee('Sekolah')
+        ->assertSee('aria-haspopup="true"', false)
+        ->assertSee(route('teacher.home'))
+        ->assertSee(route('about'));
+
+    Setting::set('catalog_open', true);
+    Setting::set('videos_open', true);
+    Plan::findByCode(Plan::PAS_PLUS)->update(['price_sen' => 15900]);
+
+    $html = $this->get(route('plus.show'))
+        ->assertSee(route('catalog.index'))
+        ->assertSee(route('videos.index'))
+        ->getContent();
+    expect($html)->toMatch('#href="'.preg_quote(route('plus.show'), '#').'"\s+aria-current="page"#');
+});

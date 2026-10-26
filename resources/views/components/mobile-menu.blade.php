@@ -35,7 +35,7 @@
     ]);
 @endphp
 
-<div x-data="{ open: false }" x-on:open-menu.window="open = true" x-on:keydown.escape.window="open = false" class="md:hidden">
+<div x-data="{ open: false }" x-on:open-menu.window="open = true" x-on:keydown.escape.window="open = false" class="lg:hidden">
     <div x-show="open" x-cloak x-transition.opacity class="fixed inset-0 z-50 bg-ink/50 backdrop-blur-sm" @click="open = false" aria-hidden="true"></div>
 
     <aside x-show="open" x-cloak
