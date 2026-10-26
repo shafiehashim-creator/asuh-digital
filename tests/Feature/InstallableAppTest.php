@@ -69,3 +69,27 @@ it('lets the installed app read its manifest while Mod Anak is on', function () 
     $this->get('/manifest.webmanifest')->assertOk()->assertJsonPath('short_name', 'ASUH');
     $this->get('/pasang')->assertRedirect('/mod-anak');
 });
+
+it('has a phone menu drawer with the public, family and school links', function () {
+    $this->get('/')->assertOk()
+        ->assertSee("\$dispatch('open-menu')", false)
+        ->assertSee('Tentang ASUH')
+        ->assertSee(route('pass.show'))
+        ->assertSee(route('pupil.join'))
+        ->assertSee(route('pilot.create'))
+        ->assertSee('Daftar percuma')
+        ->assertDontSee('Keluarga saya')
+        ->assertDontSee(route('purchase.plus'));
+
+    Setting::set('catalog_open', true);
+    Setting::set('videos_open', true);
+    Plan::findByCode(Plan::PAS_PLUS)->update(['price_sen' => 15900]);
+    $this->actingAs(User::factory()->create());
+
+    $this->get('/')
+        ->assertSee('Keluarga saya')
+        ->assertSee(route('account.children'))
+        ->assertSee(route('purchase.plus'))
+        ->assertSee(route('videos.index'))
+        ->assertDontSee('Daftar percuma');
+});
