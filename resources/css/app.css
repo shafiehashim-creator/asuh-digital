@@ -55,21 +55,52 @@ html {
 /*
  * Video player filling the screen: the browser's full screen, or on iPhone
  * (no full screen for page elements) the player covering the page itself.
- * The 16:9 picture is as large as fits, with the controls below it.
+ * Cinema style: black, no rounded frame, the 16:9 picture as large as fits
+ * with the controls below. Held upright, a filled player turns sideways,
+ * as YouTube does, so turning the phone gives the big picture.
  */
 .video-filled {
     position: fixed;
     inset: 0;
     z-index: 60;
+    container-type: size;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: var(--color-lavender);
-    padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+    gap: 0.5rem;
+    background: #000;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+@media (orientation: portrait) {
+    .video-filled {
+        inset: auto;
+        top: 0;
+        left: 100vw;
+        width: 100dvh;
+        height: 100vw;
+        transform: rotate(90deg);
+        transform-origin: top left;
+        padding: 0 env(safe-area-inset-bottom) 0 env(safe-area-inset-top);
+    }
+}
+
+[data-video-wrap]:fullscreen {
+    container-type: size;
+    background: #000;
+    padding: 0;
+    gap: 0.5rem;
 }
 
 .video-filled :is([data-video-player], [data-controls]),
 [data-video-wrap]:fullscreen :is([data-video-player], [data-controls]) {
-    width: min(100%, calc((100dvh - 6rem) * 16 / 9));
-    margin-inline: auto;
+    width: min(100cqw, calc((100cqh - 4.5rem) * 16 / 9));
+    margin: 0 auto;
+}
+
+.video-filled [data-video-player],
+[data-video-wrap]:fullscreen [data-video-player] {
+    border-radius: 0;
+    border-width: 0;
+    box-shadow: none;
 }

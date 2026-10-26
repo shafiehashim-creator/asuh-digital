@@ -3,7 +3,7 @@
 @php($seekId = 'video-seek-'.Str::random(6))
 
 {{-- The animated video player (Phase 2); see resources/js/video-player.js. --}}
-<div data-video-wrap {{ $attributes->class(['flex flex-col justify-center [&:fullscreen]:bg-lavender [&:fullscreen]:p-3']) }}>
+<div data-video-wrap {{ $attributes->class(['flex flex-col justify-center']) }}>
 <div data-video-player @if ($lazy) data-lazy @endif data-autoplay="{{ $autoplay ? 1 : 0 }}"
     class="relative aspect-video w-full overflow-hidden rounded-3xl border-2 border-ink bg-ink shadow-[0_4px_0_var(--color-ink)] select-none"
     data-provider="{{ $embed['provider'] }}" data-video-id="{{ $embed['id'] }}" data-embed-url="{{ $embed['url'] }}"
