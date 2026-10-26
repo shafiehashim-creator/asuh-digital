@@ -23,6 +23,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 /**
  * Parent accounts, read-only. Account details are the parent's own to change
@@ -36,13 +37,17 @@ class CustomerResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static string|UnitEnum|null $navigationGroup = 'Jualan';
+
+    protected static ?string $navigationLabel = 'Pelanggan';
+
+    protected static ?int $navigationSort = 11;
+
     protected static ?string $modelLabel = 'pelanggan';
 
     protected static ?string $pluralModelLabel = 'Pelanggan';
 
     protected static ?string $slug = 'pelanggan';
-
-    protected static ?int $navigationSort = 11;
 
     /** Buyers' personal data: Super Admin only. */
     public static function canAccess(): bool

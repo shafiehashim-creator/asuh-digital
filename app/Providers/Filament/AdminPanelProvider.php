@@ -6,11 +6,14 @@ use App\Http\Middleware\AuthenticateAdmin;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
+use Filament\Support\Icons\Heroicon;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -43,9 +46,23 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets([
-                AccountWidget::class,
+            ->font('Nunito')
+            // A narrow icon rail on desktop, opened again with the button at the top.
+            ->sidebarCollapsibleOnDesktop()
+            ->navigationGroups([
+                NavigationGroup::make('Jualan'),
+                NavigationGroup::make('Kandungan'),
+                NavigationGroup::make('Keluarga dan institusi'),
+                NavigationGroup::make('Sistem'),
             ])
+            ->navigationItems([
+                NavigationItem::make('Lihat laman')
+                    ->url(fn () => url('/'), shouldOpenInNewTab: true)
+                    ->icon(Heroicon::OutlinedArrowTopRightOnSquare)
+                    ->group('Sistem')
+                    ->sort(99),
+            ])
+            ->renderHook(PanelsRenderHook::GLOBAL_SEARCH_BEFORE, fn () => view('filament.view-site-button'))
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

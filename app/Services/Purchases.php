@@ -5,8 +5,8 @@ namespace App\Services;
 use App\Actions\Fortify\CreateNewUser;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Enums\PromoProduct;
 use App\Models\Book;
-use App\Models\Institution;
 use App\Models\Order;
 use App\Models\Plan;
 use App\Models\User;
@@ -25,6 +25,7 @@ class Purchases
         private PreorderSlots $slots,
         private CreateNewUser $createNewUser,
         private PlusOffer $plusOffer,
+        private PromoCodes $promoCodes,
     ) {}
 
     /**
@@ -51,7 +52,7 @@ class Purchases
     {
         $plan = $this->regularPlan() ?? throw new InvalidArgumentException('Langganan Tahunan tidak dijual buat masa ini.');
 
-        return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen, schoolDiscount: true);
+        return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen, PromoProduct::Pass);
     }
 
     /**
@@ -72,7 +73,7 @@ class Purchases
             throw new InvalidArgumentException('Anda sudah ada Langganan Tahunan. Naik taraf ke Langganan Plus dengan membayar bezanya sahaja.');
         }
 
-        return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen, schoolDiscount: true);
+        return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen, PromoProduct::Plus);
     }
 
     /**
@@ -88,7 +89,7 @@ class Purchases
             throw new InvalidArgumentException('Tiada langganan untuk dinaik taraf.');
         }
 
-        return $this->order($user, $input, ['plan_id' => $plan->id, 'upgrades_pass_id' => $pass->id], $price);
+        return $this->order($user, $input, ['plan_id' => $plan->id, 'upgrades_pass_id' => $pass->id], $price, PromoProduct::Upgrade);
     }
 
     /**
@@ -104,7 +105,7 @@ class Purchases
             throw new InvalidArgumentException('Anda sudah boleh membaca buku ini.');
         }
 
-        return $this->order($user, $input, ['book_id' => $book->id], $book->single_price_sen);
+        return $this->order($user, $input, ['book_id' => $book->id], $book->single_price_sen, PromoProduct::Book);
     }
 
     /**
@@ -113,16 +114,17 @@ class Purchases
      *
      * @param  array{plan_id?: int, book_id?: int, upgrades_pass_id?: int}  $item
      */
-    private function order(?User $user, array $input, array $item, int $priceSen, bool $schoolDiscount = false): Order
+    private function order(?User $user, array $input, array $item, int $priceSen, PromoProduct $product): Order
     {
         $isNewAccount = $user === null;
         $method = PaymentMethod::from($input['payment_method']);
 
-        // A school's parent code takes its percentage off a new yearly subscription.
-        $school = $schoolDiscount ? Institution::findByParentCode($input['school_code'] ?? null) : null;
-        $discountSen = $school ? (int) round($priceSen * $school->parent_discount_percent / 100) : 0;
-        $priceSen -= $discountSen;
-        $referral = ['referral_institution_id' => $school?->id, 'discount_sen' => $discountSen];
+        // One "Kod promosi": a school code, a coupon or an affiliate code.
+        // Old links still send school_code.
+        $referral = $this->promoCodes->apply(
+            $input['promo_code'] ?? $input['school_code'] ?? null, $product, $user, $priceSen,
+        );
+        $priceSen -= $referral['discount_sen'];
 
         $order = DB::transaction(function () use ($user, $input, $item, $priceSen, $method, $referral) {
             $user ??= $this->createNewUser->create($input);
@@ -141,7 +143,9 @@ class Purchases
                 // completes an earlier CHIP checkout, its callback must find
                 // this order.
                 // The CHIP method and its fee are chosen again on the pay page.
-                $existing->update(['payment_method' => $method, 'amount_sen' => $priceSen, 'processing_fee_sen' => 0, 'chip_method' => null] + $referral);
+                // An affiliate credited earlier (from a ?ref= link) stays unless a new code names one.
+                $existing->update(['payment_method' => $method, 'amount_sen' => $priceSen, 'processing_fee_sen' => 0, 'chip_method' => null]
+                    + array_filter($referral, fn ($value, $key) => $key !== 'affiliate_id' || $value !== null, ARRAY_FILTER_USE_BOTH));
 
                 return $existing;
             }

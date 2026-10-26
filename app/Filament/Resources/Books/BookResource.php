@@ -29,6 +29,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use UnitEnum;
 
 /**
  * Books are managed by admins and editors (CLAUDE.md). The status is never
@@ -44,13 +45,17 @@ class BookResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
+    protected static string|UnitEnum|null $navigationGroup = 'Kandungan';
+
+    protected static ?string $navigationLabel = 'Buku';
+
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $modelLabel = 'buku';
 
     protected static ?string $pluralModelLabel = 'Buku';
 
     protected static ?string $slug = 'buku';
-
-    protected static ?int $navigationSort = 1;
 
     public static function canAccess(): bool
     {

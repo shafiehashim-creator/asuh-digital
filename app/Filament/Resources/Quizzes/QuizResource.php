@@ -21,6 +21,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use UnitEnum;
 
 /**
  * One quiz per book: 3–5 multiple-choice questions, passed at 80%
@@ -32,13 +33,17 @@ class QuizResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPuzzlePiece;
 
+    protected static string|UnitEnum|null $navigationGroup = 'Kandungan';
+
+    protected static ?string $navigationLabel = 'Kuiz';
+
+    protected static ?int $navigationSort = 4;
+
     protected static ?string $modelLabel = 'kuiz';
 
     protected static ?string $pluralModelLabel = 'Kuiz';
 
     protected static ?string $slug = 'kuiz';
-
-    protected static ?int $navigationSort = 3;
 
     public static function canAccess(): bool
     {

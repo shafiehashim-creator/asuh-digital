@@ -11,6 +11,8 @@
         ['Pencapaian', 'account.progress', ['account.progress'], ['M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12', 'm8.5 13.5-1.5 8 5-3 5 3-1.5-8'], $shelfOpen],
         ['Langganan dan pesanan', 'account.billing', ['account.billing'], ['M6 2h12v20l-3-2-3 2-3-2-3 2z', 'M9 7h6', 'M9 11h6', 'M9 15h4'], true],
         ['Profil dan keselamatan', 'account.profile', ['account.profile'], ['M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8', 'M5 21a7 7 0 0 1 14 0'], true],
+        ['Affiliate', 'account.affiliate', ['account.affiliate'], ['M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6', 'M6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6', 'M18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6', 'm8.6 13.5 6.8 4', 'm15.4 6.5-6.8 4'],
+            app(App\Services\Affiliates::class)->isOpen() || auth()->user()?->affiliate()->exists()],
     ], fn ($item) => $item[4]);
 
     // One offer at a time, matched to the family's subscription.

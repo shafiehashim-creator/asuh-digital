@@ -13,6 +13,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 /**
  * Read-only list of yearly passes. Passes are made only by
@@ -24,13 +25,17 @@ class PassResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedIdentification;
 
+    protected static string|UnitEnum|null $navigationGroup = 'Jualan';
+
+    protected static ?string $navigationLabel = 'Langganan Tahunan';
+
+    protected static ?int $navigationSort = 12;
+
     protected static ?string $modelLabel = 'langganan';
 
     protected static ?string $pluralModelLabel = 'Langganan Tahunan';
 
     protected static ?string $slug = 'langganan';
-
-    protected static ?int $navigationSort = 12;
 
     /** Tied to payments: Super Admin only. */
     public static function canAccess(): bool

@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AffiliateStatus;
 use App\Enums\Badge;
 use App\Http\Middleware\EnsureCatalogOpen;
 use App\Models\Book;
 use App\Models\ChildBadge;
+use App\Models\Setting;
 use App\Models\User;
+use App\Services\Affiliates;
 use App\Services\FamilyProgress;
 use App\Services\PlusOffer;
 use Illuminate\Database\Eloquent\Collection;
@@ -92,6 +95,48 @@ class AccountController extends Controller
     public function profile(Request $request): View
     {
         return $this->page('account.profile', $request->user());
+    }
+
+    public function affiliate(Request $request, Affiliates $affiliates): View
+    {
+        $user = $request->user();
+        $affiliate = $user->affiliate()->first();
+
+        abort_unless($affiliate || $affiliates->isOpen(), 404);
+
+        return $this->page('account.affiliate', $user, [
+            'affiliate' => $affiliate,
+            'summary' => $affiliate?->isActive() ? $affiliates->summary($affiliate) : null,
+            'commissions' => $affiliate?->isActive() ? $affiliate->commissions()->with('order.plan', 'order.book')->latest()->limit(50)->get() : collect(),
+            'percent' => $affiliate?->effectivePercent() ?? (float) Setting::get('affiliate_commission_percent'),
+            'holdDays' => (int) Setting::get('affiliate_hold_days'),
+            'cookieDays' => (int) Setting::get('affiliate_cookie_days'),
+        ]);
+    }
+
+    public function applyAffiliate(Request $request, Affiliates $affiliates): RedirectResponse
+    {
+        $user = $request->user();
+        $current = $user->affiliate()->first();
+        abort_unless($current || $affiliates->isOpen(), 404);
+        abort_if($current?->status === AffiliateStatus::Suspended, 403);
+
+        $data = $request->validate([
+            'promotion_channels' => ['required', 'string', 'max:1000'],
+            'bank_name' => ['required', 'string', 'max:100'],
+            'bank_account_name' => ['required', 'string', 'max:150'],
+            'bank_account_number' => ['required', 'string', 'max:40', 'regex:/^[0-9 -]+$/'],
+        ], [], [
+            'promotion_channels' => 'cara anda mempromosi',
+            'bank_name' => 'nama bank',
+            'bank_account_name' => 'nama pemegang akaun',
+            'bank_account_number' => 'nombor akaun',
+        ]);
+
+        $wasActive = $current?->isActive();
+        $affiliates->apply($user, $data);
+
+        return redirect()->route('account.affiliate')->with('status', $wasActive ? 'affiliate-saved' : 'affiliate-applied');
     }
 
     /** Every account page gets the subscription state for its side menu and upgrade card. */

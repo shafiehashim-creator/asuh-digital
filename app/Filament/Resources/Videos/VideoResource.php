@@ -25,6 +25,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use UnitEnum;
 
 /**
  * Animated videos (Phase 2). Admins and editors manage them like books,
@@ -38,13 +39,17 @@ class VideoResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
+    protected static string|UnitEnum|null $navigationGroup = 'Kandungan';
+
+    protected static ?string $navigationLabel = 'Video animasi';
+
+    protected static ?int $navigationSort = 3;
+
     protected static ?string $modelLabel = 'video';
 
     protected static ?string $pluralModelLabel = 'Video animasi';
 
     protected static ?string $slug = 'video';
-
-    protected static ?int $navigationSort = 2;
 
     public static function canAccess(): bool
     {
