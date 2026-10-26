@@ -148,3 +148,30 @@ it('has an English line for every text on the public pages', function () {
 
     expect($missing)->toBe([]);
 });
+
+it('saves the language picked before logging in to the account', function () {
+    $user = User::factory()->create(['locale' => 'ms']);
+
+    $this->get(route('locale.switch', 'en'));
+    $this->post(route('login'), ['email' => $user->email, 'password' => 'password']);
+
+    expect($user->fresh()->locale)->toBe('en');
+});
+
+it('shows the account language after logging in on a browser with no pick', function () {
+    $user = User::factory()->create(['locale' => 'en']);
+
+    $this->post(route('login'), ['email' => $user->email, 'password' => 'password']);
+
+    expect($user->fresh()->locale)->toBe('en');
+    $this->get('/')->assertSee('<html lang="en"', false);
+});
+
+it('switches an English account back to BM for e-mails', function () {
+    $user = User::factory()->create(['locale' => 'en']);
+
+    $this->actingAs($user)->get(route('locale.switch', 'ms'));
+
+    expect($user->fresh()->locale)->toBe('ms')
+        ->and($user->fresh()->preferredLocale())->toBe('ms');
+});

@@ -152,6 +152,7 @@ it('stops at the parent\'s daily limit', function () {
 // --- Recording ---------------------------------------------------------------------
 
 it('counts no more time than really passed', function () {
+    $this->freezeTime(); // only the travel below may count, never wall-clock seconds
     $child = childWithPlan();
     $video = Video::factory()->published()->create(['age_group' => AgeGroup::SixToNine]);
     watchAs($child);
