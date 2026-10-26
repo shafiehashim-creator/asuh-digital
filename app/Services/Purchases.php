@@ -140,7 +140,8 @@ class Purchases
                 // chip_purchase_id is kept on purpose: if the buyer still
                 // completes an earlier CHIP checkout, its callback must find
                 // this order.
-                $existing->update(['payment_method' => $method, 'amount_sen' => $priceSen] + $referral);
+                // The CHIP method and its fee are chosen again on the pay page.
+                $existing->update(['payment_method' => $method, 'amount_sen' => $priceSen, 'processing_fee_sen' => 0, 'chip_method' => null] + $referral);
 
                 return $existing;
             }

@@ -10,11 +10,15 @@ Bayaran anda telah diterima. Ini resit untuk rekod anda.
 | **No. resit / rujukan** | {{ $order->reference }} |
 | **Tarikh bayaran** | {{ $order->paid_at?->translatedFormat('j F Y, g:i A') }} |
 | **Item** | {{ $order->itemName() }} |
-| **Kaedah bayaran** | {{ $order->payment_method->getLabel() }} |
+| **Kaedah bayaran** | {{ $order->chip_method?->label() ?? $order->payment_method->getLabel() }} |
 @if ($order->discount_sen > 0)
 | **Diskaun kod sekolah** | −{{ Money::format($order->discount_sen) }} |
 @endif
-| **Jumlah dibayar** | **{{ Money::format($order->amount_sen) }}** |
+@if ($order->processing_fee_sen > 0)
+| **Harga** | {{ Money::format($order->amount_sen) }} |
+| **Caj pemprosesan** | {{ Money::format($order->processing_fee_sen) }} |
+@endif
+| **Jumlah dibayar** | **{{ Money::format($order->totalSen()) }}** |
 </x-mail::table>
 
 @if ($pass?->starts_at)

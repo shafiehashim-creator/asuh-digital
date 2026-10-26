@@ -57,7 +57,10 @@
                 @if ($order->discount_sen > 0)
                     <div class="flex justify-between gap-4"><dt class="text-ink/70">Diskaun {{ $order->referralInstitution?->name ?? 'sekolah' }}</dt><dd class="font-semibold text-biru">−{{ Money::format($order->discount_sen) }}</dd></div>
                 @endif
-                <div class="flex justify-between gap-4 border-t-2 border-ink/10 pt-2"><dt class="font-bold">Jumlah</dt><dd class="font-display text-2xl font-extrabold">{{ Money::format($order->amount_sen) }}</dd></div>
+                @if ($order->processing_fee_sen > 0)
+                    <div class="flex justify-between gap-4"><dt class="text-ink/70">Caj pemprosesan ({{ $order->chip_method?->label() }})</dt><dd class="font-semibold">{{ Money::format($order->processing_fee_sen) }}</dd></div>
+                @endif
+                <div class="flex justify-between gap-4 border-t-2 border-ink/10 pt-2"><dt class="font-bold">Jumlah</dt><dd class="font-display text-2xl font-extrabold">{{ Money::format($order->totalSen()) }}</dd></div>
             </dl>
         </section>
 
@@ -94,12 +97,26 @@
                 @if ($preorder)
                     <p>Slot anda ditempah sehingga <strong>{{ $preorder->reserved_until->translatedFormat('g:i A, j F Y') }}</strong>. Selesaikan bayaran sebelum masa itu.</p>
                 @endif
-                @if ($chipUrl)
-                    <form method="POST" action="{{ $chipUrl }}" class="mt-5">
-                        @csrf
-                        <button type="submit" class="btn-utama w-full text-lg">Bayar {{ Money::format($order->amount_sen) }} sekarang</button>
-                    </form>
-                    <p class="mt-3 text-center text-sm text-ink/70">Anda akan dibawa ke halaman bayaran selamat CHIP (FPX, kad atau e-wallet).</p>
+                @if ($chipUrl && $chipOptions->isNotEmpty())
+                    <h2 class="mt-5 font-display text-lg font-bold text-plum first:mt-0">Pilih kaedah bayaran</h2>
+                    <ul class="mt-3 space-y-3">
+                        @foreach ($chipOptions as ['method' => $method, 'fee' => $fee])
+                            <li>
+                                <form method="POST" action="{{ $chipUrl }}">
+                                    @csrf
+                                    <input type="hidden" name="kaedah" value="{{ $method->value }}">
+                                    <button type="submit" class="flex min-h-16 w-full items-center justify-between gap-4 rounded-2xl border-2 border-ink bg-white px-4 py-3 text-left shadow-[0_3px_0_var(--color-ink)] transition hover:-translate-y-px hover:bg-kuning/30 active:translate-y-0.5 active:shadow-[0_1px_0_var(--color-ink)]">
+                                        <span>
+                                            <span class="block font-display text-lg font-bold">{{ $method->label() }}</span>
+                                            <span class="block text-sm text-ink/70">{{ $fee > 0 ? 'Termasuk caj pemprosesan '.Money::format($fee) : 'Tiada caj pemprosesan' }}</span>
+                                        </span>
+                                        <span class="shrink-0 font-display text-xl font-extrabold">{{ Money::format($order->amount_sen + $fee) }}</span>
+                                    </button>
+                                </form>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <p class="mt-3 text-center text-sm text-ink/70">Anda akan dibawa ke halaman bayaran selamat CHIP. Caj pemprosesan dikenakan oleh penyedia bayaran.</p>
                 @else
                     <p class="mt-4 rounded-xl bg-oren/15 px-4 py-3 text-sm font-semibold">Bayaran dalam talian belum dibuka. Sila cuba sebentar lagi.</p>
                 @endif

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ChipMethod;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Services\VisitTracker;
@@ -16,6 +17,7 @@ use Illuminate\Support\Str;
     'reference', 'user_id', 'plan_id', 'book_id', 'amount_sen', 'currency',
     'payment_method', 'status', 'chip_purchase_id', 'bank_receipt_path',
     'confirmed_by', 'confirmed_at', 'paid_at', 'upgrades_pass_id', 'admin_note', 'referral_institution_id', 'discount_sen', 'source', 'medium', 'campaign',
+    'processing_fee_sen', 'chip_method',
 ])]
 class Order extends Model
 {
@@ -25,7 +27,9 @@ class Order extends Model
     {
         return [
             'amount_sen' => 'integer',
+            'processing_fee_sen' => 'integer',
             'payment_method' => PaymentMethod::class,
+            'chip_method' => ChipMethod::class,
             'status' => OrderStatus::class,
             'confirmed_at' => 'datetime',
             'paid_at' => 'datetime',
@@ -54,6 +58,16 @@ class Order extends Model
         } while (static::query()->where('reference', $reference)->exists());
 
         return $reference;
+    }
+
+    /**
+     * What the buyer pays: the price (amount_sen, after any school discount)
+     * plus the CHIP processing fee for the chosen method. Sales reports count
+     * amount_sen only, since the fee goes to CHIP.
+     */
+    public function totalSen(): int
+    {
+        return $this->amount_sen + (int) $this->processing_fee_sen;
     }
 
     public function isPaid(): bool

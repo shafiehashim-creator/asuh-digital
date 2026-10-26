@@ -2,11 +2,13 @@
 
 namespace App\Services\Chip;
 
+use App\Enums\ChipMethod;
 use App\Models\Order;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
+use Throwable;
 
 /**
  * Thin wrapper around the CHIP Collect API.
@@ -42,13 +44,22 @@ class ChipClient
             'client' => $client,
             'purchase' => [
                 'currency' => $order->currency,
-                'products' => [[
-                    'name' => $order->itemName(),
-                    // CHIP prices are in cents (sen), like amount_sen.
-                    'price' => $order->amount_sen,
-                    'quantity' => 1,
-                ]],
+                'products' => array_values(array_filter([
+                    [
+                        'name' => $order->itemName(),
+                        // CHIP prices are in cents (sen), like amount_sen.
+                        'price' => $order->amount_sen,
+                        'quantity' => 1,
+                    ],
+                    $order->processing_fee_sen > 0 ? [
+                        'name' => 'Caj pemprosesan '.$order->chip_method?->label(),
+                        'price' => $order->processing_fee_sen,
+                        'quantity' => 1,
+                    ] : null,
+                ])),
             ],
+            // Only the method the buyer chose on our pay page, so its fee is right.
+            'payment_method_whitelist' => $order->chip_method ? $this->whitelist($order->chip_method) : null,
             'success_redirect' => $urls['success'] ?? null,
             'failure_redirect' => $urls['failure'] ?? null,
             'cancel_redirect' => $urls['cancel'] ?? null,
@@ -66,6 +77,76 @@ class ChipClient
     {
         return $this->request()->retry(2, 500, throw: false)
             ->get('purchases/'.rawurlencode($id).'/')->throw()->json();
+    }
+
+    /**
+     * Cancel an unpaid purchase so its checkout page can no longer be paid,
+     * before a new one is made for a different method.
+     */
+    public function cancelPurchase(string $id): void
+    {
+        $this->request()->post('purchases/'.rawurlencode($id).'/cancel/')->throw();
+    }
+
+    /**
+     * Payment method codes the brand has switched on, cached for an hour.
+     * Null when CHIP cannot be asked; the whitelist then uses our own list.
+     *
+     * @return list<string>|null
+     */
+    public function availableMethods(): ?array
+    {
+        $key = 'chip.payment_methods.'.config('services.chip.brand_id');
+        $cached = Cache::get($key);
+
+        if ($cached !== null) {
+            return $cached ?: null; // false: CHIP could not be asked a moment ago
+        }
+
+        try {
+            $methods = $this->request()->timeout(5)
+                ->get('payment_methods/', ['brand_id' => config('services.chip.brand_id'), 'currency' => 'MYR'])
+                ->throw()->json('available_payment_methods');
+
+            if (! is_array($methods) || $methods === []) {
+                throw new RuntimeException('Unexpected CHIP payment methods response.');
+            }
+
+            Cache::put($key, array_values($methods), now()->addHour());
+
+            return array_values($methods);
+        } catch (Throwable) {
+            // Do not make every pay page wait on CHIP while it is unreachable.
+            Cache::put($key, false, now()->addMinutes(5));
+
+            return null;
+        }
+    }
+
+    /**
+     * Which methods the buyer can pick on the pay page: those the brand has on,
+     * or all when CHIP cannot be asked.
+     *
+     * @return list<ChipMethod>
+     */
+    public function offeredMethods(): array
+    {
+        $available = $this->availableMethods();
+
+        return array_values(array_filter(
+            ChipMethod::cases(),
+            fn (ChipMethod $method) => $available === null || array_intersect($method->chipCodes(), $available) !== [],
+        ));
+    }
+
+    /** @return list<string> */
+    private function whitelist(ChipMethod $method): array
+    {
+        $available = $this->availableMethods();
+
+        return $available === null
+            ? $method->chipCodes()
+            : array_values(array_intersect($method->chipCodes(), $available));
     }
 
     /**

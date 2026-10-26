@@ -31,6 +31,12 @@ return [
         'preview_pages' => 5,
         // Floating WhatsApp button (digits with country code, e.g. 60123456789); hidden when empty.
         'whatsapp_number' => null,
+        // CHIP processing fee passed on to buyers, per method: fixed RM plus percent.
+        // Cards are never charged a fee (no surcharging card payments in Malaysia).
+        'chip_fee_fpx_fixed' => 0,
+        'chip_fee_fpx_percent' => 0,
+        'chip_fee_ewallet_fixed' => 0,
+        'chip_fee_ewallet_percent' => 0,
 
         // Landing page copy
         'landing_headline' => 'Rak buku Islamik digital untuk anak 6–13 tahun',

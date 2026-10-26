@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ChipMethod;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Models\Order;
 use App\Models\PaymentLog;
 use App\Services\Chip\ChipClient;
+use App\Services\Chip\ProcessingFee;
 use App\Services\PaymentProcessor;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\RedirectResponse;
@@ -23,7 +25,7 @@ class ChipPaymentController extends Controller
      * Send the buyer to CHIP's hosted checkout, reusing an unpaid purchase
      * so a double click can never create two payable purchases.
      */
-    public function start(Request $request, Order $order): RedirectResponse
+    public function start(Request $request, Order $order, ProcessingFee $fees): RedirectResponse
     {
         abort_unless($order->user_id === $request->user()->id, 404);
         abort_unless($order->payment_method === PaymentMethod::Chip, 404);
@@ -38,11 +40,22 @@ class ChipPaymentController extends Controller
             return $backToOrder->withErrors(['payment' => 'Bayaran dalam talian belum dibuka. Sila cuba sebentar lagi.']);
         }
 
+        // The buyer picks FPX, e-wallet or card here, so the fee is known up front.
+        $method = ChipMethod::tryFrom((string) $request->input('kaedah'));
+
+        if (! $method || ! in_array($method, $this->chip->offeredMethods(), true)) {
+            return $backToOrder->withErrors(['payment' => 'Sila pilih kaedah bayaran.']);
+        }
+
+        $fee = $fees->for($method, $order->amount_sen);
+        $sameTerms = $order->chip_method === $method && $order->processing_fee_sen === $fee;
+
         try {
             if ($order->chip_purchase_id) {
                 $existing = $this->chip->getPurchase($order->chip_purchase_id);
+                $payable = in_array($existing['status'] ?? null, ChipClient::PAYABLE_STATUSES, true);
 
-                if (in_array($existing['status'] ?? null, ChipClient::PAYABLE_STATUSES, true) && ! empty($existing['checkout_url'])) {
+                if ($payable && $sameTerms && ! empty($existing['checkout_url'])) {
                     return redirect()->away($existing['checkout_url']);
                 }
 
@@ -50,7 +63,15 @@ class ChipPaymentController extends Controller
                     // Paid but the callback has not arrived yet; wait for it.
                     return $backToOrder->with('payment_checking', true);
                 }
+
+                // Another method (or a new fee): the old checkout must not stay
+                // payable, or a payment there would no longer match this order.
+                if ($payable) {
+                    $this->chip->cancelPurchase($order->chip_purchase_id);
+                }
             }
+
+            $order->update(['chip_method' => $method, 'processing_fee_sen' => $fee]);
 
             $purchase = $this->chip->createPurchase($order->loadMissing('user', 'plan'), $this->urls($order));
         } catch (RequestException $e) {
@@ -136,7 +157,7 @@ class ChipPaymentController extends Controller
     {
         return ($purchase['status'] ?? null) === 'paid'
             && ($purchase['id'] ?? null) === $order->chip_purchase_id
-            && (int) ($purchase['purchase']['total'] ?? -1) === $order->amount_sen
+            && (int) ($purchase['purchase']['total'] ?? -1) === $order->totalSen()
             && ($purchase['purchase']['currency'] ?? null) === $order->currency
             // A test purchase must never activate a pass on the live site.
             && (bool) ($purchase['is_test'] ?? true) === (bool) config('services.chip.test_mode');

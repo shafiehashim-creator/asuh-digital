@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ChipMethod;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentMethod;
 use App\Exceptions\PreorderUnavailable;
 use App\Http\Requests\StorePreorderRequest;
 use App\Models\Order;
 use App\Models\Setting;
 use App\Services\BankTransfers;
+use App\Services\Chip\ChipClient;
+use App\Services\Chip\ProcessingFee;
 use App\Services\PreorderCheckout;
 use App\Services\PreorderSlots;
 use Illuminate\Contracts\Cache\LockTimeoutException;
@@ -66,7 +70,7 @@ class PreorderController extends Controller
         return redirect()->route('preorder.pay', $preorder->order);
     }
 
-    public function pay(Request $request, Order $order, BankTransfers $bankTransfers): View
+    public function pay(Request $request, Order $order, BankTransfers $bankTransfers, ChipClient $chip, ProcessingFee $fees): View
     {
         // Orders are only visible to their owner; 404 so references cannot be probed.
         abort_unless($order->user_id === $request->user()->id, 404);
@@ -91,6 +95,10 @@ class PreorderController extends Controller
             },
             'awaitingConfirmation' => $awaitingConfirmation,
             'canUploadReceipt' => $bankTransfers->canUploadReceipt($order),
+            // FPX, e-wallet and card, each with the processing fee the buyer adds.
+            'chipOptions' => $order->payment_method === PaymentMethod::Chip && $order->status === OrderStatus::Pending && $chip->isConfigured()
+                ? collect($chip->offeredMethods())->map(fn (ChipMethod $method) => ['method' => $method, 'fee' => $fees->for($method, $order->amount_sen)])
+                : collect(),
             'isExpired' => ! $awaitingConfirmation && (
                 $order->status === OrderStatus::Failed
                 || ($order->preorder?->reserved_until?->isPast() && $order->status === OrderStatus::Pending)
