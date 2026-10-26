@@ -106,6 +106,7 @@
                     <x-locale-switch />
                 </div>
             </div>
+            <x-campaign-bar />
         </header>
 
         <main>
