@@ -38,6 +38,7 @@ function initVideoPlayer(root) {
     const seek = wrap.querySelector('[data-seek]');
     const timeLabel = wrap.querySelector('[data-time]');
     const fullscreenButton = wrap.querySelector('[data-fullscreen]');
+    const zoomButton = wrap.querySelector('[data-zoom]');
     const replayButton = root.querySelector('[data-replay]');
 
     let player = null; // { play, pause, seekTo, time, duration }
@@ -97,6 +98,18 @@ function initVideoPlayer(root) {
         if (unsent >= 30) send();
     }, 1000);
 
+    // Big screen (filled or full screen): the controls float over the video
+    // and fade out after a few seconds of playing, as in the YouTube app.
+    const fullTarget = wrap === document ? root : wrap;
+    let hideTimer = null;
+    const isBig = () => fullTarget.classList.contains('video-big');
+    const controlsHidden = () => fullTarget.classList.contains('controls-hidden');
+    const showControls = () => {
+        fullTarget.classList.remove('controls-hidden');
+        clearTimeout(hideTimer);
+        if (isBig() && playing) hideTimer = setTimeout(() => fullTarget.classList.add('controls-hidden'), 3000);
+    };
+
     const setPlaying = (value) => {
         playing = value;
         lastTick = Date.now();
@@ -104,6 +117,7 @@ function initVideoPlayer(root) {
             playButton.textContent = value ? '❚❚' : '▶';
             playButton.setAttribute('aria-label', value ? root.dataset.labelPause || 'Jeda' : root.dataset.labelPlay || 'Main');
         }
+        showControls();
     };
 
     const onEnded = () => {
@@ -119,20 +133,38 @@ function initVideoPlayer(root) {
     };
 
     playButton?.addEventListener('click', toggle);
-    cover?.addEventListener('click', toggle);
+    // On a big screen a tap first brings the hidden controls back.
+    cover?.addEventListener('click', () => (isBig() && controlsHidden() ? showControls() : toggle()));
+    wrap.querySelector('[data-controls]')?.addEventListener('pointerdown', showControls);
     pausedScreen?.addEventListener('click', toggle);
     seek?.addEventListener('change', () => player?.seekTo(parseInt(seek.value, 10)));
     replayButton?.addEventListener('click', () => { show(endScreen, false); player?.seekTo(0); player?.play(); });
     // Full screen: the browser's own where allowed. iPhone (Safari and the
     // installed app) has no full screen for page elements, so there the
     // player fills the screen itself instead (.video-filled in app.css).
-    const fullTarget = wrap === document ? root : wrap;
     let filled = false;
+    const setBig = (on) => {
+        fullTarget.classList.toggle('video-big', on);
+        if (!on) setZoom(false);
+        if (fullscreenButton) fullscreenButton.setAttribute('aria-label', on ? root.dataset.labelExitFull || 'Keluar skrin penuh' : root.dataset.labelFull || 'Skrin penuh');
+        showControls();
+    };
+    // "Penuhkan": cover the whole screen, cutting a little off the top and
+    // bottom, instead of black bars at the sides.
+    const setZoom = (on) => {
+        fullTarget.classList.toggle('video-zoomed', on);
+        zoomButton?.setAttribute('aria-pressed', on ? 'true' : 'false');
+    };
+    zoomButton?.addEventListener('click', () => setZoom(!fullTarget.classList.contains('video-zoomed')));
     const fill = (on) => {
         filled = on;
         fullTarget.classList.toggle('video-filled', on);
         document.documentElement.classList.toggle('overflow-hidden', on);
+        setBig(on);
     };
+    const onFullscreenChange = () => setBig((document.fullscreenElement || document.webkitFullscreenElement) === fullTarget);
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
     fullscreenButton?.addEventListener('click', async () => {
         if (filled) {
             fill(false);

@@ -9,7 +9,8 @@
     data-provider="{{ $embed['provider'] }}" data-video-id="{{ $embed['id'] }}" data-embed-url="{{ $embed['url'] }}"
     data-progress-url="{{ $progressUrl }}" data-csrf="{{ csrf_token() }}"
     data-start="{{ $startAt }}" data-seconds-left="{{ $secondsLeft }}"
-    data-label-play="{{ __('Main') }}" data-label-pause="{{ __('Jeda') }}">
+    data-label-play="{{ __('Main') }}" data-label-pause="{{ __('Jeda') }}"
+    data-label-full="{{ __('Skrin penuh') }}" data-label-exit-full="{{ __('Keluar skrin penuh') }}">
 
     <div data-frame class="absolute inset-0 [&_iframe]:h-full [&_iframe]:w-full"></div>
 
@@ -59,6 +60,8 @@
     <label class="sr-only" for="{{ $seekId }}">{{ __('Kedudukan video') }}</label>
     <input id="{{ $seekId }}" data-seek type="range" min="0" max="0" value="0" class="h-3 min-w-0 flex-1 accent-biru">
     <span data-time class="shrink-0 font-mono text-sm font-bold">0:00</span>
+    {{-- Only on a big screen (app.css): fill it completely, cutting the top and bottom a little. --}}
+    <button type="button" data-zoom aria-pressed="false" class="size-12 shrink-0 items-center justify-center rounded-full border-2 border-ink text-xl" aria-label="{{ __('Penuhkan skrin') }}">⤢</button>
     <button type="button" data-fullscreen class="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-ink text-xl" aria-label="{{ __('Skrin penuh') }}">⛶</button>
 </div>
 </div>
