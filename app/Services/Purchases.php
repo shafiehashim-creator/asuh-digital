@@ -28,16 +28,18 @@ class Purchases
         private PlusOffer $plusOffer,
         private PromoCodes $promoCodes,
         private SubscriptionPlans $plans,
+        private Campaigns $campaigns,
     ) {}
 
     /**
-     * Early bird first: the regular pass is sold only once its slots are gone.
+     * Early bird first: the regular pass is sold once its slots are gone, or
+     * outside the early bird campaign when one is set up.
      */
     public function earlyBirdOpen(): bool
     {
         $plan = $this->slots->plan();
 
-        return $plan?->is_active && ! $this->slots->isSoldOut();
+        return $plan?->is_active && ! $this->slots->isSoldOut() && $this->campaigns->earlyBirdWindowOpen();
     }
 
     public function regularPlan(): ?Plan
@@ -78,7 +80,10 @@ class Purchases
             throw new InvalidArgumentException(__('Anda sudah ada Langganan Tahunan. Naik taraf ke Langganan Plus dengan membayar bezanya sahaja.'));
         }
 
-        return $this->order($user, $input, ['plan_id' => $plan->id], $plan->price_sen, $plan->isMonthly() ? PromoProduct::Monthly : PromoProduct::Plus);
+        // A Langganan Plus campaign lowers the yearly price while it runs.
+        $price = $plan->isMonthly() ? $plan->price_sen : $this->plusOffer->priceSen();
+
+        return $this->order($user, $input, ['plan_id' => $plan->id], $price, $plan->isMonthly() ? PromoProduct::Monthly : PromoProduct::Plus);
     }
 
     /**

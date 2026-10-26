@@ -1,7 +1,6 @@
 @php
     use App\Support\Money;
 
-    $price = $plan->price_sen;
     $thumb = fn ($video) => $video->thumbnail_path ? Storage::disk('public')->url($video->thumbnail_path) : null;
     $card = 'rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)]';
 @endphp
@@ -16,7 +15,12 @@
                 {{ __('Semua e-book ASUH, ditambah semua video animasi, untuk seisi keluarga selama 12 bulan. Anak membaca dahulu, kemudian menonton kisahnya bergerak dan bersuara.') }}
             </p>
 
-            <p class="mt-6 font-display text-6xl font-extrabold">{{ Money::short($price) }}</p>
+            <p class="mt-6 font-display text-6xl font-extrabold">
+                {{ Money::short($price) }}
+                @if ($compareAt)
+                    <span class="text-3xl text-white/60 line-through">{{ Money::short($compareAt) }}</span>
+                @endif
+            </p>
             <p class="mt-1 font-semibold text-white/80">{{ __('Kira-kira :month sebulan, atau :day sehari.', ['month' => Money::format(intdiv($price, 12)), 'day' => Money::format(intdiv($price, 365))]) }}</p>
 
             <ul class="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 font-bold">

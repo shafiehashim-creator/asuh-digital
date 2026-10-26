@@ -32,7 +32,9 @@ class PlusPageController extends Controller
         return view('plus.show', [
             'plan' => $plan,
             'yearly' => $yearly,
-            'extraSen' => $yearly && $plan->price_sen > $yearly->price_sen ? $plan->price_sen - $yearly->price_sen : null,
+            'price' => $offer->priceSen(),
+            'compareAt' => $offer->compareAtSen(),
+            'extraSen' => $yearly && $offer->priceSen() > $yearly->price_sen ? $offer->priceSen() - $yearly->price_sen : null,
             'videos' => $videos->take(6),
             'videoCount' => $videos->count(),
             'bookCount' => $stats->summary()['books'],
