@@ -102,23 +102,29 @@ html {
     aspect-ratio: auto;
 }
 
-/* The picture itself covers the box; YouTube is resized to it (ResizeObserver). */
+/*
+ * The picture itself covers the box and is centred by plain offsets; YouTube
+ * is resized to it (ResizeObserver). No transform here: iPhone draws the
+ * video layer in the wrong place under a translate, worse inside the turned
+ * (rotated) player.
+ */
 .video-big.video-zoomed [data-frame] {
+    --zoom-w: max(100cqw, calc(100cqh * 16 / 9));
+    --zoom-h: max(100cqh, calc(100cqw * 9 / 16));
     inset: auto;
-    top: 50%;
-    left: 50%;
-    width: max(100cqw, calc(100cqh * 16 / 9));
-    height: max(100cqh, calc(100cqw * 9 / 16));
-    transform: translate(-50%, -50%);
+    width: var(--zoom-w);
+    height: var(--zoom-h);
+    left: calc((100cqw - var(--zoom-w)) / 2);
+    top: calc((100cqh - var(--zoom-h)) / 2);
 }
 
 .video-big [data-controls] {
     position: absolute;
-    left: 50%;
+    left: 0;
+    right: 0;
     bottom: max(0.75rem, env(safe-area-inset-bottom));
     width: min(calc(100cqw - 1.5rem), 40rem);
-    margin: 0;
-    transform: translateX(-50%);
+    margin: 0 auto;
     background: rgb(255 255 255 / 0.92);
     transition: opacity 0.3s;
 }
