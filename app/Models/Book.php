@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 #[Fillable([
-    'title', 'slug', 'author', 'synopsis', 'age_group', 'single_price_sen',
+    'title', 'slug', 'author', 'synopsis', 'age_group', 'single_price_sen', 'royalty_single_percent',
     'is_enhanced_edition', 'cover_path', 'status', 'published_at',
 ])]
 class Book extends Model
@@ -31,6 +31,7 @@ class Book extends Model
             'age_group' => AgeGroup::class,
             'status' => BookStatus::class,
             'single_price_sen' => 'integer',
+            'royalty_single_percent' => 'float',
             'is_enhanced_edition' => 'boolean',
             'published_at' => 'datetime',
         ];
@@ -157,6 +158,12 @@ class Book extends Model
     public function videos(): HasMany
     {
         return $this->hasMany(Video::class);
+    }
+
+    /** Royalty payees and their share (%) of this book's royalty. */
+    public function contributors(): BelongsToMany
+    {
+        return $this->belongsToMany(Contributor::class)->withPivot(['role', 'share_percent'])->withTimestamps();
     }
 
     public function quiz(): HasOne
