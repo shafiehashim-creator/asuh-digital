@@ -53,23 +53,18 @@ html {
 }
 
 /*
- * Video player filling the screen: the browser's full screen, or on iPhone
- * (no full screen for page elements) the player covering the page itself.
- * Cinema style: black, no rounded frame, the 16:9 picture as large as fits
- * with the controls below. Held upright, a filled player turns sideways,
- * as YouTube does, so turning the phone gives the big picture.
+ * Video player on a big screen: the browser's full screen, or on iPhone (no
+ * full screen for page elements) the player covering the page itself
+ * (.video-filled). Cinema style: black, frameless, the 16:9 picture using
+ * the full height, controls floating over it and fading out while playing.
+ * Held upright, a filled player turns sideways, as YouTube does.
+ * .video-zoomed covers the whole screen, cutting a little off the top and
+ * bottom instead of black bars at the sides (phones are wider than 16:9).
  */
 .video-filled {
     position: fixed;
     inset: 0;
     z-index: 60;
-    container-type: size;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 0.5rem;
-    background: #000;
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 @media (orientation: portrait) {
@@ -81,26 +76,71 @@ html {
         height: 100vw;
         transform: rotate(90deg);
         transform-origin: top left;
-        padding: 0 env(safe-area-inset-bottom) 0 env(safe-area-inset-top);
     }
 }
 
-[data-video-wrap]:fullscreen {
+.video-big {
     container-type: size;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
     background: #000;
     padding: 0;
-    gap: 0.5rem;
 }
 
-.video-filled :is([data-video-player], [data-controls]),
-[data-video-wrap]:fullscreen :is([data-video-player], [data-controls]) {
-    width: min(100cqw, calc((100cqh - 4.5rem) * 16 / 9));
-    margin: 0 auto;
-}
-
-.video-filled [data-video-player],
-[data-video-wrap]:fullscreen [data-video-player] {
-    border-radius: 0;
+.video-big [data-video-player] {
+    width: min(100cqw, calc(100cqh * 16 / 9));
     border-width: 0;
+    border-radius: 0;
     box-shadow: none;
+}
+
+.video-big.video-zoomed [data-video-player] {
+    width: 100cqw;
+    height: 100cqh;
+    aspect-ratio: auto;
+}
+
+/* The picture itself covers the box; YouTube is resized to it (ResizeObserver). */
+.video-big.video-zoomed [data-frame] {
+    inset: auto;
+    top: 50%;
+    left: 50%;
+    width: max(100cqw, calc(100cqh * 16 / 9));
+    height: max(100cqh, calc(100cqw * 9 / 16));
+    transform: translate(-50%, -50%);
+}
+
+.video-big [data-controls] {
+    position: absolute;
+    left: 50%;
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    width: min(calc(100cqw - 1.5rem), 40rem);
+    margin: 0;
+    transform: translateX(-50%);
+    background: rgb(255 255 255 / 0.92);
+    transition: opacity 0.3s;
+}
+
+.video-big.controls-hidden [data-controls] {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* The browser's own full screen; .video-filled is fixed instead. */
+.video-big:not(.video-filled) {
+    position: relative;
+}
+
+[data-zoom] {
+    display: none;
+}
+
+.video-big [data-zoom] {
+    display: flex;
+}
+
+.video-big.video-zoomed [data-zoom] {
+    background: var(--color-kuning);
 }
