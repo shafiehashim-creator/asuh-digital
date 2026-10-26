@@ -10,9 +10,11 @@ beforeEach(function () {
     Setting::set('brand_video_title', 'Lagu ASUH: Jom Jadi Baik!');
 });
 
-it('shows the music video on the home, about and account pages, loading YouTube only on play', function () {
+it('shows the music video on the home, about and account pages, on the ASUH player started on play', function () {
     $this->get('/')->assertOk()->assertSee('Jom nyanyi bersama Anis dan Anas')
-        ->assertSee('youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0', false);
+        ->assertSee('data-video-id="dQw4w9WgXcQ"', false)
+        ->assertSee('data-lazy', false)
+        ->assertDontSee('youtube-nocookie.com/embed', false);
     $this->get('/tentang-kami')->assertSee('Lagu ASUH: Jom Jadi Baik!');
     $this->actingAs(User::factory()->create())->get('/akaun')->assertSee('Lagu ASUH: Jom Jadi Baik!');
 });

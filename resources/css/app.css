@@ -46,3 +46,8 @@
 html {
     touch-action: manipulation;
 }
+
+/* Alpine: hide until Alpine has started. */
+[x-cloak] {
+    display: none !important;
+}
