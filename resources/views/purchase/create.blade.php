@@ -89,6 +89,7 @@
                         <input type="checkbox" name="pdpa_consent" value="1" @checked(old('pdpa_consent')) class="mt-0.5 size-5 shrink-0 rounded border-2 border-ink/30 text-biru" required>
                         <span class="text-sm">
                             Saya bersetuju dengan <a href="{{ route('terms') }}" class="pautan" target="_blank">terma dan syarat</a>
+                            (termasuk <a href="{{ route('refund') }}" class="pautan" target="_blank">polisi bayaran balik</a>)
                             serta membenarkan data saya diproses oleh ASUH (Galeri Ilmu Media Group) seperti dalam
                             <a href="{{ route('privacy') }}" class="pautan" target="_blank">notis privasi</a>.
                         </span>

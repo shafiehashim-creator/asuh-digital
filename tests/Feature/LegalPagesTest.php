@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Setting;
+use Database\Seeders\PlanSeeder;
 
 it('renders the privacy notice and terms inside the full site layout', function (string $url, string $title) {
     // Regression: a Blade directive glued to a word ("permintaan@if") once
@@ -14,6 +15,8 @@ it('renders the privacy notice and terms inside the full site layout', function 
 })->with([
     'privacy' => ['/privasi', 'Notis privasi'],
     'terms' => ['/terma', 'Terma dan syarat'],
+    'refund' => ['/polisi-bayaran-balik', 'Polisi bayaran balik'],
+    'delivery' => ['/polisi-penghantaran', 'Polisi penghantaran'],
 ]);
 
 it('covers what the privacy notice must say about children and payments', function () {
@@ -61,9 +64,35 @@ it('shows the draft notice outside production only', function () {
 });
 
 it('links the terms and privacy notice from the checkout consent', function () {
-    $this->seed(Database\Seeders\PlanSeeder::class);
+    $this->seed(PlanSeeder::class);
 
     $this->get('/pre-order')
         ->assertSee(route('terms'), false)
         ->assertSee(route('privacy'), false);
+});
+
+it('shows the admin refund policy with how to ask and the contact e-mail', function () {
+    Setting::set('refund_policy', 'Polisi ujian: bayaran balik dalam 7 hari.');
+    Setting::set('contact_email', 'bantuan@contoh.my');
+
+    $this->get('/polisi-bayaran-balik')
+        ->assertSee('Polisi ujian: bayaran balik dalam 7 hari.')
+        ->assertSee('bantuan@contoh.my')
+        ->assertSee('nombor rujukan pesanan');
+});
+
+it('explains digital delivery and follows the pass start rule', function () {
+    Setting::set('pass_start_rule', 'on_launch');
+    $this->get('/polisi-penghantaran')
+        ->assertSee('Tiada barang fizikal dihantar')
+        ->assertSee('akses dibuka pada tarikh platform ASUH Digital dilancarkan');
+
+    Setting::set('pass_start_rule', 'on_payment');
+    $this->get('/polisi-penghantaran')->assertSee('akses dibuka sebaik bayaran disahkan');
+});
+
+it('links both policies from every page footer', function () {
+    $this->get('/')
+        ->assertSee(route('refund'), false)
+        ->assertSee(route('delivery'), false);
 });

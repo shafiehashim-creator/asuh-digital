@@ -119,6 +119,7 @@
                         <span class="text-sm">
                             Saya bersetuju dengan
                             @if ($termsUrl) <a href="{{ $termsUrl }}" class="pautan" target="_blank">terma dan syarat</a> @else terma dan syarat @endif
+                            (termasuk <a href="{{ route('refund') }}" class="pautan" target="_blank">polisi bayaran balik</a>)
                             serta membenarkan data saya dan maklumat keluarga di atas diproses oleh ASUH (Galeri Ilmu Media Group)
                             untuk pesanan ini dan akaun ASUH Digital, seperti dalam
                             @if ($privacyUrl) <a href="{{ $privacyUrl }}" class="pautan" target="_blank">notis privasi</a>.@else notis privasi.@endif
