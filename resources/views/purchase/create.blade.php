@@ -6,23 +6,27 @@
     $cardClass = 'rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)] sm:p-8';
     $bankHours = (int) Setting::get('bank_transfer_reservation_hours');
     $schoolCode ??= false;
+    $periods ??= [];
+    $chosen = old('tempoh', request('tempoh', $periods[0]['value'] ?? null));
 @endphp
 
 <x-layouts.app :title="$title">
     <div class="mx-auto max-w-2xl px-4 py-10">
         <h1 class="font-display text-3xl font-extrabold text-magenta sm:text-4xl">{{ $title }}</h1>
 
-        <div class="mt-4 rounded-2xl border-2 border-ink bg-kuning px-5 py-4">
-            <div class="flex flex-wrap items-center justify-between gap-4">
-                <p class="font-display text-lg font-bold">{{ $item }}</p>
-                <p class="font-display text-3xl font-extrabold">{{ $price }}</p>
+        @unless ($periods)
+            <div class="mt-4 rounded-2xl border-2 border-ink bg-kuning px-5 py-4">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <p class="font-display text-lg font-bold">{{ $item }}</p>
+                    <p class="font-display text-3xl font-extrabold">{{ $price }}</p>
+                </div>
+                <ul class="mt-2 space-y-1 text-sm font-semibold">
+                    @foreach ($details as $detail)
+                        <li>✓ {{ $detail }}</li>
+                    @endforeach
+                </ul>
             </div>
-            <ul class="mt-2 space-y-1 text-sm font-semibold">
-                @foreach ($details as $detail)
-                    <li>✓ {{ $detail }}</li>
-                @endforeach
-            </ul>
-        </div>
+        @endunless
 
         @if ($note)
             <p role="note" class="mt-4 rounded-xl border-2 border-biru/30 bg-biru/5 px-4 py-3 text-sm font-semibold text-biru">{{ $note }}</p>
@@ -34,6 +38,35 @@
 
         <form method="POST" action="{{ $action }}" class="mt-8 space-y-8" novalidate>
             @csrf
+
+            @if ($periods)
+                {{-- Yearly or monthly: yearly comes first, chosen by default and marked the better deal. --}}
+                <fieldset class="space-y-3">
+                    <legend class="sr-only">{{ __('Pilih tempoh langganan') }}</legend>
+                    @foreach ($periods as $period)
+                        <label @class([
+                            'relative flex cursor-pointer items-center gap-4 rounded-3xl border-2 border-ink/20 bg-white p-5 transition has-checked:border-ink has-checked:bg-kuning has-checked:shadow-[0_4px_0_var(--color-ink)]',
+                            'pt-7' => $period['badge'],
+                        ])>
+                            @if ($period['badge'])
+                                <span class="absolute -top-3 left-5 rounded-full border-2 border-ink bg-oren px-3 py-0.5 text-xs font-extrabold">★ {{ $period['badge'] }}</span>
+                            @endif
+                            <input type="radio" name="tempoh" value="{{ $period['value'] }}" @checked($chosen === $period['value']) class="size-6 shrink-0 text-biru">
+                            <span class="min-w-0 flex-1">
+                                <span class="block font-display text-xl font-extrabold">{{ $period['label'] }}</span>
+                                <span class="block text-sm font-semibold text-ink/75">{{ $period['line'] }}</span>
+                            </span>
+                            <span class="shrink-0 font-display text-3xl font-extrabold">{{ $period['price'] }}</span>
+                        </label>
+                    @endforeach
+                    <ul class="grid gap-1 px-2 pt-1 text-sm font-semibold text-ink/80 sm:grid-cols-3">
+                        @foreach ($details as $detail)
+                            <li>✓ {{ $detail }}</li>
+                        @endforeach
+                    </ul>
+                    @error('tempoh') <p class="text-sm font-semibold text-magenta">{{ $message }}</p> @enderror
+                </fieldset>
+            @endif
 
             <section class="{{ $cardClass }} space-y-5" aria-labelledby="akaun-heading">
                 <h2 id="akaun-heading" class="font-display text-xl font-bold text-plum">1. {{ __('Akaun anda') }}</h2>

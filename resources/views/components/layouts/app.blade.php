@@ -117,7 +117,18 @@
                         </a>
                     </li>
                 @endforeach
+                <li class="flex-1">
+                    <button type="button" x-data @click="$dispatch('open-menu')"
+                        class="group flex min-h-16 w-full flex-col items-center justify-center gap-0.5 text-xs font-bold text-ink/60">
+                        <span class="flex h-8 w-14 items-center justify-center rounded-full group-hover:bg-lavender">
+                            <svg viewBox="0 0 24 24" class="size-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        </span>
+                        {{ __('Menu') }}
+                    </button>
+                </li>
             </ul>
         </nav>
+
+        <x-mobile-menu :catalog-open="$catalogOpen" :videos-open="$videosOpen" :is-teacher="$isTeacher" />
     </body>
 </html>

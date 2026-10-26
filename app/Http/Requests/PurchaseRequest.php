@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\BillingPeriod;
 use App\Enums\PaymentMethod;
 use App\Models\User;
 use App\Support\Phone;
@@ -45,6 +46,8 @@ class PurchaseRequest extends FormRequest
             // One "Kod promosi" (school, coupon or affiliate); checked against the product in PromoCodes.
             'promo_code' => ['nullable', 'string', 'max:30'],
             'school_code' => ['nullable', 'string', 'max:30'],
+            // Langganan Tahunan (default) or Bulanan; ignored for e-books and upgrades.
+            'tempoh' => ['nullable', Rule::enum(BillingPeriod::class)],
         ];
     }
 }

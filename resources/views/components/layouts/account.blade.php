@@ -15,8 +15,21 @@
             app(App\Services\Affiliates::class)->isOpen() || auth()->user()?->affiliate()->exists()],
     ], fn ($item) => $item[4]);
 
+    // Monthly subscribers: the yearly plan of the same kind, and what it saves.
+    $monthlyPass = $activePass?->plan?->isMonthly() ? $activePass : null;
+    $yearlySaving = null;
+    if ($monthlyPass) {
+        $plans = app(App\Services\SubscriptionPlans::class);
+        $period = App\Enums\BillingPeriod::Yearly;
+        $yearlyPlan = $monthlyPass->isPlus() ? $plans->plus($period) : $plans->pass($period);
+        $yearlySaving = $yearlyPlan ? App\Services\SubscriptionPlans::yearlySavingPercent($yearlyPlan, $monthlyPass->plan) : null;
+    }
+
     // One offer at a time, matched to the family's subscription.
     $offer = match (true) {
+        $monthlyPass !== null && $yearlySaving => ['Jimat '.$yearlySaving.'% dengan tahunan', 'Tukar ke langganan tahunan. Ia bermula sebaik bulan semasa tamat, jadi tiada hari yang hilang.', $monthlyPass->isPlus() ? route('purchase.plus', ['tempoh' => 'tahunan']) : route('purchase.pass', ['tempoh' => 'tahunan']), 'Tukar ke tahunan'],
+        $monthlyPass !== null && $monthlyPass->ends_at->lessThan(now()->addDays(7)) => ['Langganan bulanan hampir tamat', 'Perbaharui untuk sebulan lagi, atau pilih tahunan untuk lebih jimat.', $monthlyPass->isPlus() ? route('purchase.plus') : route('purchase.pass'), 'Perbaharui'],
+        $monthlyPass !== null => null,
         $plusUpgradePrice !== null => ['Baharu: video animasi', 'Naik taraf ke Langganan Plus. Bayar beza harga untuk baki langganan sahaja.', route('purchase.plus'), 'Naik taraf · '.Money::short($plusUpgradePrice)],
         $activePass === null && $pendingPass === null => ['Buka semua buku', 'Langganan Tahunan membuka semua e-book ASUH untuk semua anak anda.', route('purchase.pass'), 'Lihat langganan'],
         $activePass !== null && $activePass->ends_at->lessThan(now()->addDays(60)) => ['Langganan hampir tamat', 'Perbaharui sekarang. Langganan baharu bermula sebaik langganan semasa tamat.', route('purchase.pass'), 'Perbaharui'],

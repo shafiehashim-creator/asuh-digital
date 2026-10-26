@@ -96,7 +96,7 @@ class Royalties
     public function recognisedRevenue(Carbon $start, Carbon $end): int
     {
         $plusShare = (float) Setting::get('royalty_plus_ebook_share') / 100;
-        $plus = Plan::findByCode(Plan::PAS_PLUS)?->id;
+        $plus = Plan::query()->whereIn('code', Plan::PLUS_CODES)->pluck('id')->all();
 
         $orders = Order::query()
             ->where('status', OrderStatus::Paid)
@@ -127,7 +127,7 @@ class Royalties
             $overlap = $this->overlapSeconds($from, $to, $start, $end);
 
             if ($overlap > 0) {
-                $share = $order->plan_id === $plus ? $plusShare : 1;
+                $share = in_array($order->plan_id, $plus, true) ? $plusShare : 1;
                 $total += $order->amount_sen * $share * $overlap / $from->diffInSeconds($to);
             }
         }

@@ -239,6 +239,7 @@
 
             @if ($onSale)
                 <a href="{{ $checkoutUrl }}" class="btn-utama mt-6 w-full text-lg">{{ $ctaLabel }}</a>
+                <x-monthly-option class="mt-3" />
                 <a href="{{ route('pass.show') }}" class="pautan mt-4 block text-center text-sm font-bold">{{ __('Kenapa Langganan Tahunan lebih jimat?') }} &rarr;</a>
             @else
                 <p class="mt-6 rounded-xl bg-ink/5 p-4 font-semibold">

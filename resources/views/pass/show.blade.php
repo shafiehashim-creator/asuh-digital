@@ -55,6 +55,7 @@
 
             @if ($onSale)
                 <a href="{{ $offer->checkoutUrl() }}" class="btn-utama mt-8 text-lg">{{ $offer->ctaLabel() }} &rarr;</a>
+                <x-monthly-option dark class="mt-4" />
             @else
                 <p class="mt-8 rounded-xl bg-white/10 p-4 font-semibold">{{ __('Langganan Tahunan belum dijual buat masa ini. Sila kembali tidak lama lagi.') }}</p>
             @endif

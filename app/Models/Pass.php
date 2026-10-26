@@ -15,6 +15,7 @@ class Pass extends Model
         return [
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
+            'renewal_reminded_at' => 'datetime',
         ];
     }
 
@@ -31,7 +32,7 @@ class Pass extends Model
     /** Langganan Plus (Phase 2) adds the animated videos. */
     public function isPlus(): bool
     {
-        return $this->plan?->code === Plan::PAS_PLUS;
+        return (bool) $this->plan?->isPlus();
     }
 
     public function user(): BelongsTo
