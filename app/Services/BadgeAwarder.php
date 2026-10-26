@@ -35,6 +35,9 @@ class BadgeAwarder
             $new[] = $badge;
         }
 
+        // A parent may have promised a reward for one of these.
+        app(RewardPromises::class)->badgesEarned($child, $new);
+
         return $new;
     }
 

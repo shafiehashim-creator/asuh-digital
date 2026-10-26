@@ -10,6 +10,7 @@
         ['Anak-anak', 'account.children', ['account.children', 'children.*'], ['M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8', 'M2 21a7 7 0 0 1 14 0', 'M16 3.5a4 4 0 0 1 0 7.5', 'M22 21a7 7 0 0 0-4-6.3'], $shelfOpen],
         ['Pencapaian', 'account.progress', ['account.progress'], ['M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12', 'm8.5 13.5-1.5 8 5-3 5 3-1.5-8'], $shelfOpen],
         ['Langganan dan pesanan', 'account.billing', ['account.billing'], ['M6 2h12v20l-3-2-3 2-3-2-3 2z', 'M9 7h6', 'M9 11h6', 'M9 15h4'], true],
+        ['Panduan', 'account.guide', ['account.guide'], ['M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20', 'M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3', 'M12 17h.01'], true],
         ['Profil dan keselamatan', 'account.profile', ['account.profile'], ['M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8', 'M5 21a7 7 0 0 1 14 0'], true],
         ['Affiliate', 'account.affiliate', ['account.affiliate'], ['M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6', 'M6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6', 'M18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6', 'm8.6 13.5 6.8 4', 'm15.4 6.5-6.8 4'],
             app(App\Services\Affiliates::class)->isOpen() || auth()->user()?->affiliate()->exists()],

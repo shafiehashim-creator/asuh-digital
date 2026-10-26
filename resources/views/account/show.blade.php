@@ -52,6 +52,16 @@
         </div>
     </section>
 
+    {{-- The how-to, for new families especially --}}
+    <a href="{{ route('account.guide') }}" class="flex items-center gap-4 rounded-3xl border-2 border-ink bg-kuning p-4 shadow-[0_3px_0_var(--color-ink)] hover:bg-kuning/90">
+        <span class="grid size-12 shrink-0 place-items-center rounded-2xl bg-white text-2xl" aria-hidden="true">📘</span>
+        <span class="min-w-0 flex-1">
+            <span class="block font-display text-lg leading-tight font-bold">Panduan penggunaan</span>
+            <span class="block text-sm text-ink/80">Cara tambah anak, PIN, Mod Anak, video dan laporan, langkah demi langkah dengan gambar.</span>
+        </span>
+        <span class="font-display text-2xl font-extrabold" aria-hidden="true">&rarr;</span>
+    </a>
+
     {{-- Stat cards --}}
     <nav aria-label="Ringkasan akaun" @class(['grid gap-3', 'grid-cols-2 md:grid-cols-4' => count($cards) === 4, 'grid-cols-2' => count($cards) === 2])>
         @foreach ($cards as [$label, $value, $line, $href, $icon])

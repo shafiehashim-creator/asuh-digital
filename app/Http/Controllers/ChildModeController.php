@@ -47,6 +47,8 @@ class ChildModeController extends Controller
             'child' => $child,
             'books' => $this->childMode->shelf($child),
             'badges' => $child->badges()->get(),
+            // The parent's reward promises not yet kept, for the child to aim for.
+            'promises' => $child->rewardPromises()->whereNull('fulfilled_at')->orderByDesc('achieved_at')->get(),
             // Phase 2 animated videos, each with the reason it is locked (if any).
             'videos' => $watching->hasAccess($child)
                 ? $watching->shelf($child)->map(fn ($video) => ['video' => $video, 'locked' => $watching->lockReason($child, $video)])

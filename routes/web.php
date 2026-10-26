@@ -25,6 +25,7 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReaderController;
 use App\Http\Controllers\ReadingProgressController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\RewardPromiseController;
 use App\Http\Controllers\SwitchAccountController;
 use App\Http\Controllers\Teacher;
 use App\Http\Controllers\VideoPageController;
@@ -144,6 +145,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/akaun', [AccountController::class, 'show'])->name('account');
     Route::get('/akaun/langganan', [AccountController::class, 'billing'])->name('account.billing');
     Route::get('/akaun/profil', [AccountController::class, 'profile'])->name('account.profile');
+    Route::get('/akaun/panduan', [AccountController::class, 'guide'])->name('account.guide');
     Route::get('/akaun/affiliate', [AccountController::class, 'affiliate'])->name('account.affiliate');
     Route::post('/akaun/affiliate', [AccountController::class, 'applyAffiliate'])->middleware('throttle:10,1')->name('account.affiliate.store');
 
@@ -160,6 +162,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/akaun/rak', [AccountController::class, 'shelf'])->name('account.shelf');
         Route::get('/akaun/anak', [AccountController::class, 'children'])->name('account.children');
         Route::get('/akaun/pencapaian', [AccountController::class, 'progress'])->name('account.progress');
+        Route::post('/akaun/anak/{child}/janji', [RewardPromiseController::class, 'store'])->middleware('throttle:20,1')->name('reward-promises.store');
+        Route::patch('/akaun/janji/{promise}/tunai', [RewardPromiseController::class, 'fulfil'])->name('reward-promises.fulfil');
+        Route::delete('/akaun/janji/{promise}', [RewardPromiseController::class, 'destroy'])->name('reward-promises.destroy');
         Route::post('/akaun/anak/{child}/mod-anak', [ChildModeController::class, 'enter'])->name('children.child-mode');
         Route::put('/akaun/laporan-mingguan', [WeeklyReportController::class, 'update'])->name('weekly-report.update');
         Route::put('/akaun/pin', [ParentPinController::class, 'update'])->middleware('throttle:10,1')->name('parent-pin.update');

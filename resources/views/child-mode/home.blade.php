@@ -9,6 +9,28 @@
             <span class="text-sm font-bold text-biru">{{ $badges->count() }} / {{ count(App\Enums\Badge::cases()) }}</span>
         </a>
 
+        @if ($promises->isNotEmpty())
+            <section class="mt-4 rounded-2xl border-2 border-ink bg-kuning p-4 shadow-[0_3px_0_var(--color-ink)]" aria-labelledby="promises-heading">
+                <h2 id="promises-heading" class="font-display text-lg font-bold">🎁 Janji ibu ayah</h2>
+                <ul class="mt-2 space-y-2">
+                    @foreach ($promises as $promise)
+                        <li class="flex items-center gap-3 rounded-xl bg-white px-3 py-2">
+                            <span class="text-2xl" aria-hidden="true">{{ $promise->isAchieved() ? '🎉' : $promise->badge->emoji() }}</span>
+                            <span class="min-w-0">
+                                @if ($promise->isAchieved())
+                                    <span class="block font-bold text-magenta">Tahniah! Kamu dapat lencana {{ $promise->badge->label() }}.</span>
+                                    <span class="block text-sm">Minta ganjaran daripada ibu ayah: <strong>{{ $promise->reward }}</strong></span>
+                                @else
+                                    <span class="block font-bold">Dapatkan lencana {{ $promise->badge->label() }} → {{ $promise->reward }}</span>
+                                    <span class="block text-sm text-ink/70">{{ $promise->badge->description() }}</span>
+                                @endif
+                            </span>
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
+
         @if (App\Support\BrandVideo::shownOn('child_mode'))
             <a href="{{ route('child-mode.song') }}" class="mt-4 flex min-h-16 items-center gap-4 rounded-2xl border-2 border-ink bg-plum px-4 py-3 text-white shadow-[0_3px_0_var(--color-ink)] hover:bg-plum/90">
                 <span class="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-kuning text-2xl text-ink" aria-hidden="true">♪</span>

@@ -12,7 +12,7 @@
             <p class="inline-block rounded-full border-2 border-ink bg-oren px-3 py-1 text-sm font-extrabold text-ink">{{ __('Baharu · e-book + video animasi') }}</p>
             <h1 class="mt-4 font-display text-4xl leading-tight font-extrabold text-kuning sm:text-5xl">{{ __('Langganan Plus ASUH Digital') }}</h1>
             <p class="mt-3 text-lg text-white/90">
-                {{ __('Semua e-book ASUH, ditambah semua video animasi, untuk seisi keluarga selama 12 bulan. Anak membaca dahulu, kemudian menonton kisahnya bergerak dan bersuara.') }}
+                {{ __('Semua e-book ASUH, ditambah semua video animasi, untuk seisi keluarga selama 12 bulan. Anak membaca kisahnya, kemudian menontonnya bergerak dan bersuara.') }}
             </p>
 
             <p class="mt-6 font-display text-6xl font-extrabold">
@@ -46,7 +46,7 @@
         <h2 class="mt-1 font-display text-3xl font-extrabold text-plum">{{ __('Anak memang suka menonton. Biar yang ditonton itu ASUH.') }}</h2>
         <div class="mt-4 space-y-4 text-lg text-ink/85">
             <p>{{ __('Anak-anak hari ini membesar dengan skrin. Kita tidak boleh menghalang mereka menonton, tetapi kita boleh memilih apa yang mereka tonton: animasi pendek daripada buku ASUH yang disemak syariah, tanpa iklan dan tanpa video lain yang muncul selepasnya.') }}</p>
-            <p>{{ __('Dan menonton tidak menggantikan membaca. Dengan suis "Baca dulu, tonton kemudian", video sesebuah buku hanya dibuka selepas anak membaca bukunya. Membaca menjadi pintu, animasi menjadi ganjaran.') }}</p>
+            <p>{{ __('Dan menonton tidak perlu menggantikan membaca. Jika mahu, ibu bapa boleh menghidupkan suis "Baca dulu, tonton kemudian" untuk setiap anak: video sesebuah buku hanya dibuka selepas anak membaca bukunya. Membaca menjadi pintu, animasi menjadi ganjaran.') }}</p>
         </div>
     </section>
 
@@ -106,7 +106,7 @@
                 @foreach ([
                     ['🎬', $videoCount > 0 ? __('Semua :count video animasi', ['count' => $videoCount]) : __('Semua video animasi ASUH'), __('Kisah daripada buku ASUH yang bergerak dan bersuara, dan video baharu sepanjang tempoh langganan.')],
                     ['📚', $bookCount > 0 ? __('Semua :count e-book', ['count' => $bookCount]) : __('Semua e-book ASUH Digital'), __('Semua yang ada dalam Langganan Tahunan: komik, kisah nabi, akhlak, doa harian dan sirah.')],
-                    ['📖', __('Baca dulu, tonton kemudian'), __('Suis ibu bapa: video sesebuah buku dibuka selepas anak membaca bukunya.')],
+                    ['📖', __('Pilihan: baca dulu, tonton kemudian'), __('Pilihan ibu bapa untuk setiap anak: jika dihidupkan, video sesebuah buku dibuka selepas anak membaca bukunya. Secara asal, semua video boleh terus ditonton.')],
                     ['⏱️', __('Had tonton harian'), __('Ibu bapa tetapkan berapa minit sehari setiap anak boleh menonton.')],
                     ['🛡️', __('Tiada iklan, tiada pautan keluar'), __('Video dimainkan dalam Mod Anak dengan pemain ASUH sendiri, bukan di YouTube.')],
                     ['👨‍👩‍👧', __('Seisi keluarga'), __('Satu langganan untuk sehingga 4 profil anak dalam satu akaun ibu bapa.')],
@@ -165,7 +165,7 @@
 
     <section class="mx-auto max-w-6xl px-4 pb-4">
         <div class="rounded-3xl border-2 border-ink bg-kuning p-8 text-center shadow-[0_6px_0_var(--color-ink)]">
-            <h2 class="font-display text-3xl font-extrabold">{{ __('Baca dahulu. Tonton kemudian. Seisi keluarga, setahun.') }}</h2>
+            <h2 class="font-display text-3xl font-extrabold">{{ __('Baca dan tonton. Seisi keluarga, setahun.') }}</h2>
             <p class="mt-2 font-display text-4xl font-extrabold">{{ Money::short($price) }}</p>
             <a href="{{ $cta['url'] }}" class="btn-gelap mt-6 text-lg">{{ $cta['label'] }} &rarr;</a>
         </div>
