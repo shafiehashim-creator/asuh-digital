@@ -71,7 +71,7 @@
     "src": "node_modules/pdfjs-dist/build/pdf.worker.min.mjs"
   },
   "resources/css/app.css": {
-    "file": "assets/app-BT4tJba0.css",
+    "file": "assets/app-1vWdiMZq.css",
     "name": "app",
     "names": [
       "app.css"
@@ -124,7 +124,7 @@
     ]
   },
   "resources/js/video-player.js": {
-    "file": "assets/video-player-CdjadKHm.js",
+    "file": "assets/video-player-Cy2QnGS2.js",
     "name": "video-player",
     "src": "resources/js/video-player.js",
     "isEntry": true

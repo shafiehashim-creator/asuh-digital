@@ -185,6 +185,14 @@ function initVideoPlayer(root) {
                             duration: () => yt.getDuration() || 0,
                         };
                         root.querySelector('[data-loading]')?.remove();
+                        // Keep YouTube's picture matched to its frame whenever the frame
+                        // changes size (filling the screen, turning the phone). iPhone
+                        // otherwise leaves it shifted with a black bar.
+                        if ('ResizeObserver' in window) {
+                            new ResizeObserver(() => {
+                                if (frameHost.clientWidth && frameHost.clientHeight) yt.setSize(frameHost.clientWidth, frameHost.clientHeight);
+                            }).observe(frameHost);
+                        }
                         if (secondsLeft !== null && secondsLeft <= 0) stopForLimit();
                         else show(pausedScreen, true);
                         // Started from a tap (the music video's poster): try to play straight
