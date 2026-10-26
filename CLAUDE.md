@@ -1,7 +1,7 @@
 # ASUH Digital — panduan projek untuk Claude Code
 
 Platform e-book kanak-kanak Islamik (umur 6–13) oleh ASUH, jenama Galeri Ilmu Media Group.
-Pembeli: ibu bapa (Pas Tahunan, e-book single) dan institusi (lesen tahunan untuk tadika, sekolah rendah agama, KAFA, tahfiz).
+Pembeli: ibu bapa (Pas Tahunan, e-book single) dan institusi (lesen tahunan untuk tadika, sekolah kebangsaan (SK), sekolah rendah agama, KAFA, tahfiz).
 Tagline jenama: **Jom Jadi Baik!**
 Rujukan skrin: prototaip ASUH Digital di claude.ai (7 skrin: utama, katalog, halaman buku, harga, bayaran, rak buku, Mod Anak).
 

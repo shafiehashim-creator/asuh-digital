@@ -56,7 +56,7 @@
                 <a href="{{ route('pass.show') }}" class="btn-utama mt-4">{{ __('Lihat Langganan Tahunan') }}</a>
             </div>
             <div class="rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)]">
-                <h3 class="font-display text-xl font-bold">{{ __('Tadika, sekolah agama, KAFA dan tahfiz') }}</h3>
+                <h3 class="font-display text-xl font-bold">{{ __('Tadika, sekolah kebangsaan, sekolah agama, KAFA dan tahfiz') }}</h3>
                 <p class="mt-2 text-ink/80">{{ __('Lesen institusi dengan portal guru, kod kelas untuk murid tanpa akaun, dan laporan kemajuan bacaan setiap murid.') }}</p>
                 <a href="{{ route('pilot.create') }}" class="btn-gelap mt-4">{{ __('Mohon pilot institusi') }}</a>
             </div>
