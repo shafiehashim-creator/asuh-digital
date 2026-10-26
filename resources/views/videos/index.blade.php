@@ -25,7 +25,7 @@
                 <div class="mt-6 flex flex-wrap items-center gap-4">
                     <a href="{{ $cta['url'] }}" class="btn-utama">{{ $cta['label'] }}</a>
                     @if ($plan)
-                        <p class="font-semibold text-white/90">{{ __(':price setahun, e-book dan animasi', ['price' => Money::short($plan->price_sen)]) }}</p>
+                        <p class="font-semibold text-white/90">{{ __(':price setahun, e-book dan animasi', ['price' => Money::short($price)]) }}</p>
                     @endif
                 </div>
                 @unless (auth()->user()?->canWatchVideos())

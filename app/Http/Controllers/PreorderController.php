@@ -10,6 +10,7 @@ use App\Http\Requests\StorePreorderRequest;
 use App\Models\Order;
 use App\Models\Setting;
 use App\Services\BankTransfers;
+use App\Services\Campaigns;
 use App\Services\Chip\ChipClient;
 use App\Services\Chip\ProcessingFee;
 use App\Services\PreorderCheckout;
@@ -22,7 +23,7 @@ use Illuminate\View\View;
 
 class PreorderController extends Controller
 {
-    public function create(Request $request, PreorderSlots $slots, PreorderCheckout $checkout): View|RedirectResponse
+    public function create(Request $request, PreorderSlots $slots, PreorderCheckout $checkout, Campaigns $campaigns): View|RedirectResponse
     {
         if ($user = $request->user()) {
             if ($existing = $checkout->existingFor($user)) {
@@ -31,6 +32,11 @@ class PreorderController extends Controller
         } else {
             // A returning buyer who taps "Log masuk" here comes straight back.
             $request->session()->put('url.intended', route('preorder.create'));
+        }
+
+        // Outside the early bird campaign (coming soon or over), the normal price is on sale.
+        if (! $campaigns->earlyBirdWindowOpen()) {
+            return redirect()->route('purchase.pass');
         }
 
         return view('preorder.create', [

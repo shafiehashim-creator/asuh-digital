@@ -25,6 +25,7 @@ class VideoPageController extends Controller
             'cta' => $showcase->cta($user),
             'showcase' => $showcase,
             'plan' => $offer->plan(),
+            'price' => $offer->priceSen(),
         ]);
     }
 }

@@ -71,7 +71,7 @@
     "src": "node_modules/pdfjs-dist/build/pdf.worker.min.mjs"
   },
   "resources/css/app.css": {
-    "file": "assets/app-Y7enlIPu.css",
+    "file": "assets/app-CAf3FOJ6.css",
     "name": "app",
     "names": [
       "app.css"
@@ -100,7 +100,7 @@
     "src": "resources/images/brand/syaitan-kurus.webp"
   },
   "resources/js/app.js": {
-    "file": "assets/app-BNM_TBJK.js",
+    "file": "assets/app-CIU3xbPy.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true

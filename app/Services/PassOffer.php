@@ -12,11 +12,11 @@ use Illuminate\Support\Facades\Route;
  */
 class PassOffer
 {
-    public function __construct(private PreorderSlots $slots) {}
+    public function __construct(private PreorderSlots $slots, private Campaigns $campaigns) {}
 
     public function earlyBird(): bool
     {
-        return (bool) $this->slots->plan()?->is_active && ! $this->slots->isSoldOut();
+        return (bool) $this->slots->plan()?->is_active && ! $this->slots->isSoldOut() && $this->campaigns->earlyBirdWindowOpen();
     }
 
     public function regularPlan(): ?Plan

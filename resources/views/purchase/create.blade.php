@@ -56,7 +56,12 @@
                                 <span class="block font-display text-xl font-extrabold">{{ $period['label'] }}</span>
                                 <span class="block text-sm font-semibold text-ink/75">{{ $period['line'] }}</span>
                             </span>
-                            <span class="shrink-0 font-display text-3xl font-extrabold">{{ $period['price'] }}</span>
+                            <span class="shrink-0 text-right">
+                                @if ($period['was'] ?? null)
+                                    <span class="block text-sm font-bold text-ink/60 line-through">{{ $period['was'] }}</span>
+                                @endif
+                                <span class="font-display text-3xl font-extrabold">{{ $period['price'] }}</span>
+                            </span>
                         </label>
                     @endforeach
                     <ul class="grid gap-1 px-2 pt-1 text-sm font-semibold text-ink/80 sm:grid-cols-3">

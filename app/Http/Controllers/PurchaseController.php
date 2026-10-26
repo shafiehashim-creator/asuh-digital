@@ -90,7 +90,7 @@ class PurchaseController extends Controller
 
         return view('purchase.create', [
             'title' => __('Beli Langganan Plus'),
-            'periods' => $this->periodChoices($plusPeriods),
+            'periods' => $this->periodChoices($plusPeriods, $offer->priceSen()),
             'details' => [__('Semua e-book dan video animasi ASUH Digital'), __('Sehingga 4 profil anak'), __('Tiada caj automatik')],
             'note' => $user?->activePass()?->isPlus()
                 ? __('Anda masih ada Langganan Plus aktif. Langganan baharu bermula sebaik langganan semasa tamat, jadi tiada hari yang hilang.')
@@ -172,24 +172,28 @@ class PurchaseController extends Controller
      * @param  array<string, Plan>  $plans  keyed by BillingPeriod value
      * @return list<array{value: string, label: string, price: string, line: string, badge: ?string}>
      */
-    private function periodChoices(array $plans): array
+    private function periodChoices(array $plans, ?int $yearlySen = null): array
     {
         $yearly = $plans[BillingPeriod::Yearly->value] ?? null;
         $monthly = $plans[BillingPeriod::Monthly->value] ?? null;
-        $saving = $yearly && $monthly ? SubscriptionPlans::yearlySavingPercent($yearly, $monthly) : 0;
+        // A campaign can lower the yearly price; the plan price then shows struck through.
+        $yearlySen ??= $yearly?->price_sen;
+        $saving = $yearly && $monthly ? SubscriptionPlans::yearlySavingPercent($yearly->replicate()->forceFill(['price_sen' => $yearlySen]), $monthly) : 0;
 
         return array_values(array_filter([
             $yearly ? [
                 'value' => BillingPeriod::Yearly->value,
                 'label' => __('Tahunan'),
-                'price' => Money::short($yearly->price_sen),
-                'line' => __(':price sebulan · bayar sekali untuk 12 bulan', ['price' => Money::format(intdiv($yearly->price_sen, 12))]),
+                'price' => Money::short($yearlySen),
+                'was' => $yearlySen < $yearly->price_sen ? Money::short($yearly->price_sen) : null,
+                'line' => __(':price sebulan · bayar sekali untuk 12 bulan', ['price' => Money::format(intdiv($yearlySen, 12))]),
                 'badge' => $saving > 0 ? __('Paling berbaloi · Jimat :percent%', ['percent' => $saving]) : __('Paling berbaloi'),
             ] : null,
             $monthly ? [
                 'value' => BillingPeriod::Monthly->value,
                 'label' => __('Bulanan'),
                 'price' => Money::short($monthly->price_sen),
+                'was' => null,
                 'line' => __('Bayar setiap bulan, berhenti bila-bila masa'),
                 'badge' => null,
             ] : null,

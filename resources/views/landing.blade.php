@@ -21,6 +21,8 @@
 @endphp
 
 <x-layouts.app>
+    <x-campaign-banner class="pt-6" />
+
     {{-- Hero --}}
     <section class="overflow-hidden">
         <div class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 md:grid-cols-[1.1fr_1fr] md:py-16">

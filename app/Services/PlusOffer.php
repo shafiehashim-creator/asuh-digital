@@ -14,11 +14,30 @@ use App\Models\User;
  */
 class PlusOffer
 {
+    public function __construct(private Campaigns $campaigns) {}
+
     public function plan(): ?Plan
     {
         $plan = Plan::findByCode(Plan::PAS_PLUS);
 
         return $plan?->is_active && $plan->price_sen > 0 ? $plan : null;
+    }
+
+    /** The yearly price now: the running campaign's promotional price, else the plan price. */
+    public function priceSen(): ?int
+    {
+        $plan = $this->plan();
+        $promo = $this->campaigns->plusPromo()?->promo_price_sen;
+
+        return $plan ? ($promo && $promo < $plan->price_sen ? $promo : $plan->price_sen) : null;
+    }
+
+    /** The normal price, shown struck through while a campaign lowers it. */
+    public function compareAtSen(): ?int
+    {
+        $plan = $this->plan();
+
+        return $plan && $this->priceSen() < $plan->price_sen ? $plan->price_sen : null;
     }
 
     public function available(): bool
@@ -42,7 +61,7 @@ class PlusOffer
     public function upgradePriceSen(Pass $pass): ?int
     {
         $plus = $this->plan();
-        $difference = $plus ? $plus->price_sen - ($pass->plan?->price_sen ?? 0) : 0;
+        $difference = $plus ? $this->priceSen() - ($pass->plan?->price_sen ?? 0) : 0;
 
         if ($difference <= 0) {
             return null;

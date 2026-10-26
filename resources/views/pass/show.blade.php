@@ -62,6 +62,8 @@
         </div>
     </section>
 
+    <x-campaign-banner class="pt-10" />
+
     {{-- Why a pass --}}
     <section class="mx-auto max-w-3xl px-4 py-14">
         <p class="text-sm font-extrabold tracking-wide text-oren uppercase">{{ __('Kenapa Langganan Tahunan?') }}</p>

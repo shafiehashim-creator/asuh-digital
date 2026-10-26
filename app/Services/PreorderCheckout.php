@@ -29,6 +29,7 @@ class PreorderCheckout
     public function __construct(
         private PreorderSlots $slots,
         private CreateNewUser $createNewUser,
+        private Campaigns $campaigns,
     ) {}
 
     /**
@@ -49,7 +50,7 @@ class PreorderCheckout
     {
         $plan = $this->slots->plan();
 
-        if (! $plan || ! $plan->is_active) {
+        if (! $plan || ! $plan->is_active || ! $this->campaigns->earlyBirdWindowOpen()) {
             throw PreorderUnavailable::closed();
         }
 
