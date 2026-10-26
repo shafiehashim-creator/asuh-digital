@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\OrderStatus;
-use App\Enums\PaymentMethod;
 use App\Enums\PreorderStatus;
 use App\Events\OrderPaid;
 use App\Models\Order;
@@ -9,6 +8,7 @@ use App\Models\Pass;
 use App\Models\PaymentLog;
 use App\Models\Preorder;
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
@@ -77,7 +77,7 @@ it('creates a CHIP purchase and sends the buyer to checkout', function () {
     )]);
 
     $this->actingAs($order->user)
-        ->post(route('payment.chip.start', $order))
+        ->post(route('payment.chip.start', $order), ['kaedah' => 'fpx'])
         ->assertRedirect('https://gate.chip-in.asia/p/pur_new/');
 
     expect($order->fresh()->chip_purchase_id)->toBe('pur_new');
@@ -93,11 +93,11 @@ it('creates a CHIP purchase and sends the buyer to checkout', function () {
 });
 
 it('reuses an unpaid purchase instead of creating a second one', function () {
-    $order = chipOrder();
+    $order = chipOrder(['chip_method' => 'fpx']);
     fakeChipLookup(chipPurchase($order, ['status' => 'viewed']));
 
     $this->actingAs($order->user)
-        ->post(route('payment.chip.start', $order))
+        ->post(route('payment.chip.start', $order), ['kaedah' => 'fpx'])
         ->assertRedirect('https://gate.chip-in.asia/p/pur_123/');
 
     Http::assertNotSent(fn ($request) => $request->method() === 'POST');
@@ -108,7 +108,7 @@ it('will not start a payment for an expired reservation or a paid order', functi
     Http::fake();
 
     $this->actingAs($created->user)
-        ->post(route('payment.chip.start', $created))
+        ->post(route('payment.chip.start', $created), ['kaedah' => 'fpx'])
         ->assertRedirect(route('preorder.pay', $created));
 
     Http::assertNothingSent();
@@ -119,7 +119,7 @@ it('will not start a payment for an expired reservation or a paid order', functi
 
 it('only lets the owner start the payment', function () {
     $order = chipOrder();
-    $this->actingAs(App\Models\User::factory()->create())
+    $this->actingAs(User::factory()->create())
         ->post(route('payment.chip.start', $order))
         ->assertNotFound();
 });
@@ -129,7 +129,7 @@ it('shows a friendly error when CHIP cannot be reached', function () {
     Http::fake(['*' => Http::response(['error' => 'down'], 500)]);
 
     $this->actingAs($order->user)
-        ->post(route('payment.chip.start', $order))
+        ->post(route('payment.chip.start', $order), ['kaedah' => 'fpx'])
         ->assertRedirect(route('preorder.pay', $order))
         ->assertSessionHasErrors('payment');
 });

@@ -69,8 +69,11 @@ class OrderResource extends Resource
                         TextEntry::make('reference')->label('Rujukan')->copyable(),
                         TextEntry::make('status')->label('Status')->badge(),
                         TextEntry::make('item')->label('Item')->state(fn (Order $record) => $record->itemName()),
-                        TextEntry::make('amount_sen')->label('Jumlah')->formatStateUsing(fn (int $state) => Money::format($state)),
-                        TextEntry::make('payment_method')->label('Kaedah'),
+                        TextEntry::make('amount_sen')->label('Harga')->formatStateUsing(fn (int $state) => Money::format($state)),
+                        TextEntry::make('processing_fee_sen')->label('Caj pemprosesan (dibayar pembeli)')->formatStateUsing(fn (int $state) => Money::format($state)),
+                        TextEntry::make('total')->label('Jumlah dibayar')->state(fn (Order $record) => Money::format($record->totalSen())),
+                        TextEntry::make('payment_method')->label('Kaedah')
+                            ->formatStateUsing(fn (Order $record) => $record->payment_method->getLabel().($record->chip_method ? ' · '.$record->chip_method->label() : '')),
                         TextEntry::make('chip_purchase_id')->label('ID purchase CHIP')->placeholder('-')->copyable(),
                         TextEntry::make('created_at')->label('Dicipta')->dateTime('j M Y, g:i A'),
                         TextEntry::make('paid_at')->label('Dibayar')->dateTime('j M Y, g:i A')->placeholder('-'),
@@ -110,7 +113,8 @@ class OrderResource extends Resource
                 TextColumn::make('reference')->label('Rujukan')->searchable()->copyable(),
                 TextColumn::make('user.name')->label('Pembeli')->searchable()
                     ->description(fn (Order $record) => $record->user?->email),
-                TextColumn::make('amount_sen')->label('Jumlah')->formatStateUsing(fn (int $state) => Money::format($state))->alignEnd(),
+                TextColumn::make('amount_sen')->label('Jumlah')->formatStateUsing(fn (int $state) => Money::format($state))->alignEnd()
+                    ->description(fn (Order $record) => $record->processing_fee_sen > 0 ? '+ caj '.Money::format($record->processing_fee_sen) : null),
                 TextColumn::make('payment_method')->label('Kaedah')->badge()->color('gray'),
                 TextColumn::make('status')->label('Status')->badge(),
                 TextColumn::make('preorder.status')->label('Slot')->badge()->placeholder('-'),

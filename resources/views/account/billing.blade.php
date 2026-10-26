@@ -51,7 +51,7 @@
                             </p>
                         </div>
                         <div class="flex items-center gap-3">
-                            <span class="font-bold">{{ Money::format($order->amount_sen) }}</span>
+                            <span class="font-bold">{{ Money::format($order->totalSen()) }}</span>
                             <span class="rounded-full px-3 py-1 text-sm font-bold {{ $statusClasses[$order->status->value] }}">
                                 {{ $order->status->getLabel() }}
                             </span>

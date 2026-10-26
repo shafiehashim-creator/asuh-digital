@@ -58,6 +58,7 @@ class Settings extends Page
         'contact_email', 'company_name', 'company_ssm_no', 'company_address', 'company_sst_no',
         'admin_notification_emails',
         'catalog_open', 'preview_pages', 'whatsapp_number', 'videos_open',
+        'chip_fee_fpx_fixed', 'chip_fee_fpx_percent', 'chip_fee_ewallet_fixed', 'chip_fee_ewallet_percent',
     ];
 
     /** @var array<string, mixed> */
@@ -160,6 +161,20 @@ class Settings extends Page
                         ->itemLabel(fn (array $state) => $state['question'] ?? null)
                         ->addActionLabel('Tambah soalan')
                         ->reorderable()->collapsible()->collapsed()->defaultItems(0),
+                ]),
+
+            Section::make('Caj pemprosesan CHIP (dibayar pembeli)')
+                ->description('Pembeli memilih FPX, e-wallet atau kad di halaman bayaran dan melihat caj sebelum membayar. Caj = amaun tetap + peratus harga. Isi ikut kadar dalam kontrak CHIP; 0 untuk tiada caj. Bayaran kad sentiasa tanpa caj, kerana peniaga di Malaysia tidak dibenarkan mengenakan caj tambahan kepada pemegang kad. Pindahan bank tanpa caj. Laporan jualan tidak mengira caj ini.')
+                ->columns(2)
+                ->schema([
+                    TextInput::make('chip_fee_fpx_fixed')->label('FPX: amaun tetap (RM)')
+                        ->numeric()->minValue(0)->maxValue(10)->step(0.01)->prefix('RM')->required(),
+                    TextInput::make('chip_fee_fpx_percent')->label('FPX: peratus')
+                        ->numeric()->minValue(0)->maxValue(5)->step(0.01)->suffix('%')->required(),
+                    TextInput::make('chip_fee_ewallet_fixed')->label('E-wallet: amaun tetap (RM)')
+                        ->numeric()->minValue(0)->maxValue(10)->step(0.01)->prefix('RM')->required(),
+                    TextInput::make('chip_fee_ewallet_percent')->label('E-wallet: peratus')
+                        ->numeric()->minValue(0)->maxValue(5)->step(0.01)->suffix('%')->required(),
                 ]),
 
             Section::make('Pindahan bank')
