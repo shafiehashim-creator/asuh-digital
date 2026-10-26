@@ -4,20 +4,29 @@ namespace App\Filament\Resources\Videos;
 
 use App\Enums\AgeGroup;
 use App\Enums\BookStatus;
+use App\Enums\ReviewStatus;
 use App\Enums\VideoProvider;
+use App\Exceptions\ContentNotApproved;
 use App\Filament\Resources\Videos\Pages\CreateVideo;
 use App\Filament\Resources\Videos\Pages\EditVideo;
 use App\Filament\Resources\Videos\Pages\ListVideos;
+use App\Models\Category;
 use App\Models\Video;
+use App\Services\ContentWorkflow;
 use App\Support\VideoId;
 use BackedEnum;
 use Closure;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -27,6 +36,9 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use InvalidArgumentException;
 use UnitEnum;
 
 /**
@@ -152,7 +164,102 @@ class VideoResource extends Resource
             ->filters([
                 SelectFilter::make('status')->label('Status')->options(BookStatus::class),
             ])
-            ->recordActions([EditAction::make()]);
+            ->recordActions([EditAction::make()])
+            // Tick several videos, then act on all of them. Each video goes
+            // through the same rules as its own page; any that do not fit
+            // (for example, publishing without a passed review) are skipped.
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    self::bulk('submit', 'Hantar untuk semakan syariah', Heroicon::OutlinedPaperAirplane, 'gray',
+                        fn (Video $video) => $video->status === BookStatus::Draft,
+                        fn (Video $video, ContentWorkflow $workflow) => $workflow->submitForReview($video),
+                        'bukan draf'),
+                    self::bulk('approve', 'Lulus semakan syariah', Heroicon::OutlinedShieldCheck, 'warning',
+                        fn (Video $video) => $video->status === BookStatus::Review,
+                        fn (Video $video, ContentWorkflow $workflow) => $workflow->review($video, auth()->user(), true),
+                        'belum dihantar untuk semakan')
+                        ->modalDescription('Sahkan bahawa anda sudah menonton setiap video yang dipilih. Video yang ditolak perlu disemak satu-satu dengan catatan.'),
+                    self::bulk('publish', 'Terbitkan', Heroicon::OutlinedGlobeAlt, 'success',
+                        fn (Video $video) => $video->status !== BookStatus::Published && $video->latestReview?->status === ReviewStatus::Approved,
+                        fn (Video $video, ContentWorkflow $workflow, array $data) => $workflow->publish($video, Carbon::parse($data['published_at'])),
+                        'semakan syariah belum lulus atau sudah diterbitkan')
+                        ->schema([
+                            DateTimePicker::make('published_at')->label('Tarikh terbit')->default(now())->required()->native(false)
+                                ->helperText('Pilih tarikh akan datang untuk menjadualkan penerbitan.'),
+                        ]),
+                    self::bulk('unpublish', 'Nyahterbit', Heroicon::OutlinedEyeSlash, 'gray',
+                        fn (Video $video) => $video->status === BookStatus::Published,
+                        fn (Video $video, ContentWorkflow $workflow) => $workflow->unpublish($video),
+                        'belum diterbitkan'),
+                    self::bulk('makeFree', 'Tandakan percuma', Heroicon::OutlinedGift, 'gray',
+                        fn (Video $video) => ! $video->is_free_sample,
+                        fn (Video $video) => $video->update(['is_free_sample' => true]),
+                        'sudah percuma'),
+                    self::bulk('makePaid', 'Buang tanda percuma', Heroicon::OutlinedLockClosed, 'gray',
+                        fn (Video $video) => $video->is_free_sample,
+                        fn (Video $video) => $video->update(['is_free_sample' => false]),
+                        'bukan percuma'),
+                    self::bulk('categories', 'Tambah kategori', Heroicon::OutlinedTag, 'gray',
+                        fn () => true,
+                        fn (Video $video, ContentWorkflow $workflow, array $data) => $video->categories()->syncWithoutDetaching($data['categories']),
+                        '')
+                        ->schema([
+                            Select::make('categories')->label('Kategori')->multiple()->required()->native(false)
+                                ->options(fn () => Category::query()->orderBy('sort_order')->pluck('name', 'id')),
+                        ]),
+                    self::bulk('age', 'Tukar umur penonton', Heroicon::OutlinedUsers, 'gray',
+                        fn () => true,
+                        fn (Video $video, ContentWorkflow $workflow, array $data) => $video->update(['age_group' => $data['age_group']]),
+                        '')
+                        ->schema([
+                            Select::make('age_group')->label('Umur penonton')->options(AgeGroup::class)->required()->native(false),
+                        ]),
+                    DeleteBulkAction::make()->label('Padam')
+                        ->modalDescription('Video yang sudah diterbitkan tidak dipadam. Nyahterbit dahulu.')
+                        ->using(fn (Collection $records) => $records->reject(fn (Video $video) => $video->status === BookStatus::Published)->each->delete()),
+                ])->label('Tindakan pukal'),
+            ]);
+    }
+
+    /**
+     * A bulk action that runs $step on each selected video that $fits, then
+     * reports how many were done and how many were skipped and why.
+     */
+    private static function bulk(string $name, string $label, Heroicon $icon, string $color, callable $fits, callable $step, string $skipReason): BulkAction
+    {
+        return BulkAction::make($name)
+            ->label($label)
+            ->icon($icon)
+            ->color($color)
+            ->requiresConfirmation()
+            ->modalHeading($label)
+            ->deselectRecordsAfterCompletion()
+            ->action(function (Collection $records, array $data, ContentWorkflow $workflow) use ($label, $fits, $step, $skipReason) {
+                $done = 0;
+                $skipped = [];
+
+                foreach ($records as $video) {
+                    if (! $fits($video)) {
+                        $skipped[] = $video->title.($skipReason ? " ({$skipReason})" : '');
+
+                        continue;
+                    }
+
+                    try {
+                        $step($video, $workflow, $data);
+                        $done++;
+                    } catch (InvalidArgumentException|ContentNotApproved $e) {
+                        $skipped[] = $video->title.' ('.$e->getMessage().')';
+                    }
+                }
+
+                Notification::make()
+                    ->title($label.': '.$done.' video')
+                    ->body($skipped ? 'Dilangkau: '.implode('; ', $skipped) : null)
+                    ->color($skipped ? 'warning' : 'success')
+                    ->icon($skipped ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle)
+                    ->send();
+            });
     }
 
     public static function getPages(): array
