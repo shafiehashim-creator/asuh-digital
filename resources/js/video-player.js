@@ -1,13 +1,31 @@
-// Animated video player for Mod Anak (Phase 2). YouTube plays through its
+// Animated video player for Mod Anak (Phase 2), also used for the ASUH
+// music video on public pages (started from its poster, see brand-video). YouTube plays through its
 // IFrame API with ASUH's own buttons; a cover over the frame stops taps from
 // reaching YouTube's title, logo or suggestions, and ASUH's own screens show
 // when the video is paused or ends. Bunny Stream uses its own clean player.
 // Time watched goes to the server every 30 seconds for the daily limit.
 
-const root = document.getElementById('video-player');
+// The YouTube IFrame API calls one global function once loaded, so every
+// player on the page waits on the same promise.
+let youTubeApi = null;
+const loadYouTubeApi = () => {
+    youTubeApi ??= new Promise((resolve) => {
+        window.onYouTubeIframeAPIReady = () => resolve(window.YT);
+        const script = document.createElement('script');
+        script.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(script);
+    });
+    return youTubeApi;
+};
 
-if (root) {
+function initVideoPlayer(root) {
+    if (root.dataset.started) return;
+    root.dataset.started = '1';
+
+    // Controls sit next to the frame, inside the same wrapper.
+    const wrap = root.closest('[data-video-wrap]') ?? document;
     const { provider, videoId, embedUrl, progressUrl, csrf } = root.dataset;
+    const autoplay = root.dataset.autoplay === '1';
     let secondsLeft = root.dataset.secondsLeft === '' ? null : parseInt(root.dataset.secondsLeft, 10);
     const startAt = parseInt(root.dataset.start || '0', 10);
 
@@ -16,10 +34,10 @@ if (root) {
     const pausedScreen = root.querySelector('[data-paused]');
     const endScreen = root.querySelector('[data-ended]');
     const limitScreen = root.querySelector('[data-limit]');
-    const playButton = document.querySelector('[data-play]');
-    const seek = document.querySelector('[data-seek]');
-    const timeLabel = document.querySelector('[data-time]');
-    const fullscreenButton = document.querySelector('[data-fullscreen]');
+    const playButton = wrap.querySelector('[data-play]');
+    const seek = wrap.querySelector('[data-seek]');
+    const timeLabel = wrap.querySelector('[data-time]');
+    const fullscreenButton = wrap.querySelector('[data-fullscreen]');
     const replayButton = root.querySelector('[data-replay]');
 
     let player = null; // { play, pause, seekTo, time, duration }
@@ -110,7 +128,7 @@ if (root) {
             if (document.fullscreenElement) {
                 await document.exitFullscreen();
             } else {
-                await (document.getElementById('video-wrap') ?? root).requestFullscreen();
+                await (wrap === document ? root : wrap).requestFullscreen();
                 // Phones: turn sideways for the 16:9 picture where the browser allows it.
                 await screen.orientation?.lock?.('landscape').catch(() => {});
             }
@@ -124,8 +142,8 @@ if (root) {
     if (provider === 'youtube') {
         const holder = document.createElement('div');
         frameHost.appendChild(holder);
-        window.onYouTubeIframeAPIReady = () => {
-            const yt = new window.YT.Player(holder, {
+        loadYouTubeApi().then((YT) => {
+            const yt = new YT.Player(holder, {
                 host: 'https://www.youtube-nocookie.com',
                 videoId,
                 width: '100%',
@@ -146,19 +164,19 @@ if (root) {
                         root.querySelector('[data-loading]')?.remove();
                         if (secondsLeft !== null && secondsLeft <= 0) stopForLimit();
                         else show(pausedScreen, true);
+                        // Started from a tap (the music video's poster): try to play straight
+                        // away; where the browser refuses, "Tekan untuk menonton" stays.
+                        if (autoplay) player.play();
                     },
                     onStateChange: (e) => {
-                        const S = window.YT.PlayerState;
+                        const S = YT.PlayerState;
                         if (e.data === S.PLAYING) { setPlaying(true); show(pausedScreen, false); show(endScreen, false); }
                         if (e.data === S.PAUSED) { setPlaying(false); show(pausedScreen, true); send(); }
                         if (e.data === S.ENDED) onEnded();
                     },
                 },
             });
-        };
-        const script = document.createElement('script');
-        script.src = 'https://www.youtube.com/iframe_api';
-        document.head.appendChild(script);
+        });
     } else {
         // Bunny Stream: its own controls; player.js events drive the count.
         const iframe = document.createElement('iframe');
@@ -168,7 +186,7 @@ if (root) {
         iframe.allowFullscreen = true;
         frameHost.appendChild(iframe);
         cover?.remove();
-        document.querySelector('[data-controls]')?.remove();
+        wrap.querySelector('[data-controls]')?.remove();
         root.querySelector('[data-loading]')?.remove();
         const script = document.createElement('script');
         script.src = 'https://assets.mediadelivery.net/playerjs/player-0.1.0.min.js';
@@ -192,3 +210,6 @@ if (root) {
         document.head.appendChild(script);
     }
 }
+
+window.initVideoPlayer = initVideoPlayer;
+document.querySelectorAll('[data-video-player]:not([data-lazy])').forEach(initVideoPlayer);
