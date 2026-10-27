@@ -19,6 +19,23 @@ class Category extends Model
         return 'slug';
     }
 
+    /** A picture for the category's shelf in Mod Anak, for children still learning to read. */
+    public function emoji(): string
+    {
+        $name = mb_strtolower($this->name);
+
+        return match (true) {
+            str_contains($name, 'nabi') => '🌙',
+            str_contains($name, 'sirah') => '🕌',
+            str_contains($name, 'akhlak') => '💛',
+            str_contains($name, 'doa') => '🤲',
+            str_contains($name, 'komik') => '💬',
+            str_contains($name, 'bergambar') => '🖼️',
+            str_contains($name, 'novel') => '📚',
+            default => '📖',
+        };
+    }
+
     public function books(): BelongsToMany
     {
         return $this->belongsToMany(Book::class);

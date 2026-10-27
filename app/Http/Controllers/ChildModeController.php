@@ -6,6 +6,7 @@ use App\Models\Book;
 use App\Models\Child;
 use App\Models\Quiz;
 use App\Services\ChildMode;
+use App\Services\ChildShelf;
 use App\Services\ParentGate;
 use App\Services\ReadingLog;
 use App\Services\VideoWatching;
@@ -35,7 +36,7 @@ class ChildModeController extends Controller
         return redirect()->route('child-mode.home');
     }
 
-    public function home(Request $request, ReadingLog $log, VideoWatching $watching): View|RedirectResponse
+    public function home(Request $request, ReadingLog $log, VideoWatching $watching, ChildShelf $shelf): View|RedirectResponse
     {
         $child = $this->childMode->child($request->user());
 
@@ -43,16 +44,21 @@ class ChildModeController extends Controller
             return redirect()->route('account');
         }
 
+        $books = $this->childMode->shelf($child)->load('categories');
+        // Phase 2 animated videos, each with the reason it is locked (if any).
+        $videos = $watching->hasAccess($child)
+            ? $watching->shelf($child)->load('categories')->map(fn ($video) => ['video' => $video, 'locked' => $watching->lockReason($child, $video)])
+            : collect();
+
         return view('child-mode.home', [
             'child' => $child,
-            'books' => $this->childMode->shelf($child),
+            'books' => $books,
+            // Rows by category once the shelf is big enough, else null for one grid.
+            'rows' => $shelf->rows($books, $videos),
             'badges' => $child->badges()->get(),
             // The parent's reward promises not yet kept, for the child to aim for.
             'promises' => $child->rewardPromises()->whereNull('fulfilled_at')->orderByDesc('achieved_at')->get(),
-            // Phase 2 animated videos, each with the reason it is locked (if any).
-            'videos' => $watching->hasAccess($child)
-                ? $watching->shelf($child)->map(fn ($video) => ['video' => $video, 'locked' => $watching->lockReason($child, $video)])
-                : collect(),
+            'videos' => $videos,
             'videoSecondsLeft' => $watching->hasAccess($child) ? $watching->secondsLeftToday($child) : null,
             // Books with a quiz the child has not passed yet.
             'quizBookIds' => Quiz::query()->where('is_active', true)->has('questions', '>=', Quiz::MIN_QUESTIONS)
