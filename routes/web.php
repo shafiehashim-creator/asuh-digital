@@ -238,4 +238,5 @@ Route::middleware(EnsureCatalogOpen::class)->prefix('/kelas')->name('pupil.')->c
     Route::get('/pilih', 'names')->name('names');
     Route::post('/pilih/{pupil}', 'choose')->middleware('throttle:30,1')->name('choose');
     Route::post('/keluar', 'leave')->name('leave');
+    Route::post('/tutup', 'exit')->name('exit');
 });

@@ -1,4 +1,4 @@
-<x-layouts.child title="Masuk kelas">
+<x-layouts.child title="Masuk kelas" exit-class>
     <div class="mx-auto max-w-md px-4 py-10">
         <div class="rounded-3xl border-2 border-ink bg-white p-6 text-center shadow-[0_4px_0_var(--color-ink)]">
             <h1 class="font-display text-3xl font-extrabold text-magenta">Jom masuk kelas!</h1>

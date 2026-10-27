@@ -1,4 +1,4 @@
-<x-layouts.child :title="$classroom->name">
+<x-layouts.child :title="$classroom->name" exit-class>
     <div class="mx-auto max-w-4xl px-4 py-8">
         <p class="font-display font-bold text-plum">{{ $classroom->institution->name }}</p>
         <h1 class="font-display text-3xl font-extrabold text-magenta sm:text-4xl">{{ $classroom->name }}</h1>
