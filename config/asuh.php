@@ -65,22 +65,26 @@ return [
         'plus_trailer_url' => null,
 
         // Landing page copy
-        'landing_headline' => 'Rak buku Islamik digital untuk anak 6–13 tahun',
-        'landing_subheadline' => 'Komik, kisah nabi, akhlak dan doa harian yang telah disemak syariah. Jom Jadi Baik!',
+        'landing_headline' => 'E-book dan video animasi Islamik untuk anak 6–13 tahun',
+        'landing_subheadline' => 'Anak baca kisah nabi, akhlak dan doa harian, kemudian tonton animasinya. Semua disemak syariah. Jom Jadi Baik!',
         // Answers that depend on other settings (when the pass starts, refunds)
         // are rendered by the landing page itself, so they never go stale.
         'landing_faq' => [
             [
                 'question' => 'Apa itu ASUH Digital?',
-                'answer' => 'Rak buku Islamik digital daripada ASUH, jenama Galeri Ilmu Media Group, untuk kanak-kanak berumur 6 hingga 13 tahun. Anak boleh membaca komik, kisah nabi, buku akhlak, doa harian dan sirah di telefon, tablet atau komputer.',
+                'answer' => 'E-book dan video animasi Islamik daripada ASUH, jenama Galeri Ilmu Media Group, untuk kanak-kanak berumur 6 hingga 13 tahun. Anak boleh membaca komik, kisah nabi, buku akhlak, doa harian dan sirah, kemudian menonton animasinya, di telefon, tablet atau komputer.',
             ],
             [
                 'question' => 'Berapa orang anak boleh guna satu langganan?',
                 'answer' => 'Satu Langganan Tahunan untuk seisi keluarga. Anda boleh mencipta sehingga 4 profil anak, dan setiap anak melihat buku yang sesuai dengan kumpulan umurnya.',
             ],
             [
+                'question' => 'Adakah video animasi termasuk?',
+                'answer' => 'Ya. Langganan Tahunan membuka semua e-book dan semua video animasi ASUH dalam Mod Anak. Ibu bapa boleh menetapkan had tonton harian dan pilihan "baca dulu, tonton kemudian" untuk setiap anak.',
+            ],
+            [
                 'question' => 'Adakah kandungannya disemak syariah?',
-                'answer' => 'Ya. Setiap buku mesti lulus semakan syariah sebelum diterbitkan di ASUH Digital.',
+                'answer' => 'Ya. Setiap buku dan video animasi mesti lulus semakan syariah sebelum diterbitkan di ASUH Digital.',
             ],
             [
                 'question' => 'Selamatkah untuk anak saya?',
@@ -98,20 +102,24 @@ return [
         'refund_policy' => 'Bayaran balik penuh boleh dimohon sebelum platform ASUH Digital dilancarkan.',
 
         // English versions (bilingual site, 2026-10-26); empty falls back to the BM text above.
-        'landing_headline_en' => 'A digital Islamic bookshelf for children aged 6–13',
-        'landing_subheadline_en' => 'Comics, stories of the prophets, good character and daily prayers, all syariah-reviewed. Jom Jadi Baik!',
+        'landing_headline_en' => 'Islamic e-books and animated videos for children aged 6–13',
+        'landing_subheadline_en' => 'Children read stories of the prophets, good character and daily prayers, then watch them animated. All syariah-reviewed. Jom Jadi Baik!',
         'landing_faq_en' => [
             [
                 'question' => 'What is ASUH Digital?',
-                'answer' => 'A digital Islamic bookshelf from ASUH, a Galeri Ilmu Media Group brand, for children aged 6 to 13. Children can read comics, stories of the prophets, books on good character, daily prayers and sirah on a phone, tablet or computer.',
+                'answer' => 'Islamic e-books and animated videos from ASUH, a Galeri Ilmu Media Group brand, for children aged 6 to 13. Children can read comics, stories of the prophets, books on good character, daily prayers and sirah, then watch them animated, on a phone, tablet or computer.',
             ],
             [
                 'question' => 'How many children can use one subscription?',
                 'answer' => 'One Yearly Subscription covers the whole family. You can create up to 4 child profiles, and each child sees the books for their age group.',
             ],
             [
+                'question' => 'Are the animated videos included?',
+                'answer' => 'Yes. The Yearly Subscription opens every ASUH e-book and every animated video in Kids Mode. Parents can set a daily watching limit and the "read first, watch later" option for each child.',
+            ],
+            [
                 'question' => 'Is the content syariah-reviewed?',
-                'answer' => 'Yes. Every book must pass a syariah review before it is published on ASUH Digital.',
+                'answer' => 'Yes. Every book and animated video must pass a syariah review before it is published on ASUH Digital.',
             ],
             [
                 'question' => 'Is it safe for my child?',

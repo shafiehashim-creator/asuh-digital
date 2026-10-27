@@ -37,7 +37,7 @@ class ManifestController extends Controller
             'id' => '/',
             'name' => 'ASUH Digital',
             'short_name' => 'ASUH',
-            'description' => __('Rak buku Islamik digital untuk anak 6–13 tahun. Jom Jadi Baik!'),
+            'description' => __('E-book dan video animasi Islamik untuk anak 6–13 tahun. Jom Jadi Baik!'),
             'lang' => app()->getLocale(),
             'start_url' => '/',
             'scope' => '/',
