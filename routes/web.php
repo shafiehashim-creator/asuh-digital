@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\PageImageController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\ChildController;
+use App\Http\Controllers\ChildGameController;
 use App\Http\Controllers\ChildModeController;
 use App\Http\Controllers\ChildQuizController;
 use App\Http\Controllers\ChildVideoController;
@@ -223,6 +224,12 @@ Route::middleware([EnsureCatalogOpen::class, AuthenticateOrPupil::class])->group
     Route::post('/mod-anak/bacaan/{book:slug}', [ReadingProgressController::class, 'store'])
         ->middleware('throttle:30,1')
         ->name('child-mode.progress');
+
+    // Games for subscribing families (2026-10-27).
+    Route::get('/mod-anak/permainan/{game}', [ChildGameController::class, 'show'])->name('child-mode.game');
+    Route::post('/mod-anak/permainan/{game}/masa', [ChildGameController::class, 'progress'])
+        ->middleware('throttle:30,1')
+        ->name('child-mode.game.progress');
 
     // Phase 2 animated videos.
     Route::get('/mod-anak/video/{video:slug}', [ChildVideoController::class, 'show'])->name('child-mode.video');

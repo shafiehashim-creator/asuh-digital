@@ -38,6 +38,10 @@
             </a>
         @endif
 
+        @if (session('game_locked'))
+            <p role="status" class="mt-4 rounded-2xl border-2 border-ink bg-kuning p-3 font-bold">{{ session('game_locked') }}</p>
+        @endif
+
         @if (session('video_locked'))
             <p role="status" class="mt-4 rounded-2xl border-2 border-ink bg-kuning p-3 font-bold">{{ session('video_locked') }}</p>
         @endif
@@ -55,6 +59,33 @@
                 @endforeach
             </div>
         @endif
+
+        @if ($games !== null)
+            {{-- Games for subscribed families, under the videos. --}}
+            <section class="mt-8" aria-labelledby="games-heading">
+                <div class="flex flex-wrap items-end justify-between gap-2">
+                    <h2 id="games-heading" class="flex items-center gap-2 font-display text-2xl font-bold text-plum">
+                        <span class="flex size-11 items-center justify-center rounded-full border-2 border-ink bg-kuning text-2xl" aria-hidden="true">🎮</span>
+                        Permainan
+                    </h2>
+                    @if ($gameSecondsLeft !== null)
+                        <p class="text-sm font-bold text-biru">Baki masa bermain hari ini: {{ intdiv($gameSecondsLeft + 59, 60) }} minit</p>
+                    @endif
+                </div>
+                <div class="-mx-4 mt-3 flex snap-x scroll-px-4 items-stretch gap-4 overflow-x-auto px-4 pb-3">
+                    @foreach ($games as $game)
+                        <a href="{{ route('child-mode.game', $game) }}" class="flex w-40 shrink-0 snap-start flex-col rounded-2xl border-2 border-ink bg-white p-4 shadow-[0_3px_0_var(--color-ink)] transition hover:-translate-y-1 hover:bg-kuning/30 sm:w-44">
+                            <span class="flex size-14 items-center justify-center rounded-full border-2 border-ink bg-lavender text-3xl" aria-hidden="true">{{ $game->emoji() }}</span>
+                            <span class="mt-3 font-display text-lg leading-tight font-bold">{{ $game->label() }}</span>
+                            @if (($gameBest[$game->value] ?? 0) > 0)
+                                <span class="mt-auto pt-2 text-sm font-bold text-biru">⭐ Terbaik: {{ $gameBest[$game->value] }}</span>
+                            @endif
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
 
         @if ($recent->isNotEmpty())
             <h2 class="mt-8 font-display text-2xl font-bold text-plum">Sambung membaca</h2>

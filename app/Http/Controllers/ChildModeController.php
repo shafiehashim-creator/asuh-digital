@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Game;
 use App\Models\Book;
 use App\Models\Child;
 use App\Models\Quiz;
 use App\Services\ChildMode;
 use App\Services\ChildShelf;
+use App\Services\GamePlaying;
 use App\Services\ParentGate;
 use App\Services\ReadingLog;
 use App\Services\VideoWatching;
@@ -36,7 +38,7 @@ class ChildModeController extends Controller
         return redirect()->route('child-mode.home');
     }
 
-    public function home(Request $request, ReadingLog $log, VideoWatching $watching, ChildShelf $shelf): View|RedirectResponse
+    public function home(Request $request, ReadingLog $log, VideoWatching $watching, ChildShelf $shelf, GamePlaying $playing): View|RedirectResponse
     {
         $child = $this->childMode->child($request->user());
 
@@ -60,6 +62,10 @@ class ChildModeController extends Controller
             'promises' => $child->rewardPromises()->whereNull('fulfilled_at')->orderByDesc('achieved_at')->get(),
             'videos' => $videos,
             'videoSecondsLeft' => $watching->hasAccess($child) ? $watching->secondsLeftToday($child) : null,
+            // Games for subscribed families only (null hides the row).
+            'games' => $playing->hasAccess($child) ? Game::cases() : null,
+            'gameSecondsLeft' => $playing->hasAccess($child) ? $playing->secondsLeftToday($child) : null,
+            'gameBest' => $playing->hasAccess($child) ? $playing->bestScores($child) : [],
             // Books with a quiz the child has not passed yet.
             'quizBookIds' => Quiz::query()->where('is_active', true)->has('questions', '>=', Quiz::MIN_QUESTIONS)
                 ->whereDoesntHave('attempts', fn ($q) => $q->where('child_id', $child->id)->where('passed', true))

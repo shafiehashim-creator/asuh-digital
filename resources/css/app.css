@@ -79,6 +79,17 @@ html {
     }
 }
 
+/* Mod Anak games: a wrong tap shakes the tile. */
+@keyframes game-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+}
+
+.game-shake {
+    animation: game-shake 0.25s ease-in-out 2;
+}
+
 /* Alpine: hide until Alpine has started. */
 [x-cloak] {
     display: none !important;
