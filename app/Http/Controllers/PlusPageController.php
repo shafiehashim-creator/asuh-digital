@@ -8,6 +8,7 @@ use App\Services\PassOffer;
 use App\Services\PlusOffer;
 use App\Services\VideoShowcase;
 use App\Support\Money;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -20,8 +21,13 @@ use Illuminate\View\View;
  */
 class PlusPageController extends Controller
 {
-    public function __invoke(Request $request, PlusOffer $offer, PassOffer $passOffer, VideoShowcase $showcase, CatalogStats $stats): View
+    public function __invoke(Request $request, PlusOffer $offer, PassOffer $passOffer, VideoShowcase $showcase, CatalogStats $stats): View|RedirectResponse
     {
+        // No separate Plus: the yearly subscription includes the videos.
+        if ($offer->merged()) {
+            return redirect()->route('pass.show');
+        }
+
         $user = $request->user();
         abort_unless($showcase->isOpenFor($user) && $offer->plan(), 404);
 

@@ -12,6 +12,10 @@ class PlusWaitlistController extends Controller
 {
     public function __invoke(Request $request, PlusOffer $offer, PlusWaitlist $waitlist): RedirectResponse
     {
+        if ($offer->merged()) {
+            return redirect()->route('pass.show');
+        }
+
         abort_unless($offer->available(), 404);
 
         if ($offer->onSale()) {

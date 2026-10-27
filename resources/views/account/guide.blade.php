@@ -163,12 +163,12 @@
         </x-guide.phone>
     </section>
 
-    {{-- 5. Videos (Langganan Plus) --}}
+    {{-- 5. Videos (in the subscription that includes them) --}}
     @if ($videosOpen)
         <section class="{{ $step }}" aria-labelledby="step-5">
             <div>
                 <div class="flex items-center gap-3"><span class="{{ $badge }}">5</span><h2 id="step-5" class="font-display text-2xl font-extrabold text-plum">Video animasi dan kawalan menonton</h2></div>
-                <p class="mt-4">Dengan <strong>Langganan Plus</strong>, rak Mod Anak ada baris <strong>Video animasi</strong>. Video dimainkan dengan pemain ASUH sendiri: tiada iklan dan tiada pautan keluar ke YouTube.</p>
+                <p class="mt-4">Dengan <strong>{{ app(App\Services\PlusOffer::class)->videoPlanName() }}</strong>, rak Mod Anak ada baris <strong>Video animasi</strong>. Video dimainkan dengan pemain ASUH sendiri: tiada iklan dan tiada pautan keluar ke YouTube.</p>
                 <p class="mt-3">Untuk setiap anak, buka <strong>Anak-anak → Ubah</strong> dan pilih:</p>
                 <ul class="mt-2 list-disc space-y-1 pl-5">
                     <li><strong>Had menonton sehari</strong>: 15 hingga 90 minit, atau tiada had.</li>

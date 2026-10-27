@@ -22,10 +22,10 @@ class VideoShowcase
 {
     public function __construct(private PlusOffer $offer) {}
 
-    /** Shown once the admin opens the videos and prices Plus; staff always see it. */
+    /** Shown once the admin opens the videos (and prices Plus, when sold separately); staff always see it. */
     public function isOpenFor(?User $user): bool
     {
-        return $this->offer->available() || ($user?->isStaff() ?? false);
+        return $this->offer->videosPublic() || ($user?->isStaff() ?? false);
     }
 
     /** @return Collection<int, Video> */
@@ -86,6 +86,10 @@ class VideoShowcase
     {
         if ($user?->canWatchVideos()) {
             return ['label' => __('Tonton dalam Mod Anak'), 'url' => route('account.children')];
+        }
+
+        if ($this->offer->merged()) {
+            return ['label' => __('Langgan sekarang'), 'url' => route('pass.show')];
         }
 
         if (! $this->offer->onSale()) {

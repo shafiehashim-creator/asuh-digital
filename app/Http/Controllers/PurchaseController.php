@@ -60,6 +60,10 @@ class PurchaseController extends Controller
      */
     public function plus(Request $request, PlusOffer $offer): View|RedirectResponse
     {
+        if ($offer->merged()) {
+            return redirect()->route('pass.show');
+        }
+
         abort_unless($offer->available() || ($request->user()?->isStaff() && $offer->plan()), 404);
 
         // Shown but not sold yet: the sales page takes "Beritahu saya" sign-ups.
@@ -108,6 +112,10 @@ class PurchaseController extends Controller
     public function storePlus(PurchaseRequest $request, PlusOffer $offer): RedirectResponse
     {
         $user = $request->user();
+
+        if ($offer->merged()) {
+            return redirect()->route('pass.show');
+        }
 
         if (! $offer->onSale()) {
             return redirect()->route('plus.show');

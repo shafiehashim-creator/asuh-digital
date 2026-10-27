@@ -129,11 +129,14 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
         return ($this->role?->isInstitutionStaff() ?? false) && $this->institution_id !== null;
     }
 
-    /** Phase 2 videos: staff, or a family with an active Langganan Plus. */
+    /** Phase 2 videos: staff, or a family with an active subscription that includes them. */
     public function canWatchVideos(): bool
     {
+        // Every family subscription includes the videos unless Plus is sold separately.
         return $this->isStaff()
-            || $this->passes()->active()->whereHas('plan', fn ($q) => $q->whereIn('code', Plan::PLUS_CODES))->exists();
+            || $this->passes()->active()
+                ->when(! Setting::get('yearly_includes_videos'), fn ($q) => $q->whereHas('plan', fn ($q) => $q->whereIn('code', Plan::PLUS_CODES)))
+                ->exists();
     }
 
     public function isStaff(): bool

@@ -26,7 +26,9 @@
             <p class="mt-3 inline-block rounded-full border-2 border-ink bg-white px-3 py-1 text-sm font-extrabold text-plum">{{ __('Langganan Tahunan ASUH Digital') }}</p>
             <h1 class="mt-3 font-display text-4xl leading-tight font-extrabold text-magenta sm:text-5xl">{{ __('Tukar masa skrin jadi masa membaca.') }}</h1>
             <p class="mt-3 text-lg text-ink/80">
-                @if ($bookCount > 0)
+                @if ($bookCount > 0 && $videoCount > 0)
+                    {{ __('Semua :books e-book Islamik dan :videos video animasi ASUH, disemak syariah, untuk seisi keluarga selama 12 bulan. Buku dan video baharu terus termasuk.', ['books' => $bookCount, 'videos' => $videoCount]) }}
+                @elseif ($bookCount > 0)
                     {{ __('Semua :count e-book Islamik ASUH, disemak syariah, untuk seisi keluarga selama 12 bulan. Buku baharu terus termasuk.', ['count' => $bookCount]) }}
                 @else
                     {{ __('Semua e-book Islamik ASUH untuk anak 6–13 tahun, disemak syariah, untuk seisi keluarga selama 12 bulan.') }}
@@ -82,7 +84,7 @@
                 @foreach ([
                     ['🛡️', __('Setiap buku disemak syariah')],
                     ['👨‍👩‍👧‍👦', __('Sehingga 4 anak, satu akaun')],
-                    ['🚫', __('Tiada iklan, tiada video asing')],
+                    $videoCount > 0 ? ['🎬', __(':count video animasi termasuk', ['count' => $videoCount])] : ['🚫', __('Tiada iklan, tiada video asing')],
                     ['🔒', __('Mod Anak berkunci dan laporan mingguan')],
                 ] as [$icon, $text])
                     <li class="flex items-center gap-3 rounded-2xl border-2 border-ink/15 bg-white p-3">
@@ -192,9 +194,14 @@
                     </div>
                 @endif
             @endforeach
-            @if ($catalogOpen)
-                <p class="mx-auto mt-6 max-w-xl px-4"><a href="{{ route('catalog.index') }}" class="pautan font-bold">{{ __('Lihat semua :count buku', ['count' => $bookCount]) }} &rarr;</a></p>
-            @endif
+            <p class="mx-auto mt-6 flex max-w-xl flex-wrap gap-x-6 gap-y-2 px-4">
+                @if ($catalogOpen)
+                    <a href="{{ route('catalog.index') }}" class="pautan font-bold">{{ __('Lihat semua :count buku', ['count' => $bookCount]) }} &rarr;</a>
+                @endif
+                @if ($videoCount > 0)
+                    <a href="{{ route('videos.index') }}" class="pautan font-bold">{{ __('Tonton contoh video animasi') }} &rarr;</a>
+                @endif
+            </p>
         </section>
         <div class="scallop text-lavender" aria-hidden="true"></div>
     @endif
@@ -223,6 +230,7 @@
                     @foreach ([
                         [__('Disemak syariah'), null, false],
                         [__('Tiada iklan'), true, false],
+                        ...($videoCount > 0 ? [[__('Video animasi kisah buku'), false, null]] : []),
                         [__('Buku baharu termasuk'), false, null],
                         [__('Kuiz dan lencana'), false, false],
                         [__('Laporan untuk ibu bapa'), false, false],
@@ -352,7 +360,7 @@
                 <div class="{{ $card }}">
                     <h3 class="font-display text-lg font-bold text-magenta">{{ __('Tak sesuai kalau anda') }}</h3>
                     <ul class="mt-3 space-y-2">
-                        @foreach ([__('Nak skrin ganti tempat ibu bapa sepenuhnya'), __('Cari kartun untuk ditonton sahaja'), __('Mahu buku fizikal untuk dipegang')] as $line)
+                        @foreach ([__('Nak skrin ganti tempat ibu bapa sepenuhnya'), __('Tak mahu had masa skrin langsung untuk anak'), __('Mahu buku fizikal untuk dipegang')] as $line)
                             <li class="flex gap-2"><span class="text-magenta" aria-hidden="true">✕</span>{{ $line }}</li>
                         @endforeach
                     </ul>

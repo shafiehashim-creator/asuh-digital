@@ -67,7 +67,7 @@ class Settings extends Page
         'bank_name', 'bank_account_name', 'bank_account_number',
         'contact_email', 'company_name', 'company_ssm_no', 'company_address', 'company_sst_no',
         'admin_notification_emails',
-        'catalog_open', 'preview_pages', 'whatsapp_number', 'videos_open', 'plus_sales_open', 'plus_opens_on',
+        'catalog_open', 'preview_pages', 'whatsapp_number', 'videos_open', 'yearly_includes_videos', 'plus_sales_open', 'plus_opens_on',
         'chip_fee_fpx_fixed', 'chip_fee_fpx_percent', 'chip_fee_ewallet_fixed', 'chip_fee_ewallet_percent',
         'affiliates_open', 'affiliate_commission_percent', 'affiliate_hold_days', 'affiliate_cookie_days',
         'royalty_pool_percent', 'royalty_plus_ebook_share', 'royalty_min_minutes', 'royalty_single_percent',
@@ -118,13 +118,19 @@ class Settings extends Page
             Section::make('Video animasi dan Langganan Plus (Fasa 2)')
                 ->columns(2)
                 ->schema([
-                    Toggle::make('videos_open')->label('Buka video animasi dan Langganan Plus')
+                    Toggle::make('videos_open')->label('Buka video animasi')
                         ->helperText('Semasa ditutup, video dan jualan Langganan Plus tersembunyi daripada pelanggan; staf masih boleh pratonton.')
                         ->columnSpanFull(),
+                    Toggle::make('yearly_includes_videos')->label('Langganan Tahunan termasuk video animasi (tiada Langganan Plus)')
+                        ->helperText('Hidup: semua langganan keluarga (early bird, tahunan, bulanan) membuka video animasi, dan halaman serta jualan Langganan Plus ditutup. Matikan hanya jika mahu menjual Plus sebagai pakej berasingan semula.')
+                        ->live()
+                        ->columnSpanFull(),
                     Toggle::make('plus_sales_open')->label('Jual Langganan Plus')
+                        ->hidden(fn (Get $get) => (bool) $get('yearly_includes_videos'))
                         ->helperText(fn () => 'Semasa dimatikan, halaman Plus dan video percuma masih dipaparkan tetapi tiada pembelian atau naik taraf: pelawat boleh tekan "Beritahu saya" dan diajak melanggan Langganan Tahunan dahulu. Bila dihidupkan, semua dalam senarai menunggu ('.app(PlusWaitlist::class)->waitingCount().' orang) menerima e-mel.')
                         ->columnSpanFull(),
                     DatePicker::make('plus_opens_on')->label('Tarikh Langganan Plus dibuka (pilihan)')
+                        ->hidden(fn (Get $get) => (bool) $get('yearly_includes_videos'))
                         ->native(false)->displayFormat('j M Y')
                         ->helperText('Dipaparkan sebagai "Langganan Plus dibuka pada …". Kosong = "tidak lama lagi". Jualan tetap dibuka dengan suis di atas.'),
                     TextInput::make('plus_price')->label('Harga Langganan Plus setahun (RM)')

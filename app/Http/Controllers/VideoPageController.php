@@ -24,8 +24,8 @@ class VideoPageController extends Controller
             'trailerId' => $showcase->trailerId(),
             'cta' => $showcase->cta($user),
             'showcase' => $showcase,
-            'plan' => $offer->plan(),
-            'price' => $offer->priceSen(),
+            'price' => $offer->videoPlanPriceSen(),
+            'planName' => $offer->videoPlanName(),
         ]);
     }
 }
