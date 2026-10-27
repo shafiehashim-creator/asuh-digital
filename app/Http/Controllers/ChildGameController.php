@@ -25,10 +25,16 @@ class ChildGameController extends Controller
             return redirect()->route('child-mode.home')->with('game_locked', 'Masa bermain hari ini sudah habis. Jom baca buku pula!');
         }
 
+        // The level asked for, never above the highest one opened.
+        $unlocked = $this->playing->unlockedLevel($child, $game);
+        $level = max(1, min($unlocked, (int) $request->query('tahap', $unlocked)));
+
         return view('child-mode.game', [
             'child' => $child,
             'game' => $game,
-            'content' => GameContent::for($game, $child->age_group),
+            'level' => $level,
+            'unlocked' => $unlocked,
+            'content' => GameContent::for($game, $child->age_group, $level),
             'progressUrl' => route('child-mode.game.progress', $game),
             'secondsLeft' => $this->playing->secondsLeftToday($child),
             'best' => $this->playing->bestScores($child)[$game->value] ?? null,
@@ -43,10 +49,16 @@ class ChildGameController extends Controller
         $data = $request->validate([
             'seconds' => ['required', 'integer', 'min:0', 'max:600'],
             'score' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'level' => ['nullable', 'integer', 'min:1', 'max:'.count(Game::LEVELS)],
         ]);
 
-        $this->playing->record($child, $game, (int) $data['seconds'], isset($data['score']) ? (int) $data['score'] : null);
+        $score = isset($data['score']) ? (int) $data['score'] : null;
+        $this->playing->record($child, $game, (int) $data['seconds'], $score);
 
-        return response()->json(['seconds_left' => $this->playing->secondsLeftToday($child)]);
+        $unlocked = $score !== null
+            ? $this->playing->finishRound($child, $game, (int) ($data['level'] ?? 1), $score)
+            : $this->playing->unlockedLevel($child, $game);
+
+        return response()->json(['seconds_left' => $this->playing->secondsLeftToday($child), 'unlocked' => $unlocked]);
     }
 }

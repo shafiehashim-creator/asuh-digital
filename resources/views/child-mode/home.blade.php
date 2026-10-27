@@ -77,6 +77,9 @@
                         <a href="{{ route('child-mode.game', $game) }}" class="flex w-40 shrink-0 snap-start flex-col rounded-2xl border-2 border-ink bg-white p-4 shadow-[0_3px_0_var(--color-ink)] transition hover:-translate-y-1 hover:bg-kuning/30 sm:w-44">
                             <span class="flex size-14 items-center justify-center rounded-full border-2 border-ink bg-lavender text-3xl" aria-hidden="true">{{ $game->emoji() }}</span>
                             <span class="mt-3 font-display text-lg leading-tight font-bold">{{ $game->label() }}</span>
+                            @if (($gameLevels[$game->value] ?? 1) > 1)
+                                <span class="mt-1 text-xs font-extrabold text-magenta">Tahap {{ App\Enums\Game::LEVELS[$gameLevels[$game->value]] }}</span>
+                            @endif
                             @if (($gameBest[$game->value] ?? 0) > 0)
                                 <span class="mt-auto pt-2 text-sm font-bold text-biru">⭐ Terbaik: {{ $gameBest[$game->value] }}</span>
                             @endif

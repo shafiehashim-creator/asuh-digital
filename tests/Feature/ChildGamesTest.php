@@ -15,6 +15,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Services\GamePlaying;
 use App\Support\GameContent;
+use App\Support\MathQuestions;
 use Database\Seeders\PlanSeeder;
 
 beforeEach(function () {
@@ -43,7 +44,7 @@ function playAs(Child $child): void
     test()->actingAs($child->user)->post("/akaun/anak/{$child->id}/mod-anak")->assertRedirect('/mod-anak');
 }
 
-it('opens all seven games to children of subscribed families', function () {
+it('opens every game to children of subscribed families', function () {
     $child = gamer();
     playAs($child);
 
@@ -119,21 +120,59 @@ it('lets the parent set the daily game limit, or none', function () {
     $this->put(route('children.update', $child), $form + ['daily_game_minutes' => '999'])->assertSessionHasErrors('daily_game_minutes');
 });
 
-it('gives every game content for both age groups', function (Game $game) {
+it('gives every game content for both age groups at every level', function (Game $game) {
     foreach ([AgeGroup::SixToNine, AgeGroup::TenToThirteen] as $age) {
-        $content = GameContent::for($game, $age);
+        foreach (array_keys(Game::LEVELS) as $level) {
+            $content = GameContent::for($game, $age, $level);
 
-        match ($game) {
-            Game::Memory => expect(count($content['pairs']))->toBeGreaterThanOrEqual(6),
-            Game::GoodChoice => expect(count($content['scenarios']))->toBeGreaterThanOrEqual($content['rounds']),
-            Game::Order => expect($content['sets'])->each(fn ($set) => $set->items->toBeArray()),
-            Game::WordSearch => expect(collect($content['words'])->filter(fn ($w) => strlen($w) <= $content['size'])->count())->toBeGreaterThanOrEqual($content['count']),
-            default => expect(count($content['questions']))->toBeGreaterThanOrEqual($content['rounds'])
-                ->and(collect($content['questions'])->every(fn ($q) => in_array($q['answer'], $q['options'], true)
-                    && count(array_unique(array_diff($q['options'], [$q['answer']]))) >= 1))->toBeTrue(),
-        };
+            match ($game) {
+                Game::Memory => expect(count($content['pairs']))->toBeGreaterThanOrEqual($content['count']),
+                Game::GoodChoice => expect(count($content['scenarios']))->toBeGreaterThanOrEqual($content['rounds']),
+                Game::Order => expect($content['sets'])->each(fn ($set) => $set->items->toBeArray()),
+                Game::WordSearch => expect(count($content['words']))->toBeGreaterThanOrEqual($content['count'])
+                    ->and(collect($content['words'])->every(fn ($w) => strlen($w) <= $content['size']))->toBeTrue(),
+                Game::Sliding => expect($content['size'])->toBeIn([3, 4])->and($content['images'])->toHaveCount(3),
+                Game::Sudoku => expect($content['size'])->toBeIn([4, 6])->and($content['blanks'])->toBeLessThan($content['size'] ** 2),
+                default => expect(count($content['questions']))->toBeGreaterThanOrEqual($content['rounds'])
+                    ->and(collect($content['questions'])->every(fn ($q) => in_array($q['answer'], $q['options'], true)
+                        && count(array_unique(array_diff($q['options'], [$q['answer']]))) >= 1))->toBeTrue(),
+            };
+        }
     }
 })->with(Game::cases());
+
+it('makes sums with the right answers, harder for older children', function () {
+    foreach ([false, true] as $older) {
+        foreach ([1, 2, 3] as $level) {
+            foreach (MathQuestions::make($older, $level, 40) as $q) {
+                if ($q['big'] !== null && ! str_contains($q['big'], '❓ ')) {
+                    $sum = str_replace(['×', '÷', '−', '= ❓'], ['*', '/', '-', ''], $q['big']);
+                    expect((string) eval("return {$sum};"))->toBe($q['answer']);
+                }
+                expect((int) $q['answer'])->toBeGreaterThanOrEqual(0)
+                    ->and(count(array_unique($q['options'])))->toBeGreaterThanOrEqual(4);
+            }
+        }
+    }
+});
+
+it('opens the next level with three stars at the highest level, one at a time', function () {
+    $child = gamer();
+    playAs($child);
+    $url = route('child-mode.game.progress', Game::Math);
+
+    $this->get(route('child-mode.game', [Game::Math, 'tahap' => 3]))->assertOk()->assertSee('🔒 Sederhana')->assertViewHas('level', 1);
+
+    $this->postJson($url, ['seconds' => 30, 'score' => 80, 'level' => 1])->assertJson(['unlocked' => 1]);
+    $this->postJson($url, ['seconds' => 30, 'score' => 95, 'level' => 1])->assertJson(['unlocked' => 2]);
+    // Three stars again at Mudah does not skip ahead.
+    $this->postJson($url, ['seconds' => 30, 'score' => 100, 'level' => 1])->assertJson(['unlocked' => 2]);
+
+    $this->get(route('child-mode.game', [Game::Math, 'tahap' => 2]))->assertOk()->assertViewHas('level', 2)->assertSee('🔒 Sukar');
+    $this->get('/mod-anak')->assertSee('Tahap Sederhana');
+    // Other games keep their own levels.
+    expect(app(GamePlaying::class)->unlockedLevel($child, Game::Memory))->toBe(1);
+});
 
 it('plays only active items for the child\'s age, from a pool drawn at random', function () {
     GameItem::query()->create(['game' => Game::Prophets, 'age_group' => 'both', 'prompt' => 'Petunjuk baharu', 'answer' => 'Nabi Lut', 'is_active' => false]);
@@ -144,7 +183,8 @@ it('plays only active items for the child\'s age, from a pool drawn at random', 
 
     expect($young)->not->toContain('Petunjuk baharu')->not->toContain('Petunjuk abang')
         ->and($old)->toContain('Petunjuk abang')
-        ->and(GameContent::for(Game::Memory, AgeGroup::SixToNine))->count->toBe(6)->pairs->toHaveCount(24);
+        ->and(GameContent::for(Game::Memory, AgeGroup::SixToNine))->count->toBe(4)->pairs->toHaveCount(24)
+        ->and(GameContent::for(Game::Memory, AgeGroup::SixToNine, 3))->count->toBe(8);
 });
 
 it('hides a game without enough active items', function () {

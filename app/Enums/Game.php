@@ -16,6 +16,14 @@ enum Game: string
     case WordSearch = 'cari-perkataan';
     case Prophets = 'teka-nabi';
     case QuickQuiz = 'kuiz-pantas';
+    case Math = 'matematik';
+    case Science = 'sains';
+    case Pattern = 'teka-corak';
+    case Sliding = 'puzzle-gelongsor';
+    case Sudoku = 'sudoku-emoji';
+
+    /** Levels a child opens one by one with three stars. */
+    public const LEVELS = [1 => 'Mudah', 2 => 'Sederhana', 3 => 'Sukar'];
 
     public function label(): string
     {
@@ -27,6 +35,11 @@ enum Game: string
             self::WordSearch => 'Cari Perkataan',
             self::Prophets => 'Teka Nabi dan Rasul',
             self::QuickQuiz => 'Kuiz Pantas Adab',
+            self::Math => 'Matematik Pantas',
+            self::Science => 'Sains Ciptaan Allah',
+            self::Pattern => 'Teka Corak',
+            self::Sliding => 'Puzzle Gelongsor',
+            self::Sudoku => 'Sudoku Emoji',
         };
     }
 
@@ -40,6 +53,11 @@ enum Game: string
             self::WordSearch => '🔎',
             self::Prophets => '🌙',
             self::QuickQuiz => '⏱️',
+            self::Math => '➕',
+            self::Science => '🔬',
+            self::Pattern => '🧩',
+            self::Sliding => '🖼️',
+            self::Sudoku => '🔲',
         };
     }
 
@@ -53,13 +71,18 @@ enum Game: string
             self::WordSearch => 'Cari perkataan yang tersembunyi.',
             self::Prophets => 'Baca petunjuk, teka nabinya.',
             self::QuickQuiz => 'Jawab cepat sebelum masa tamat!',
+            self::Math => 'Kira dengan cepat dan tepat.',
+            self::Science => 'Kenali alam ciptaan Allah.',
+            self::Pattern => 'Cari coraknya, teka yang seterusnya.',
+            self::Sliding => 'Gelongsorkan kepingan hingga gambar lengkap.',
+            self::Sudoku => 'Setiap baris, lajur dan kotak ada semua emoji.',
         };
     }
 
-    /** Whether the admin writes its content (hijaiyah letters are fixed). */
+    /** Whether the admin writes its content (letters, sums, patterns and puzzles are made in code). */
     public function editable(): bool
     {
-        return $this !== self::Hijaiyah;
+        return in_array($this, [self::Memory, self::GoodChoice, self::Order, self::WordSearch, self::Prophets, self::QuickQuiz, self::Science], true);
     }
 
     /** The Alpine component that plays it (resources/js/games.js). */
@@ -69,8 +92,10 @@ enum Game: string
             self::Memory => 'gameMemory',
             self::GoodChoice => 'gameGoodChoice',
             self::Order => 'gameOrder',
-            self::Hijaiyah, self::Prophets, self::QuickQuiz => 'gameQuiz',
+            self::Hijaiyah, self::Prophets, self::QuickQuiz, self::Math, self::Science, self::Pattern => 'gameQuiz',
             self::WordSearch => 'gameWordSearch',
+            self::Sliding => 'gameSliding',
+            self::Sudoku => 'gameSudoku',
         };
     }
 }

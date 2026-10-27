@@ -6,6 +6,8 @@
         'progressUrl' => $progressUrl,
         'secondsLeft' => $secondsLeft,
         'csrf' => csrf_token(),
+        'level' => $level,
+        'unlocked' => $unlocked,
     ];
     $tile = 'rounded-2xl border-2 border-ink bg-white shadow-[0_3px_0_var(--color-ink)]';
 @endphp
@@ -14,7 +16,13 @@
     <div class="mx-auto max-w-3xl px-4 py-6" x-data="{{ $game->component() }}(@js($config))">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <a href="{{ route('child-mode.home') }}" class="inline-flex min-h-11 items-center rounded-full border-2 border-ink bg-white px-4 font-bold shadow-[0_2px_0_var(--color-ink)]">← Rak</a>
-            <p x-show="minutesLeft !== null" x-cloak class="rounded-full bg-white px-3 py-1 text-sm font-bold text-biru">Baki masa bermain: <span x-text="minutesLeft"></span> minit</p>
+            <div class="flex items-center gap-2">
+                <p x-show="minutesLeft !== null" x-cloak class="rounded-full bg-white px-3 py-1 text-sm font-bold text-biru">Baki masa: <span x-text="minutesLeft"></span> minit</p>
+                <button type="button" @click="toggleSound()" class="grid size-11 place-items-center rounded-full border-2 border-ink bg-white text-xl shadow-[0_2px_0_var(--color-ink)]"
+                    :aria-label="sound ? 'Matikan bunyi' : 'Hidupkan bunyi'" :aria-pressed="sound.toString()">
+                    <span x-text="sound ? '🔊' : '🔇'" aria-hidden="true"></span>
+                </button>
+            </div>
         </div>
 
         <h1 class="mt-4 flex items-center gap-3 font-display text-3xl font-extrabold text-plum">
@@ -22,6 +30,18 @@
             {{ $game->label() }}
         </h1>
         <p class="mt-1 font-semibold text-ink/75">{{ $game->description() }}@if ($best) · Markah terbaik: {{ $best }}@endif</p>
+
+        {{-- Levels: the next one opens with three stars. --}}
+        <nav class="mt-4 flex gap-2" aria-label="Tahap">
+            @foreach (App\Enums\Game::LEVELS as $number => $name)
+                @if ($number <= $unlocked)
+                    <a href="{{ route('child-mode.game', [$game, 'tahap' => $number]) }}" @if ($number === $level) aria-current="page" @endif
+                        @class(['inline-flex min-h-11 items-center rounded-full border-2 border-ink px-4 text-sm font-extrabold', 'bg-plum text-white' => $number === $level, 'bg-white' => $number !== $level])>{{ $name }}</a>
+                @else
+                    <span class="inline-flex min-h-11 items-center rounded-full border-2 border-ink/30 bg-white/60 px-4 text-sm font-bold text-ink/50" title="Dapatkan 3 bintang di tahap {{ App\Enums\Game::LEVELS[$number - 1] }} untuk membukanya">🔒 {{ $name }}</span>
+                @endif
+            @endforeach
+        </nav>
 
         {{-- Time is up for today --}}
         <div x-show="timeUp" x-cloak class="mt-6 {{ $tile }} p-6 text-center">
@@ -35,9 +55,11 @@
         <div x-show="done && !timeUp" x-cloak class="mt-6 {{ $tile }} p-6 text-center">
             <p class="text-5xl" aria-hidden="true"><span x-text="'⭐'.repeat(stars)"></span></p>
             <p class="mt-2 font-display text-2xl font-bold">Tahniah! Markah kamu <span x-text="score"></span></p>
-            <p class="mt-1 text-ink/75">Jom Jadi Baik!</p>
+            <p x-show="!newLevel" class="mt-1 text-ink/75" x-text="stars < 3 && level === unlocked && level < 3 ? 'Dapatkan 3 bintang untuk membuka tahap seterusnya.' : 'Jom Jadi Baik!'"></p>
+            <p x-show="newLevel" x-cloak class="mt-2 rounded-2xl bg-kuning px-4 py-2 font-display text-xl font-extrabold">🎉 Tahap <span x-text="{{ Js::from(App\Enums\Game::LEVELS) }}[unlocked]"></span> dibuka!</p>
             <div class="mt-4 flex flex-wrap justify-center gap-3">
-                <button type="button" class="btn-utama" @click="restart()">Main lagi</button>
+                <a x-show="newLevel" x-cloak :href="{{ Js::from(route('child-mode.game', $game)) }} + '?tahap=' + unlocked" class="btn-utama">Cuba tahap baharu →</a>
+                <button type="button" :class="newLevel ? 'btn-gelap' : 'btn-utama'" @click="restart()">Main lagi</button>
                 <a href="{{ route('child-mode.home') }}" class="btn-gelap">Ke rak buku</a>
             </div>
         </div>
@@ -118,21 +140,66 @@
                     </div>
                     @break
 
+                @case(Game::Sliding)
+                    <p class="font-semibold">Langkah: <span x-text="moves"></span> · Tekan kepingan di sebelah ruang kosong.</p>
+                    <div class="mt-3 flex flex-wrap items-start gap-4">
+                        <div class="grid w-full max-w-sm gap-1 rounded-2xl border-2 border-ink bg-ink p-1" :style="`grid-template-columns: repeat(${size}, minmax(0, 1fr))`">
+                            <template x-for="(tile, cell) in tiles" :key="tile">
+                                <button type="button" @click="slide(cell)" :disabled="isBlank(tile)"
+                                    class="relative aspect-square rounded-lg bg-lavender transition-transform active:scale-95"
+                                    :style="isBlank(tile) ? '' : pieceStyle(tile)" :aria-label="isBlank(tile) ? 'Ruang kosong' : 'Kepingan ' + (tile + 1)">
+                                    @if ($content['numbers'])
+                                        <span x-show="!isBlank(tile)" class="absolute top-1 left-1 grid size-6 place-items-center rounded-full bg-white/90 text-xs font-extrabold" x-text="tile + 1"></span>
+                                    @endif
+                                </button>
+                            </template>
+                        </div>
+                        <div class="w-28 shrink-0">
+                            <p class="text-sm font-bold">Gambar penuh:</p>
+                            <img :src="image" alt="" class="mt-1 w-28 rounded-xl border-2 border-ink">
+                        </div>
+                    </div>
+                    @break
+
+                @case(Game::Sudoku)
+                    <p class="font-semibold">Tekan kotak kosong, kemudian pilih gambar. Setiap baris, lajur dan kotak tebal ada semua gambar sekali.</p>
+                    <div class="mx-auto mt-3 grid w-full max-w-sm overflow-hidden rounded-2xl border-4 border-ink bg-white" :style="`grid-template-columns: repeat(${size}, minmax(0, 1fr))`">
+                        <template x-for="(entry, cell) in entries" :key="cell">
+                            <button type="button" @click="pick(cell)"
+                                class="grid aspect-square place-items-center border border-ink/20 text-3xl"
+                                :class="[borderClass(cell), selected === cell ? 'bg-kuning' : (given[cell] ? 'bg-lavender' : 'bg-white')]"
+                                :aria-label="entry === null ? 'Kotak kosong' : symbols[entry]">
+                                <span x-text="entry === null ? '' : symbols[entry]"></span>
+                            </button>
+                        </template>
+                    </div>
+                    <div class="mx-auto mt-4 flex max-w-sm flex-wrap justify-center gap-2">
+                        <template x-for="(symbol, value) in symbols" :key="value">
+                            <button type="button" @click="place(value)"
+                                class="grid size-14 place-items-center rounded-2xl border-2 border-ink bg-white text-3xl shadow-[0_3px_0_var(--color-ink)]"
+                                :class="shaking === value && 'game-shake border-magenta'" x-text="symbol"></button>
+                        </template>
+                    </div>
+                    <p class="mt-2 text-center text-sm font-semibold">Silap: <span x-text="mistakes"></span></p>
+                    @break
+
                 @default
-                    {{-- Hijaiyah, prophets and the quick manners quiz: multiple choice --}}
+                    {{-- Hijaiyah, prophets, manners, maths, science and patterns: multiple choice --}}
                     <div class="flex items-center justify-between gap-3 font-semibold">
                         <p>Soalan <span x-text="index + 1"></span> / <span x-text="questions.length"></span></p>
                         <p x-show="countdown !== null" x-cloak class="rounded-full bg-white px-3 py-1 font-display text-lg font-extrabold" :class="countdown <= 3 && 'text-magenta'">⏱️ <span x-text="countdown"></span></p>
                     </div>
                     <div class="mt-3 {{ $tile }} p-5 text-center">
                         <p class="font-display text-xl leading-snug font-bold" x-text="question?.prompt"></p>
-                        <p x-show="question?.big" class="mt-2 text-8xl leading-tight" dir="rtl" lang="ar" x-text="question?.big"></p>
+                        <p x-show="question?.big" class="mt-3 leading-tight font-display font-extrabold break-words"
+                            :class="question?.rtl ? 'text-8xl font-normal' : ((question?.big ?? '').length > 18 ? 'text-3xl sm:text-4xl' : 'text-4xl sm:text-5xl')"
+                            :dir="question?.rtl ? 'rtl' : 'ltr'" :lang="question?.rtl ? 'ar' : 'ms'" x-text="question?.big"></p>
                     </div>
                     <div class="mt-4 grid gap-3 sm:grid-cols-2">
                         <template x-for="choice in question?.choices ?? []" :key="choice">
                             <button type="button" @click="choose(choice)"
-                                class="min-h-14 rounded-2xl border-2 border-ink px-4 py-2 font-display text-lg font-bold shadow-[0_3px_0_var(--color-ink)]"
-                                :class="picked === null ? 'bg-white' : (choice === question.answer ? 'bg-kuning' : (choice === picked ? 'bg-magenta text-white' : 'bg-white opacity-60'))"
+                                class="min-h-14 rounded-2xl border-2 border-ink px-4 py-2 font-display font-bold shadow-[0_3px_0_var(--color-ink)]"
+                                :class="[/^\p{Extended_Pictographic}/u.test(choice) ? 'text-4xl' : 'text-lg', picked === null ? 'bg-white' : (choice === question.answer ? 'bg-kuning' : (choice === picked ? 'bg-magenta text-white' : 'bg-white opacity-60'))]"
                                 x-text="choice"></button>
                         </template>
                     </div>

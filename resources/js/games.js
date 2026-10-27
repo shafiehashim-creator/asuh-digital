@@ -16,10 +16,66 @@ const shuffle = (list) => {
     return out;
 };
 
+/*
+ * Sound effects made in the browser with the Web Audio API (no sound files):
+ * short tones for a tap, a right and a wrong answer, and a little tune when a
+ * round is won. Muted with the 🔊 button; the choice is kept on the device.
+ */
+const SOUND_KEY = 'asuh_game_sound';
+let audio = null;
+
+const soundOn = () => {
+    try {
+        return localStorage.getItem(SOUND_KEY) !== 'off';
+    } catch {
+        return true;
+    }
+};
+
+const play = (notes) => {
+    if (!soundOn()) {
+        return;
+    }
+    try {
+        audio ??= new (window.AudioContext || window.webkitAudioContext)();
+        if (audio.state === 'suspended') {
+            audio.resume();
+        }
+        const now = audio.currentTime;
+        for (const [freq, start, length, type = 'sine', volume = 0.18] of notes) {
+            const osc = audio.createOscillator();
+            const gain = audio.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.0001, now + start);
+            gain.gain.exponentialRampToValueAtTime(volume, now + start + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + start + length);
+            osc.connect(gain).connect(audio.destination);
+            osc.start(now + start);
+            osc.stop(now + start + length + 0.05);
+        }
+    } catch {
+        // No sound on this device: the game plays on silently.
+    }
+};
+
+export const sfx = {
+    tap: () => play([[520, 0, 0.07, 'triangle', 0.12]]),
+    flip: () => play([[420, 0, 0.06, 'triangle', 0.1], [640, 0.05, 0.06, 'triangle', 0.1]]),
+    right: () => play([[660, 0, 0.12], [880, 0.1, 0.22]]),
+    wrong: () => play([[260, 0, 0.18, 'triangle'], [200, 0.14, 0.26, 'triangle']]),
+    win: () => play([[523, 0, 0.14], [659, 0.14, 0.14], [784, 0.28, 0.14], [1047, 0.42, 0.4]]),
+    levelUp: () => play([[784, 0, 0.12], [988, 0.12, 0.12], [1175, 0.24, 0.12], [1568, 0.36, 0.45]]),
+};
+
 // Copies the shell in with its getters intact (a spread would freeze them).
 const withShell = (cfg, game) => Object.defineProperties(game, Object.getOwnPropertyDescriptors(shell(cfg)));
 
 const shell = (cfg) => ({
+    level: cfg.level ?? 1,
+    unlocked: cfg.unlocked ?? 1,
+    newLevel: false,
+    sound: soundOn(),
     secondsLeft: cfg.secondsLeft,
     timeUp: cfg.secondsLeft !== null && cfg.secondsLeft <= 0,
     done: false,
@@ -43,11 +99,16 @@ const shell = (cfg) => ({
             const response = await fetch(cfg.progressUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': cfg.csrf },
-                body: JSON.stringify({ seconds, score }),
+                body: JSON.stringify({ seconds, score, level: this.level }),
             });
             if (response.ok) {
                 const data = await response.json();
                 this.secondsLeft = data.seconds_left;
+                if (data.unlocked > this.unlocked) {
+                    this.unlocked = data.unlocked;
+                    this.newLevel = true;
+                    setTimeout(() => sfx.levelUp(), 700);
+                }
                 if (data.seconds_left === 0) {
                     this.timeUp = true;
                     clearInterval(this.clock);
@@ -61,7 +122,21 @@ const shell = (cfg) => ({
     finish(score) {
         this.score = Math.max(0, Math.min(100, Math.round(score)));
         this.done = true;
+        this.newLevel = false;
+        this.score >= 60 ? sfx.win() : sfx.right();
         this.tick(this.score);
+    },
+
+    toggleSound() {
+        this.sound = !this.sound;
+        try {
+            localStorage.setItem(SOUND_KEY, this.sound ? 'on' : 'off');
+        } catch {
+            // Private browsing: the choice lasts for this page only.
+        }
+        if (this.sound) {
+            sfx.tap();
+        }
     },
 
     get stars() {
@@ -106,6 +181,7 @@ const gameMemory = (cfg) => withShell(cfg, {
             return;
         }
         this.open.push(card.key);
+        sfx.flip();
         if (this.open.length < 2) {
             return;
         }
@@ -115,11 +191,13 @@ const gameMemory = (cfg) => withShell(cfg, {
         if (a.id === b.id) {
             this.matched.push(a.id);
             this.open = [];
+            sfx.right();
             if (this.matched.length === this.cards.length / 2) {
                 this.finish(100 - (this.moves - this.cards.length / 2) * 5);
             }
         } else {
             this.busy = true;
+            setTimeout(() => sfx.wrong(), 350);
             setTimeout(() => {
                 this.open = [];
                 this.busy = false;
@@ -159,6 +237,7 @@ const gameGoodChoice = (cfg) => withShell(cfg, {
         const ok = this.item.good === good;
         this.correct += ok ? 1 : 0;
         this.feedback = { ok, why: this.item.why };
+        ok ? sfx.right() : sfx.wrong();
     },
 
     next() {
@@ -211,9 +290,13 @@ const gameOrder = (cfg) => withShell(cfg, {
             this.placed.push(tile.order);
             if (this.placed.length === this.set.items.length) {
                 this.setDone = true;
+                sfx.right();
+            } else {
+                sfx.tap();
             }
         } else {
             this.mistakes++;
+            sfx.wrong();
             this.shaking = tile.order;
             setTimeout(() => (this.shaking = null), 500);
         }
@@ -287,6 +370,7 @@ const gameQuiz = (cfg) => withShell(cfg, {
         clearInterval(this.timer);
         this.picked = choice ?? '';
         this.correct += choice === this.question.answer ? 1 : 0;
+        choice === this.question.answer ? sfx.right() : sfx.wrong();
         setTimeout(() => this.next(), choice === this.question.answer ? 700 : 1600);
     },
 
@@ -330,17 +414,19 @@ const gameWordSearch = (cfg) => withShell(cfg, {
                 const [dr, dc] = directions[Math.floor(Math.random() * directions.length)];
                 const row = Math.floor(Math.random() * (size - dr * (word.length - 1)));
                 const col = Math.floor(Math.random() * (size - dc * (word.length - 1)));
-                const cells = [...word].map((_, i) => (row + dr * i) * size + (col + dc * i));
-                if (cells.every((cell, i) => grid[cell] === null || grid[cell] === word[i])) {
-                    cells.forEach((cell, i) => (grid[cell] = word[i]));
+                // At the hardest level some words hide backwards.
+                const letters = cfg.content.backwards && Math.random() < 0.5 ? [...word].reverse() : [...word];
+                const cells = letters.map((_, i) => (row + dr * i) * size + (col + dc * i));
+                if (cells.every((cell, i) => grid[cell] === null || grid[cell] === letters[i])) {
+                    cells.forEach((cell, i) => (grid[cell] = letters[i]));
                     placed.push(word);
                     break;
                 }
             }
         }
 
-        const letters = 'ABDEGHIJKLMNOPRSTUWYZ';
-        this.grid = grid.map((letter) => letter ?? letters[Math.floor(Math.random() * letters.length)]);
+        const filler = 'ABDEGHIJKLMNOPRSTUWYZ';
+        this.grid = grid.map((letter) => letter ?? filler[Math.floor(Math.random() * filler.length)]);
         this.words = placed;
         this.found = [];
         this.foundCells = [];
@@ -355,6 +441,7 @@ const gameWordSearch = (cfg) => withShell(cfg, {
         }
         if (this.start === null) {
             this.start = cell;
+            sfx.tap();
 
             return;
         }
@@ -377,17 +464,213 @@ const gameWordSearch = (cfg) => withShell(cfg, {
         if (word) {
             this.found.push(word);
             this.foundCells.push(...cells);
+            sfx.right();
             if (this.found.length === this.words.length) {
                 this.finish(100 - this.misses * 5);
             }
         } else {
             this.misses++;
+            sfx.wrong();
         }
         this.start = null;
     },
 });
 
+// 🖼️ Slide the pieces into place until the picture of Anis and Anas is whole.
+const gameSliding = (cfg) => withShell(cfg, {
+    size: cfg.content.size,
+    tiles: [],
+    moves: 0,
+    image: null,
+
+    init() {
+        this.startClock();
+        this.restart();
+    },
+
+    restart() {
+        const n = this.size * this.size;
+        this.image = cfg.content.images[Math.floor(Math.random() * cfg.content.images.length)];
+        // Shuffle by random legal moves from the solved picture, so it can always be solved.
+        const tiles = Array.from({ length: n }, (_, i) => i);
+        let blank = n - 1;
+        let previous = -1;
+        for (let i = 0; i < cfg.content.shuffle; i++) {
+            const next = shuffle(this.neighbours(blank)).find((cell) => cell !== previous);
+            [tiles[blank], tiles[next]] = [tiles[next], tiles[blank]];
+            previous = blank;
+            blank = next;
+        }
+        if (tiles.every((tile, i) => tile === i)) {
+            const next = this.neighbours(blank)[0];
+            [tiles[blank], tiles[next]] = [tiles[next], tiles[blank]];
+        }
+        this.tiles = tiles;
+        this.moves = 0;
+        this.done = false;
+    },
+
+    neighbours(cell) {
+        const size = this.size;
+        const [row, col] = [Math.floor(cell / size), cell % size];
+
+        return [[row - 1, col], [row + 1, col], [row, col - 1], [row, col + 1]]
+            .filter(([r, c]) => r >= 0 && r < size && c >= 0 && c < size)
+            .map(([r, c]) => r * size + c);
+    },
+
+    blank() {
+        return this.tiles.indexOf(this.size * this.size - 1);
+    },
+
+    isBlank(tile) {
+        return tile === this.size * this.size - 1;
+    },
+
+    // Where a piece of the picture sits, as a CSS background.
+    pieceStyle(tile) {
+        const size = this.size;
+        const [row, col] = [Math.floor(tile / size), tile % size];
+        const at = (i) => (size === 1 ? 0 : (i / (size - 1)) * 100);
+
+        return `background-image:url('${this.image}');background-size:${size * 100}% ${size * 100}%;background-position:${at(col)}% ${at(row)}%`;
+    },
+
+    slide(cell) {
+        if (this.done || this.timeUp || !this.neighbours(cell).includes(this.blank())) {
+            return;
+        }
+        const blank = this.blank();
+        [this.tiles[blank], this.tiles[cell]] = [this.tiles[cell], this.tiles[blank]];
+        this.moves++;
+        sfx.tap();
+        if (this.tiles.every((tile, i) => tile === i)) {
+            // Full marks within about one and a half times the shuffle, less after that.
+            const fair = cfg.content.shuffle * 1.5 + 10;
+            setTimeout(() => this.finish(Math.max(40, Math.min(100, (fair / this.moves) * 100))), 300);
+        }
+    },
+});
+
+// 🔲 Fill the grid so every row, column and box has each picture once.
+const gameSudoku = (cfg) => withShell(cfg, {
+    size: cfg.content.size,
+    symbols: cfg.content.symbols.slice(0, cfg.content.size),
+    solution: [],
+    given: [],
+    entries: [],
+    selected: null,
+    mistakes: 0,
+    shaking: null,
+
+    init() {
+        this.startClock();
+        this.restart();
+    },
+
+    restart() {
+        const n = this.size;
+        // Boxes are 2×2 for a 4×4 grid and 2 rows × 3 columns for 6×6.
+        const [boxRows, boxCols] = n === 6 ? [2, 3] : [2, 2];
+        const pattern = (r, c) => (boxCols * (r % boxRows) + Math.floor(r / boxRows) + c) % n;
+        // Shuffle the symbols, the rows within each band and the bands, the same for columns.
+        const order = (count, group) => shuffle([...Array(count / group).keys()]).flatMap((g) => shuffle([...Array(group).keys()]).map((i) => g * group + i));
+        const rows = order(n, boxRows);
+        const cols = order(n, boxCols);
+        const symbols = shuffle([...Array(n).keys()]);
+
+        this.solution = rows.flatMap((r) => cols.map((c) => symbols[pattern(r, c)]));
+        // Hide cells one by one, keeping only those that leave a single answer.
+        const hidden = new Set();
+        const grid = [...this.solution];
+        for (const cell of shuffle([...Array(n * n).keys()])) {
+            if (hidden.size === cfg.content.blanks) {
+                break;
+            }
+            grid[cell] = null;
+            if (this.solutions(grid, boxRows, boxCols) === 1) {
+                hidden.add(cell);
+            } else {
+                grid[cell] = this.solution[cell];
+            }
+        }
+        this.given = this.solution.map((_, cell) => !hidden.has(cell));
+        this.entries = this.solution.map((value, cell) => (hidden.has(cell) ? null : value));
+        this.selected = [...hidden][0];
+        this.mistakes = 0;
+        this.done = false;
+    },
+
+    // Counts the ways to fill the grid, stopping at two.
+    solutions(grid, boxRows, boxCols) {
+        const n = this.size;
+        const empty = grid.indexOf(null);
+        if (empty === -1) {
+            return 1;
+        }
+        const [row, col] = [Math.floor(empty / n), empty % n];
+        const [top, left] = [row - (row % boxRows), col - (col % boxCols)];
+        let count = 0;
+        for (let value = 0; value < n && count < 2; value++) {
+            let clash = false;
+            for (let i = 0; i < n && !clash; i++) {
+                const boxCell = (top + Math.floor(i / boxCols)) * n + left + (i % boxCols);
+                clash = grid[row * n + i] === value || grid[i * n + col] === value || grid[boxCell] === value;
+            }
+            if (!clash) {
+                grid[empty] = value;
+                count += this.solutions(grid, boxRows, boxCols);
+                grid[empty] = null;
+            }
+        }
+
+        return count;
+    },
+
+    borderClass(cell) {
+        const n = this.size;
+        const [boxRows, boxCols] = n === 6 ? [2, 3] : [2, 2];
+        const [row, col] = [Math.floor(cell / n), cell % n];
+
+        return [
+            col % boxCols === boxCols - 1 && col < n - 1 ? 'border-r-ink border-r-4' : '',
+            row % boxRows === boxRows - 1 && row < n - 1 ? 'border-b-ink border-b-4' : '',
+        ].join(' ');
+    },
+
+    pick(cell) {
+        if (!this.given[cell] && this.entries[cell] === null) {
+            this.selected = cell;
+            sfx.tap();
+        }
+    },
+
+    place(value) {
+        const cell = this.selected;
+        if (cell === null || this.done || this.timeUp) {
+            return;
+        }
+        if (this.solution[cell] !== value) {
+            this.mistakes++;
+            this.shaking = value;
+            sfx.wrong();
+            setTimeout(() => (this.shaking = null), 500);
+
+            return;
+        }
+        this.entries[cell] = value;
+        sfx.right();
+        const next = this.entries.findIndex((entry) => entry === null);
+        this.selected = next === -1 ? null : next;
+        if (next === -1) {
+            setTimeout(() => this.finish(100 - this.mistakes * 10), 300);
+        }
+    },
+});
+
 export function registerGames(Alpine) {
+    Alpine.data('gameSliding', gameSliding);
+    Alpine.data('gameSudoku', gameSudoku);
     Alpine.data('gameMemory', gameMemory);
     Alpine.data('gameGoodChoice', gameGoodChoice);
     Alpine.data('gameOrder', gameOrder);
