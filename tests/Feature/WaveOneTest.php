@@ -168,13 +168,13 @@ it('sells the pass with simple maths when buying one by one costs more', functio
         ->assertSee('Anda jimat 33%')
         ->assertSee('RM79')
         ->assertSee('Tempah slot saya')
-        ->assertSee('Buku yang termasuk');
+        ->assertSee('Apa anak baca, itulah yang anak ikut.');
 });
 
 it('skips the maths when it would not show a saving', function () {
     Book::factory()->published()->create(['single_price_sen' => 990]);
 
-    $this->get(route('pass.show'))->assertOk()->assertDontSee('Matematik mudah')->assertDontSee('Buku yang termasuk');
+    $this->get(route('pass.show'))->assertOk()->assertDontSee('Matematik mudah')->assertDontSee('Apa anak baca, itulah yang anak ikut.');
 });
 
 it('sends the old "Pas" links to the new "Langganan" pages', function () {
