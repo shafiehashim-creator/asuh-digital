@@ -47,6 +47,38 @@ html {
     touch-action: manipulation;
 }
 
+/* Sales page: a scalloped edge hanging from the section above (its colour = currentColor). */
+.scallop {
+    height: 16px;
+    background: radial-gradient(circle at 16px 0, currentColor 15.5px, transparent 16px) repeat-x;
+    background-size: 32px 16px;
+}
+
+/* Sales page: book covers drifting sideways; still for those who prefer less motion. */
+@keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+.marquee-track {
+    width: max-content;
+    animation: marquee 60s linear infinite;
+}
+
+.marquee-track.marquee-reverse {
+    animation-direction: reverse;
+}
+
+.marquee:hover .marquee-track {
+    animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+        animation: none;
+    }
+}
+
 /* Alpine: hide until Alpine has started. */
 [x-cloak] {
     display: none !important;
