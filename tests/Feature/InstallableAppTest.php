@@ -18,6 +18,7 @@ it('serves the app manifest with the shortcuts that are open', function () {
 
     Setting::set('catalog_open', true);
     Setting::set('videos_open', true);
+    Setting::set('yearly_includes_videos', false);
     Setting::set('plus_sales_open', true);
     Plan::findByCode(Plan::PAS_PLUS)->update(['price_sen' => 15900]);
 
@@ -57,6 +58,7 @@ it('puts Video in the phone tab bar once the videos open, and names the account 
     expect($tabs())->toContain('Keluarga')->toContain('Buku')->not->toContain(route('videos.index'));
 
     Setting::set('videos_open', true);
+    Setting::set('yearly_includes_videos', false);
     Setting::set('plus_sales_open', true);
     Plan::findByCode(Plan::PAS_PLUS)->update(['price_sen' => 15900]);
     expect($tabs())->toContain(route('videos.index'));
@@ -85,6 +87,7 @@ it('has a phone menu drawer with the public, family and school links', function 
 
     Setting::set('catalog_open', true);
     Setting::set('videos_open', true);
+    Setting::set('yearly_includes_videos', false);
     Setting::set('plus_sales_open', true);
     Plan::findByCode(Plan::PAS_PLUS)->update(['price_sen' => 15900]);
     $this->actingAs(User::factory()->create());
@@ -114,6 +117,7 @@ it('keeps the app tab bar on phones and tablets and gives computers the full men
 
     Setting::set('catalog_open', true);
     Setting::set('videos_open', true);
+    Setting::set('yearly_includes_videos', false);
     Setting::set('plus_sales_open', true);
     Plan::findByCode(Plan::PAS_PLUS)->update(['price_sen' => 15900]);
 

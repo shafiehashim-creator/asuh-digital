@@ -6,8 +6,8 @@
     $thumb = fn ($video) => $video->thumbnail_path ? Storage::disk('public')->url($video->thumbnail_path) : null;
     $endCta = [
         'text' => $lockedCount > 0
-            ? __('Suka? Ada :count lagi animasi dalam Langganan Plus.', ['count' => $lockedCount])
-            : __('Suka? Tonton semua animasi ASUH dengan Langganan Plus.'),
+            ? __('Suka? Ada :count lagi animasi dalam :plan.', ['count' => $lockedCount, 'plan' => $planName])
+            : __('Suka? Tonton semua animasi ASUH dengan :plan.', ['plan' => $planName]),
         ...$cta,
     ];
 @endphp
@@ -17,14 +17,14 @@
     <section class="bg-plum text-white">
         <div class="mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 md:grid-cols-2">
             <div class="min-w-0">
-                <p class="inline-block rounded-full border-2 border-ink bg-oren px-3 py-1 text-sm font-extrabold text-ink">{{ __('Baharu · Langganan Plus') }}</p>
+                <p class="inline-block rounded-full border-2 border-ink bg-oren px-3 py-1 text-sm font-extrabold text-ink">{{ __('Baharu · :plan', ['plan' => $planName]) }}</p>
                 <h1 class="mt-4 font-display text-4xl leading-tight font-extrabold text-kuning sm:text-5xl">{{ __('Video animasi ASUH') }}</h1>
                 <p class="mt-3 text-lg text-white/90">
                     {{ __('Kisah dalam buku ASUH kini bergerak dan bersuara. Animasi pendek yang disemak syariah, dengan kawalan ibu bapa: had tonton harian dan "baca dulu, tonton kemudian".') }}
                 </p>
                 <div class="mt-6 flex flex-wrap items-center gap-4">
                     <a href="{{ $cta['url'] }}" class="btn-utama">{{ $cta['label'] }}</a>
-                    @if ($plan)
+                    @if ($price)
                         <p class="font-semibold text-white/90">{{ __(':price setahun, e-book dan animasi', ['price' => Money::short($price)]) }}</p>
                     @endif
                 </div>
@@ -58,7 +58,7 @@
             </nav>
         @endif
 
-        {{-- Each category: free samples (play here) and Langganan Plus videos (locked) together --}}
+        {{-- Each category: free samples (play here) and subscriber videos (locked) together --}}
         @foreach ($groups as $group)
             @php
                 $free = $group['videos']->where('is_free_sample', true)->count();
@@ -72,7 +72,7 @@
                         <p class="mt-1 text-sm font-semibold text-ink/70">
                             {{ collect([
                                 $free ? __(':count percuma', ['count' => $free]) : null,
-                                $plus ? __(':count dalam Langganan Plus', ['count' => $plus]) : null,
+                                $plus ? __(':count dalam :plan', ['count' => $plus, 'plan' => $planName]) : null,
                             ])->filter()->implode(' · ') }}
                         </p>
                     </div>
@@ -103,9 +103,9 @@
             <p class="rounded-3xl border-2 border-ink/15 bg-white p-6 text-center text-ink/80">{{ __('Video animasi pertama sedang disiapkan. Nantikan!') }}</p>
         @endif
 
-        {{-- Why Plus --}}
+        {{-- Why subscribe --}}
         <section class="rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)] sm:p-8">
-            <h2 class="font-display text-2xl font-extrabold text-plum">{{ __('Langganan Plus: baca dan tonton') }}</h2>
+            <h2 class="font-display text-2xl font-extrabold text-plum">{{ __(':plan: baca dan tonton', ['plan' => $planName]) }}</h2>
             <ul class="mt-4 grid gap-3 sm:grid-cols-2">
                 @foreach ([
                     __('Semua e-book ASUH, ditambah semua video animasi'),

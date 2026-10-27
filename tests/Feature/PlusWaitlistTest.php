@@ -18,6 +18,7 @@ beforeEach(function () {
     $this->seed(PlanSeeder::class);
     Setting::set('catalog_open', true);
     Setting::set('videos_open', true);
+    Setting::set('yearly_includes_videos', false);
     Plan::findByCode(Plan::PAS_PLUS)->update(['price_sen' => 14900]);
 });
 

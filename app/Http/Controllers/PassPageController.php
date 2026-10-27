@@ -9,8 +9,10 @@ use App\Http\Middleware\EnsureCatalogOpen;
 use App\Models\Book;
 use App\Models\Setting;
 use App\Models\Testimonial;
+use App\Models\Video;
 use App\Services\CatalogStats;
 use App\Services\PassOffer;
+use App\Services\PlusOffer;
 use App\Services\SubscriptionPlans;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -24,7 +26,7 @@ use Illuminate\View\View;
  */
 class PassPageController extends Controller
 {
-    public function __invoke(Request $request, PassOffer $offer, CatalogStats $stats, SubscriptionPlans $plans): View
+    public function __invoke(Request $request, PassOffer $offer, CatalogStats $stats, SubscriptionPlans $plans, PlusOffer $plus): View
     {
         $catalogOpen = EnsureCatalogOpen::isOpenFor($request->user());
         $price = $offer->priceSen();
@@ -54,6 +56,8 @@ class PassPageController extends Controller
             'savingPercent' => $yearAgainst ? (int) round(100 - $price / $yearAgainst['sen'] * 100) : null,
             'monthlySavingPercent' => $monthly && $yearly ? SubscriptionPlans::yearlySavingPercent($yearly, $monthly) : null,
             'stats' => $stats->summary(),
+            // The animated videos included in the subscription (no separate Plus).
+            'videoCount' => $plus->merged() && $plus->videosPublic() ? Video::query()->published()->count() : 0,
             'shelves' => $catalogOpen ? [
                 AgeGroup::SixToNine->getLabel() => $this->shelf(AgeGroup::SixToNine),
                 AgeGroup::TenToThirteen->getLabel() => $this->shelf(AgeGroup::TenToThirteen),

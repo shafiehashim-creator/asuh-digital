@@ -22,11 +22,14 @@ beforeEach(function () {
     $this->seed(PlanSeeder::class);
     Notification::fake();
     Mail::fake();
+    // These tests cover Plus sold on its own (off since 2026-10-27).
+    Setting::set('yearly_includes_videos', false);
 });
 
 function openPlus(int $priceSen = 15900): Plan
 {
     Setting::set('videos_open', true);
+    Setting::set('yearly_includes_videos', false);
     Setting::set('plus_sales_open', true);
     $plan = Plan::findByCode(Plan::PAS_PLUS);
     $plan->update(['price_sen' => $priceSen]);
@@ -61,6 +64,7 @@ it('keeps Langganan Plus off sale until the videos open and it has a price', fun
     $this->get('/beli/langganan-plus')->assertNotFound();
 
     Setting::set('videos_open', true);
+    Setting::set('yearly_includes_videos', false);
     Setting::set('plus_sales_open', true);
     $this->get('/beli/langganan-plus')->assertNotFound(); // still no price
 

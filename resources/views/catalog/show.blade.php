@@ -105,22 +105,23 @@
                 $video = $videos->first();
                 $cta = $showcase->cta(auth()->user());
                 $canWatch = auth()->user()?->canWatchVideos() ?? false;
+                $planName = app(App\Services\PlusOffer::class)->videoPlanName();
             @endphp
             <section class="mt-12 grid items-center gap-6 rounded-3xl border-2 border-ink bg-lavender p-5 shadow-[0_4px_0_var(--color-ink)] sm:p-8 md:grid-cols-2" aria-labelledby="animation-heading">
                 <x-showcase-video :embed="$showcase->embed($video)" :title="$video->title"
                     :thumb="$video->thumbnail_path ? Storage::disk('public')->url($video->thumbnail_path) : null"
                     :duration="$video->durationLabel()"
-                    :end-cta="['text' => __('Suka? Tonton semua animasi ASUH dengan Langganan Plus.'), ...$cta]" />
+                    :end-cta="['text' => __('Suka? Tonton semua animasi ASUH dengan :plan.', ['plan' => $planName]), ...$cta]" />
                 <div class="min-w-0">
                     <p class="text-sm font-extrabold tracking-wide text-biru uppercase">🎬 {{ __('Ada versi animasi!') }}</p>
                     <h2 id="animation-heading" class="mt-1 font-display text-2xl font-extrabold text-plum">{{ $video->title }}</h2>
                     <p class="mt-2 text-ink/80">
                         @if ($canWatch)
-                            {{ __('Termasuk dalam Langganan Plus anda. Anak boleh menontonnya dalam Mod Anak.') }}
+                            {{ __('Termasuk dalam :plan anda. Anak boleh menontonnya dalam Mod Anak.', ['plan' => $planName]) }}
                         @elseif ($video->is_free_sample)
-                            {{ __('Tonton percuma bersama anak. Animasi lain untuk buku ASUH ada dalam Langganan Plus.') }}
+                            {{ __('Tonton percuma bersama anak. Animasi lain untuk buku ASUH ada dalam :plan.', ['plan' => $planName]) }}
                         @else
-                            {{ __('Kisah buku ini dalam bentuk animasi, dalam Langganan Plus bersama semua e-book ASUH.') }}
+                            {{ __('Kisah buku ini dalam bentuk animasi, dalam :plan bersama semua e-book ASUH.', ['plan' => $planName]) }}
                         @endif
                     </p>
                     <div class="mt-4 flex flex-wrap gap-3">

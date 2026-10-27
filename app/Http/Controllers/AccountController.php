@@ -96,7 +96,7 @@ class AccountController extends Controller
             'children' => $children,
             'hasPin' => $user->hasParentPin(),
             'hasRead' => $children->isNotEmpty() && ReadingSession::query()->whereIn('child_id', $children->modelKeys())->exists(),
-            'videosOpen' => $this->plus->available(),
+            'videosOpen' => $this->plus->videosPublic(),
         ]);
     }
 

@@ -15,7 +15,34 @@ use Carbon\CarbonImmutable;
  */
 class PlusOffer
 {
-    public function __construct(private Campaigns $campaigns) {}
+    public function __construct(private Campaigns $campaigns, private PassOffer $passOffer) {}
+
+    /**
+     * No separate Plus (user decision 2026-10-27): every family subscription
+     * includes the videos, and the Plus pages and sales are closed.
+     */
+    public function merged(): bool
+    {
+        return (bool) Setting::get('yearly_includes_videos');
+    }
+
+    /** The videos are shown to the public: opened by the admin, with a subscription that includes them. */
+    public function videosPublic(): bool
+    {
+        return (bool) Setting::get('videos_open') && ($this->merged() || $this->plan() !== null);
+    }
+
+    /** The name of the subscription that includes the videos, as shown to visitors. */
+    public function videoPlanName(): string
+    {
+        return $this->merged() ? __('Langganan Tahunan') : __('Langganan Plus');
+    }
+
+    /** The yearly price of the subscription that includes the videos. */
+    public function videoPlanPriceSen(): ?int
+    {
+        return $this->merged() ? $this->passOffer->priceSen() : $this->priceSen();
+    }
 
     public function plan(): ?Plan
     {
@@ -41,10 +68,10 @@ class PlusOffer
         return $plan && $this->priceSen() < $plan->price_sen ? $plan->price_sen : null;
     }
 
-    /** Shown to the public: the videos are open and Plus has a price. */
+    /** Plus shown to the public as its own product: the videos are open and Plus has a price. */
     public function available(): bool
     {
-        return (bool) Setting::get('videos_open') && $this->plan() !== null;
+        return ! $this->merged() && (bool) Setting::get('videos_open') && $this->plan() !== null;
     }
 
     /**

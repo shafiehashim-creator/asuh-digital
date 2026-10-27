@@ -30,6 +30,9 @@ return [
         // Langganan Plus can be shown (videos open) before it is sold: the
         // sales page then takes "notify me" sign-ups, with an optional date.
         'plus_sales_open' => false,
+        // User decision 2026-10-27: no separate Plus; every family subscription
+        // (early bird, yearly, monthly) includes the animated videos. Off brings Plus back.
+        'yearly_includes_videos' => true,
         'plus_opens_on' => null,
         // Pages anyone may read free from a book's "versi pantas" (0 turns previews off).
         'preview_pages' => 5,

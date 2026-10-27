@@ -126,6 +126,7 @@ it('starts yearly after the current month when a monthly family switches', funct
 
 it('lets monthly families buy Plus but not upgrade a month to it', function () {
     Setting::set('videos_open', true);
+    Setting::set('yearly_includes_videos', false);
     Setting::set('plus_sales_open', true);
     Plan::findByCode(Plan::PAS_PLUS)->update(['price_sen' => 15900]);
     Plan::findByCode(Plan::PAS_PLUS_BULANAN)->update(['price_sen' => 2490]);
