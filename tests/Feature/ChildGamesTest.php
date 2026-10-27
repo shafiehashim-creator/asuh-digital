@@ -2,8 +2,11 @@
 
 use App\Enums\AgeGroup;
 use App\Enums\Game;
+use App\Enums\Role;
+use App\Filament\Resources\GameItems\Pages\ManageGameItems;
 use App\Models\Child;
 use App\Models\Classroom;
+use App\Models\GameItem;
 use App\Models\GamePlay;
 use App\Models\Order;
 use App\Models\Pass;
@@ -131,3 +134,43 @@ it('gives every game content for both age groups', function (Game $game) {
         };
     }
 })->with(Game::cases());
+
+it('plays only active items for the child\'s age, from a pool drawn at random', function () {
+    GameItem::query()->create(['game' => Game::Prophets, 'age_group' => 'both', 'prompt' => 'Petunjuk baharu', 'answer' => 'Nabi Lut', 'is_active' => false]);
+    GameItem::query()->create(['game' => Game::Prophets, 'age_group' => '10-13', 'prompt' => 'Petunjuk abang', 'answer' => 'Nabi Yahya']);
+
+    $young = collect(GameContent::for(Game::Prophets, AgeGroup::SixToNine)['questions'])->pluck('prompt');
+    $old = collect(GameContent::for(Game::Prophets, AgeGroup::TenToThirteen)['questions'])->pluck('prompt');
+
+    expect($young)->not->toContain('Petunjuk baharu')->not->toContain('Petunjuk abang')
+        ->and($old)->toContain('Petunjuk abang')
+        ->and(GameContent::for(Game::Memory, AgeGroup::SixToNine))->count->toBe(6)->pairs->toHaveCount(24);
+});
+
+it('hides a game without enough active items', function () {
+    GameItem::query()->where('game', Game::QuickQuiz)->update(['is_active' => false]);
+    $child = gamer();
+    playAs($child);
+
+    $this->get('/mod-anak')->assertOk()->assertDontSee(route('child-mode.game', Game::QuickQuiz), false)
+        ->assertSee(route('child-mode.game', Game::Memory), false);
+    $this->get(route('child-mode.game', Game::QuickQuiz))->assertNotFound();
+});
+
+it('lets staff write game items, and only a Super Admin switches them on', function () {
+    $this->actingAs(User::factory()->admin()->create());
+    Livewire\Livewire::test(ManageGameItems::class)->assertOk()
+        ->callAction('create', ['game' => 'kuiz-pantas', 'age_group' => 'both', 'prompt' => 'Apa kita ucap ketika naik kenderaan?', 'answer' => 'Doa naik kenderaan', 'options' => ['Bismillah sahaja', 'Diam'], 'is_active' => true])
+        ->assertHasNoActionErrors();
+    expect(GameItem::latest('id')->first())->is_active->toBeTrue()->options->toBe(['Bismillah sahaja', 'Diam']);
+
+    $this->actingAs(User::factory()->role(Role::Editor)->create());
+    Livewire\Livewire::test(ManageGameItems::class)
+        ->callAction('create', ['game' => 'cari-perkataan', 'age_group' => 'both', 'prompt' => 'RAHMAT', 'is_active' => true])
+        ->assertHasNoActionErrors();
+    expect(GameItem::latest('id')->first())->prompt->toBe('RAHMAT')->is_active->toBeFalse();
+
+    Livewire\Livewire::test(ManageGameItems::class)
+        ->callAction('create', ['game' => 'cari-perkataan', 'age_group' => 'both', 'prompt' => 'DUA KATA'])
+        ->assertHasActionErrors(['prompt']);
+});

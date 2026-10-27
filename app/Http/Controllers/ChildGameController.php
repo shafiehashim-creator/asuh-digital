@@ -19,7 +19,7 @@ class ChildGameController extends Controller
     public function show(Request $request, Game $game): View|RedirectResponse
     {
         $child = $this->childMode->child($request->user());
-        abort_unless($child && $this->playing->hasAccess($child), 404);
+        abort_unless($child && $this->playing->hasAccess($child) && GameContent::playable($game, $child->age_group), 404);
 
         if ($this->playing->secondsLeftToday($child) === 0) {
             return redirect()->route('child-mode.home')->with('game_locked', 'Masa bermain hari ini sudah habis. Jom baca buku pula!');

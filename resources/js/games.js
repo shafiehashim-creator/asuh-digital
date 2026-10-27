@@ -87,7 +87,7 @@ const gameMemory = (cfg) => withShell(cfg, {
     },
 
     restart() {
-        this.cards = shuffle(cfg.content.pairs.flatMap(([emoji, word], id) => [
+        this.cards = shuffle(shuffle(cfg.content.pairs).slice(0, cfg.content.count).flatMap(([emoji, word], id) => [
             { key: `${id}e`, id, face: emoji, word: false },
             { key: `${id}w`, id, face: word, word: true },
         ]));
@@ -115,8 +115,8 @@ const gameMemory = (cfg) => withShell(cfg, {
         if (a.id === b.id) {
             this.matched.push(a.id);
             this.open = [];
-            if (this.matched.length === cfg.content.pairs.length) {
-                this.finish(100 - (this.moves - cfg.content.pairs.length) * 5);
+            if (this.matched.length === this.cards.length / 2) {
+                this.finish(100 - (this.moves - this.cards.length / 2) * 5);
             }
         } else {
             this.busy = true;
@@ -186,7 +186,7 @@ const gameOrder = (cfg) => withShell(cfg, {
     },
 
     restart() {
-        this.sets = shuffle(cfg.content.sets);
+        this.sets = shuffle(cfg.content.sets).slice(0, cfg.content.rounds);
         this.setIndex = 0;
         this.mistakes = 0;
         this.done = false;
