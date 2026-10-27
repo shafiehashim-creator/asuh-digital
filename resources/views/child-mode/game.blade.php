@@ -45,8 +45,8 @@
         <div x-show="!done && !timeUp" class="mt-6">
             @switch($game)
                 @case(Game::Memory)
-                    <p class="font-semibold">Langkah: <span x-text="moves"></span> · Pasangan: <span x-text="matched.length"></span> / {{ count($content['pairs']) }}</p>
-                    <div @class(['mt-3 grid gap-3', 'grid-cols-3 sm:grid-cols-4' => count($content['pairs']) <= 6, 'grid-cols-4' => count($content['pairs']) > 6])>
+                    <p class="font-semibold">Langkah: <span x-text="moves"></span> · Pasangan: <span x-text="matched.length"></span> / {{ $content['count'] }}</p>
+                    <div @class(['mt-3 grid gap-3', 'grid-cols-3 sm:grid-cols-4' => $content['count'] <= 6, 'grid-cols-4' => $content['count'] > 6])>
                         <template x-for="card in cards" :key="card.key">
                             <button type="button" @click="flip(card)"
                                 class="grid aspect-square place-items-center rounded-2xl border-2 border-ink p-1 text-center font-display font-bold shadow-[0_3px_0_var(--color-ink)] transition"

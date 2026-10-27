@@ -60,7 +60,7 @@
             </div>
         @endif
 
-        @if ($games !== null)
+        @if (! empty($games))
             {{-- Games for subscribed families, under the videos. --}}
             <section class="mt-8" aria-labelledby="games-heading">
                 <div class="flex flex-wrap items-end justify-between gap-2">

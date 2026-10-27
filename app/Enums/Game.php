@@ -56,6 +56,12 @@ enum Game: string
         };
     }
 
+    /** Whether the admin writes its content (hijaiyah letters are fixed). */
+    public function editable(): bool
+    {
+        return $this !== self::Hijaiyah;
+    }
+
     /** The Alpine component that plays it (resources/js/games.js). */
     public function component(): string
     {

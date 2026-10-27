@@ -13,6 +13,7 @@ use App\Services\ParentGate;
 use App\Services\ReadingLog;
 use App\Services\VideoWatching;
 use App\Support\BrandVideo;
+use App\Support\GameContent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -63,7 +64,7 @@ class ChildModeController extends Controller
             'videos' => $videos,
             'videoSecondsLeft' => $watching->hasAccess($child) ? $watching->secondsLeftToday($child) : null,
             // Games for subscribed families only (null hides the row).
-            'games' => $playing->hasAccess($child) ? Game::cases() : null,
+            'games' => $playing->hasAccess($child) ? array_values(array_filter(Game::cases(), fn (Game $game) => GameContent::playable($game, $child->age_group))) : null,
             'gameSecondsLeft' => $playing->hasAccess($child) ? $playing->secondsLeftToday($child) : null,
             'gameBest' => $playing->hasAccess($child) ? $playing->bestScores($child) : [],
             // Books with a quiz the child has not passed yet.
