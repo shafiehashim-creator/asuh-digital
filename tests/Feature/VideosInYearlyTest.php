@@ -139,3 +139,12 @@ it('updates the landing texts on the server only while they are still the old de
     expect(Setting::get('landing_headline'))->toBe('E-book dan video animasi Islamik untuk anak 6–13 tahun')
         ->and(Setting::get('landing_subheadline'))->toBe('Teks sendiri admin');
 });
+
+it('shows the new landing headline straight after the migration, even with the settings cached', function () {
+    Setting::set('landing_headline', 'Rak buku Islamik digital untuk anak 6–13 tahun');
+    expect(Setting::get('landing_headline'))->toBe('Rak buku Islamik digital untuk anak 6–13 tahun'); // now cached
+
+    (require database_path('migrations/2026_10_27_000004_refresh_landing_texts_cache.php'))->up();
+
+    $this->get('/')->assertOk()->assertSee('E-book dan video animasi Islamik untuk anak 6–13 tahun');
+});
