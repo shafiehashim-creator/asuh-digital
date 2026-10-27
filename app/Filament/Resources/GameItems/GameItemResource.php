@@ -101,9 +101,10 @@ class GameItemResource extends Resource
             TextInput::make('answer')->label('Nama nabi')->visible($is(Game::Prophets))->required()->maxLength(40)
                 ->helperText('Tulis sama seperti item lain (contoh: Nabi Nuh), kerana nama ini juga menjadi pilihan jawapan soalan lain.'),
 
-            Textarea::make('prompt')->label('Soalan')->visible($is(Game::QuickQuiz))->required()->rows(2)->maxLength(200)->columnSpanFull(),
-            TextInput::make('answer')->label('Jawapan betul')->visible($is(Game::QuickQuiz))->required()->maxLength(60),
-            TagsInput::make('options')->label('Jawapan salah')->visible($is(Game::QuickQuiz))->required()
+            Textarea::make('prompt')->label('Soalan')->visible($is(Game::QuickQuiz, Game::Science))->required()->rows(2)->maxLength(200)->columnSpanFull()
+                ->helperText('Boleh mulakan dengan satu emoji, contohnya 🐟 Ikan bernafas menggunakan …'),
+            TextInput::make('answer')->label('Jawapan betul')->visible($is(Game::QuickQuiz, Game::Science))->required()->maxLength(60),
+            TagsInput::make('options')->label('Jawapan salah')->visible($is(Game::QuickQuiz, Game::Science))->required()
                 ->rules(['array', 'min:1', 'max:3'])
                 ->helperText('1 hingga 3 jawapan salah. Taip dan tekan Enter.'),
 
@@ -127,7 +128,7 @@ class GameItemResource extends Resource
                         Game::Memory, Game::Prophets => $record->answer,
                         Game::GoodChoice => $record->is_good ? '👍 Baik' : '👎 Tak baik',
                         Game::Order => implode(' → ', $record->options ?? []),
-                        Game::QuickQuiz => '✔ '.$record->answer.' · ✘ '.implode(', ', $record->options ?? []),
+                        Game::QuickQuiz, Game::Science => '✔ '.$record->answer.' · ✘ '.implode(', ', $record->options ?? []),
                         default => null,
                     }),
                 TextColumn::make('age_group')->label('Umur'),

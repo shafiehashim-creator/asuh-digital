@@ -67,6 +67,7 @@ class ChildModeController extends Controller
             'games' => $playing->hasAccess($child) ? array_values(array_filter(Game::cases(), fn (Game $game) => GameContent::playable($game, $child->age_group))) : null,
             'gameSecondsLeft' => $playing->hasAccess($child) ? $playing->secondsLeftToday($child) : null,
             'gameBest' => $playing->hasAccess($child) ? $playing->bestScores($child) : [],
+            'gameLevels' => $playing->hasAccess($child) ? $playing->unlockedLevels($child) : [],
             // Books with a quiz the child has not passed yet.
             'quizBookIds' => Quiz::query()->where('is_active', true)->has('questions', '>=', Quiz::MIN_QUESTIONS)
                 ->whereDoesntHave('attempts', fn ($q) => $q->where('child_id', $child->id)->where('passed', true))

@@ -71,7 +71,7 @@
     "src": "node_modules/pdfjs-dist/build/pdf.worker.min.mjs"
   },
   "resources/css/app.css": {
-    "file": "assets/app-_0XH1QoX.css",
+    "file": "assets/app-8pxg49N8.css",
     "name": "app",
     "names": [
       "app.css"
@@ -99,8 +99,20 @@
     "file": "assets/syaitan-kurus-CE3pTzYZ.webp",
     "src": "resources/images/brand/syaitan-kurus.webp"
   },
+  "resources/images/games/puzzle-1.webp": {
+    "file": "assets/puzzle-1-BEn4C39W.webp",
+    "src": "resources/images/games/puzzle-1.webp"
+  },
+  "resources/images/games/puzzle-2.webp": {
+    "file": "assets/puzzle-2-DyJ6WVbw.webp",
+    "src": "resources/images/games/puzzle-2.webp"
+  },
+  "resources/images/games/puzzle-3.webp": {
+    "file": "assets/puzzle-3-LCCE1Xbk.webp",
+    "src": "resources/images/games/puzzle-3.webp"
+  },
   "resources/js/app.js": {
-    "file": "assets/app--4fSZRz0.js",
+    "file": "assets/app-BxBvOa2I.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true

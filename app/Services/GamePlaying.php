@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\Game;
 use App\Models\Child;
+use App\Models\GameLevel;
 use App\Models\GamePlay;
 use App\Models\Setting;
 
@@ -16,6 +17,9 @@ class GamePlaying
 {
     /** Never count more than this for one heartbeat (sent every 30 seconds). */
     public const MAX_TICK_SECONDS = 35;
+
+    /** A round at the child's highest level with this score opens the next level (three stars). */
+    public const UNLOCK_SCORE = 90;
 
     /** Daily limits a parent can pick, in minutes; none means no limit. */
     public const LIMIT_CHOICES = [10, 20, 30, 45, 60];
@@ -48,6 +52,30 @@ class GamePlaying
         $played = (int) GamePlay::query()->where('child_id', $child->id)->whereDate('played_on', today())->sum('seconds');
 
         return max(0, $child->daily_game_minutes * 60 - $played);
+    }
+
+    /** The highest level the child has opened in this game (1 Mudah, 2 Sederhana, 3 Sukar). */
+    public function unlockedLevel(Child $child, Game $game): int
+    {
+        return (int) (GameLevel::query()->where('child_id', $child->id)->where('game', $game)->value('unlocked') ?? 1);
+    }
+
+    /** @return array<string, int> the highest level opened per game */
+    public function unlockedLevels(Child $child): array
+    {
+        return GameLevel::query()->where('child_id', $child->id)->pluck('unlocked', 'game')->map(fn ($v) => (int) $v)->all();
+    }
+
+    /** Three stars at the highest level opened so far opens the next one. */
+    public function finishRound(Child $child, Game $game, int $level, int $score): int
+    {
+        $unlocked = $this->unlockedLevel($child, $game);
+
+        if ($score >= self::UNLOCK_SCORE && $level === $unlocked && $unlocked < count(Game::LEVELS)) {
+            GameLevel::query()->updateOrCreate(['child_id' => $child->id, 'game' => $game], ['unlocked' => ++$unlocked]);
+        }
+
+        return $unlocked;
     }
 
     public function record(Child $child, Game $game, int $seconds, ?int $score): GamePlay
