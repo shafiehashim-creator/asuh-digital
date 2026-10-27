@@ -59,7 +59,7 @@ Rujukan skrin: prototaip ASUH Digital di claude.ai (7 skrin: utama, katalog, hal
 - `books`: tajuk, slug, penulis, sinopsis, `age_group`, kategori (banyak, melalui jadual `book_category`), harga single, `is_enhanced_edition`, `published_at`, status (`draft` / `review` / `published`)
 - `book_files`: `book_id`, edisi (`original` / `enhanced`), path fail peribadi, bilangan halaman
 - `syariah_reviews`: `book_id`, penyemak, status, catatan, tarikh. **Buku tidak boleh diterbitkan tanpa semakan yang lulus.**
-- `plans`: `pas_tahunan` (RM99), `pas_tahunan_early` (RM79), `pas_plus` (Fasa 2), `pas_bulanan` (RM14.90, 1 bulan), `pas_plus_bulanan` (harga di Tetapan, 0 = tidak dijual), `single`. `duration_months` menentukan tempoh langganan; `Plan::PLUS_CODES` ialah pelan yang termasuk video.
+- `plans`: `pas_tahunan` (RM149 sejak 2026-10-27, termasuk video animasi; dahulu RM99, ditukar oleh migrasi `raise_yearly_price_to_149` hanya jika masih RM99), `pas_tahunan_early` (RM79), `pas_plus` (Fasa 2), `pas_bulanan` (RM14.90, 1 bulan), `pas_plus_bulanan` (harga di Tetapan, 0 = tidak dijual), `single`. `duration_months` menentukan tempoh langganan; `Plan::PLUS_CODES` ialah pelan yang termasuk video.
 - `orders`: `user_id`, `plan_id` / `book_id`, jumlah, kaedah (`chip` / `bank_transfer`), status (`pending` / `paid` / `failed` / `refunded`), rujukan CHIP, resit pindahan bank, disahkan oleh dan bila
 - `settings`: tetapan yang boleh disunting di admin (harga, had slot, teks landing page, butiran bank, maklumat syarikat, e-mel notifikasi)
 - `passes`: `user_id`, `plan_id`, `starts_at`, `ends_at`

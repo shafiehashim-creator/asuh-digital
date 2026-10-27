@@ -62,7 +62,7 @@ it('loads current values into the settings form', function () {
         ->assertOk()
         ->assertSchemaStateSet([
             'early_bird_price' => '79.00',
-            'regular_price' => '99.00',
+            'regular_price' => '149.00',
             'preorder_slot_limit' => 100,
             'landing_headline' => 'Rak buku Islamik digital untuk anak 6–13 tahun',
         ]);

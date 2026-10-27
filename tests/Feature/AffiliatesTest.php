@@ -11,6 +11,7 @@ use App\Models\Affiliate;
 use App\Models\AffiliateCommission;
 use App\Models\Coupon;
 use App\Models\Order;
+use App\Models\Plan;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\Affiliates;
@@ -22,6 +23,8 @@ use Livewire\Livewire;
 
 beforeEach(function () {
     $this->seed(PlanSeeder::class);
+    // The sums below use the earlier RM99 yearly price (RM149 since 2026-10-27).
+    Plan::query()->where('code', 'pas_tahunan')->update(['price_sen' => 9900]);
     Mail::fake();
     Setting::set('affiliates_open', true);
     Setting::set('admin_notification_emails', ['admin@asuh.test']);

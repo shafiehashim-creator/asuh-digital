@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Notification;
 
 beforeEach(function () {
     $this->seed(PlanSeeder::class);
+    // The sums below use the earlier RM99 yearly price (RM149 since 2026-10-27).
+    Plan::query()->where('code', 'pas_tahunan')->update(['price_sen' => 9900]);
     Notification::fake();
     Mail::fake();
 });

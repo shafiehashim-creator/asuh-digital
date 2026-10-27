@@ -14,7 +14,7 @@ class PlanSeeder extends Seeder
     public function run(): void
     {
         $plans = [
-            ['code' => Plan::PAS_TAHUNAN, 'name' => 'Langganan Tahunan', 'price_sen' => 9900, 'duration_months' => 12, 'is_active' => true],
+            ['code' => Plan::PAS_TAHUNAN, 'name' => 'Langganan Tahunan', 'price_sen' => 14900, 'duration_months' => 12, 'is_active' => true],
             ['code' => Plan::PAS_TAHUNAN_EARLY, 'name' => 'Langganan Tahunan (Early Bird)', 'price_sen' => 7900, 'duration_months' => 12, 'is_active' => true],
             ['code' => Plan::PAS_PLUS, 'name' => 'Langganan Plus', 'price_sen' => 0, 'duration_months' => 12, 'is_active' => true],
             ['code' => Plan::PAS_BULANAN, 'name' => 'Langganan Bulanan', 'price_sen' => 1490, 'duration_months' => 1, 'is_active' => true],

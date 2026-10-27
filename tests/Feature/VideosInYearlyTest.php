@@ -1,11 +1,13 @@
 <?php
 
 use App\Enums\AgeGroup;
+use App\Enums\PreorderStatus;
 use App\Models\Book;
 use App\Models\Child;
 use App\Models\Order;
 use App\Models\Pass;
 use App\Models\Plan;
+use App\Models\Preorder;
 use App\Models\Setting;
 use App\Models\User;
 use App\Models\Video;
@@ -84,4 +86,26 @@ it('says on a book page that its animation comes with the yearly subscription', 
 
     $this->get(route('catalog.show', $book))->assertOk()
         ->assertSee('dalam Langganan Tahunan bersama semua e-book ASUH');
+});
+
+it('raises the yearly price from RM99 to RM149, but keeps a price the admin set by hand', function () {
+    $migration = require database_path('migrations/2026_10_27_000002_raise_yearly_price_to_149.php');
+    $yearly = Plan::findByCode(Plan::PAS_TAHUNAN);
+
+    $yearly->update(['price_sen' => 9900]);
+    $migration->up();
+    expect($yearly->fresh()->price_sen)->toBe(14900);
+
+    $yearly->update(['price_sen' => 12900]);
+    $migration->up();
+    expect($yearly->fresh()->price_sen)->toBe(12900);
+});
+
+it('sells the yearly subscription at RM149 once the early bird is over', function () {
+    expect(Plan::findByCode(Plan::PAS_TAHUNAN)->price_sen)->toBe(14900);
+    Setting::set('preorder_slot_limit', 1);
+    Preorder::factory()->status(PreorderStatus::Paid)->create();
+
+    $this->get(route('pass.show'))->assertOk()
+        ->assertSeeInOrder(['Langganan 12 bulan', 'RM12.41', 'sebulan', 'Dibayar sekali setahun:', 'RM149']);
 });

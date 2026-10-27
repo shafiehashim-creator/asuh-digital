@@ -13,7 +13,11 @@ use App\Services\PlusOffer;
 use Database\Seeders\PlanSeeder;
 use Livewire\Livewire;
 
-beforeEach(fn () => $this->seed(PlanSeeder::class));
+beforeEach(function () {
+    $this->seed(PlanSeeder::class);
+    // The sums below use the earlier RM99 yearly price (RM149 since 2026-10-27).
+    Plan::query()->where('code', 'pas_tahunan')->update(['price_sen' => 9900]);
+});
 
 function campaign(array $overrides = []): Campaign
 {

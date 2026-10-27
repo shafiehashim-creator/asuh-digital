@@ -8,6 +8,7 @@ use App\Models\Classroom;
 use App\Models\Institution;
 use App\Models\License;
 use App\Models\Order;
+use App\Models\Plan;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\PaymentProcessor;
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\Notification;
 
 beforeEach(function () {
     $this->seed(PlanSeeder::class);
+    // The sums below use the earlier RM99 yearly price (RM149 since 2026-10-27).
+    Plan::query()->where('code', 'pas_tahunan')->update(['price_sen' => 9900]);
     Setting::set('catalog_open', true);
     Mail::fake();
     Notification::fake();

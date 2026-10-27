@@ -11,7 +11,7 @@ use Illuminate\Database\QueryException;
 it('seeds the pass plans with prices in sen', function () {
     $this->seed(PlanSeeder::class);
 
-    expect(Plan::findByCode(Plan::PAS_TAHUNAN)->price_sen)->toBe(9900)
+    expect(Plan::findByCode(Plan::PAS_TAHUNAN)->price_sen)->toBe(14900)
         ->and(Plan::findByCode(Plan::PAS_TAHUNAN_EARLY)->price_sen)->toBe(7900)
         // Langganan Plus is active but unpriced: not on sale until the admin sets a price.
         ->and(Plan::findByCode(Plan::PAS_PLUS)->price_sen)->toBe(0);
