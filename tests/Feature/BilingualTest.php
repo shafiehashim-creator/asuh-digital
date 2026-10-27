@@ -15,7 +15,7 @@ it('shows the site in Bahasa Melayu by default', function () {
     $this->get('/')
         ->assertOk()
         ->assertSee('<html lang="ms"', false)
-        ->assertSee('Rak buku Islamik digital untuk anak 6–13 tahun');
+        ->assertSee('E-book dan video animasi Islamik untuk anak 6–13 tahun');
 });
 
 it('switches to English, remembers it and goes back to the same page', function () {
@@ -26,11 +26,11 @@ it('switches to English, remembers it and goes back to the same page', function 
 
     $this->get('/')
         ->assertSee('<html lang="en"', false)
-        ->assertSee('A digital Islamic bookshelf for children aged 6–13')
-        ->assertDontSee('Rak buku Islamik digital untuk anak 6–13 tahun');
+        ->assertSee('Islamic e-books and animated videos for children aged 6–13')
+        ->assertDontSee('E-book dan video animasi Islamik untuk anak 6–13 tahun');
 
     $this->get(route('locale.switch', 'ms'));
-    $this->get('/')->assertSee('Rak buku Islamik digital untuk anak 6–13 tahun');
+    $this->get('/')->assertSee('E-book dan video animasi Islamik untuk anak 6–13 tahun');
 });
 
 it('reads the language from the cookie on a new visit', function () {

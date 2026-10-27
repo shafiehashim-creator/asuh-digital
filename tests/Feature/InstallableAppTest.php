@@ -31,7 +31,7 @@ it('serves the manifest in English when chosen', function () {
 
     $this->get('/manifest.webmanifest')
         ->assertJsonPath('lang', 'en')
-        ->assertJsonPath('description', 'A digital Islamic bookshelf for children aged 6–13. Jom Jadi Baik!');
+        ->assertJsonPath('description', 'Islamic e-books and animated videos for children aged 6–13. Jom Jadi Baik!');
 });
 
 it('links the manifest on every page and ships a service worker and offline page', function () {

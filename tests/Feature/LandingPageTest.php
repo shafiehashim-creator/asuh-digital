@@ -16,7 +16,7 @@ beforeEach(function () {
 it('shows the early bird offer', function () {
     $this->get('/')
         ->assertOk()
-        ->assertSee('Rak buku Islamik digital untuk anak 6–13 tahun')
+        ->assertSee('E-book dan video animasi Islamik untuk anak 6–13 tahun')
         ->assertSee('RM79')
         ->assertSee('RM99')
         ->assertSee('Tempah slot saya');

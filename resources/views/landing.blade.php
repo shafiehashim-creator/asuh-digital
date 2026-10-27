@@ -15,10 +15,13 @@
     $statItems = array_filter([
         $stats['families'] >= CatalogStats::MIN_FAMILIES ? [number_format($stats['families']).'+', __('Keluarga melanggan')] : null,
         $catalogOpen && $stats['books'] > 0 ? [number_format($stats['books']), __('E-book Islamik')] : null,
+        $videoCount > 0 ? [number_format($videoCount), __('Video animasi')] : null,
         $catalogOpen && $stats['pages'] > 0 ? [number_format($stats['pages']).'+', __('Halaman bacaan')] : null,
         $catalogOpen && $stats['categories'] > 0 ? [$stats['categories'], __('Kategori')] : null,
     ]);
-    $shelfRow = '-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2';
+    $statItems = array_slice($statItems, 0, 4);
+    $thumb = fn ($video) => $video->thumbnail_path ? Storage::disk('public')->url($video->thumbnail_path) : null;
+    $shelfRow = '-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2';
 @endphp
 
 <x-layouts.app>
@@ -42,7 +45,9 @@
                                 {{ Money::short($offer->compareAtSen()) }}
                             </p>
                         @endif
-                        <p class="w-full text-sm font-semibold text-ink/70">{{ __('Langganan Tahunan · 12 bulan · sekali bayar, tiada caj automatik') }}</p>
+                        <p class="w-full text-sm font-semibold text-ink/70">
+                            {{ $videoCount > 0 ? __('Langganan Tahunan · e-book dan video animasi · 12 bulan · sekali bayar, tiada caj automatik') : __('Langganan Tahunan · 12 bulan · sekali bayar, tiada caj automatik') }}
+                        </p>
                     </div>
                 @endif
 
@@ -56,7 +61,9 @@
                     @else
                         <span class="btn-utama" aria-disabled="true">{{ __('Slot early bird telah habis') }}</span>
                     @endif
-                    @if ($catalogOpen)
+                    @if ($videoCount > 0)
+                        <a href="{{ route('videos.index') }}" class="btn-gelap">▶ {{ __('Tonton video animasi') }}</a>
+                    @elseif ($catalogOpen)
                         <a href="{{ route('catalog.index') }}" class="btn-gelap">{{ __('Lihat semua buku') }}</a>
                     @else
                         <a href="#soalan" class="btn-gelap">{{ __('Soalan lazim') }}</a>
@@ -65,6 +72,11 @@
             </div>
 
             <div class="relative mx-auto grid w-full max-w-md grid-cols-2 gap-4">
+                @if ($videoCount > 0)
+                    {{-- What the subscription holds, on the characters --}}
+                    <p class="absolute -top-3 left-2 z-10 -rotate-3 rounded-full border-2 border-ink bg-kuning px-3 py-1 font-display font-extrabold shadow-[0_3px_0_var(--color-ink)]">📖 {{ $catalogOpen && $stats['books'] > 0 ? __(':count e-book', ['count' => $stats['books']]) : __('E-book') }}</p>
+                    <p class="absolute right-2 bottom-6 z-10 rotate-3 rounded-full border-2 border-ink bg-oren px-3 py-1 font-display font-extrabold shadow-[0_3px_0_var(--color-ink)]">🎬 {{ __(':count video animasi', ['count' => $videoCount]) }}</p>
+                @endif
                 <img src="{{ Vite::asset('resources/images/brand/anis.webp') }}" alt="{{ __('Anis, watak baik ASUH') }}"
                     width="640" height="960" class="aspect-[2/3] w-full rounded-3xl border-2 border-ink object-cover shadow-[0_4px_0_var(--color-ink)]">
                 <img src="{{ Vite::asset('resources/images/brand/anas.webp') }}" alt="{{ __('Anas, watak baik ASUH') }}"
@@ -88,6 +100,46 @@
                     </div>
                 @endforeach
             </dl>
+        </section>
+    @endif
+
+    {{-- The animated videos, included in the yearly subscription --}}
+    @if ($videoCount > 0)
+        <section @class(['bg-plum py-14 text-white', 'border-t-2 border-white/15' => $statItems]) aria-labelledby="videos-heading">
+            <div class="mx-auto max-w-6xl px-4">
+                <div class="flex flex-wrap items-end justify-between gap-2">
+                    <div>
+                        <p class="text-sm font-extrabold tracking-wide text-kuning uppercase">🎬 {{ __('Video animasi · termasuk dalam langganan') }}</p>
+                        <h2 id="videos-heading" class="font-display text-3xl font-extrabold">{{ __('Baca kisahnya, tonton animasinya') }}</h2>
+                        <p class="mt-2 max-w-2xl text-white/85">{{ __(':count video animasi pendek daripada kisah buku ASUH, disemak syariah dan tanpa iklan. Ibu bapa tetapkan had tonton harian.', ['count' => $videoCount]) }}</p>
+                    </div>
+                    <a href="{{ route('videos.index') }}" class="font-bold text-kuning underline underline-offset-4">{{ __('Semua video animasi') }} &rarr;</a>
+                </div>
+
+                @if ($videoSample)
+                    <div class="mx-auto mt-8 max-w-3xl">
+                        <x-showcase-video :embed="$showcase->embed($videoSample)" :title="$videoSample->title" :thumb="$thumb($videoSample)" :duration="$videoSample->durationLabel()"
+                            :end-cta="['text' => __('Suka? Tonton semua animasi ASUH dengan :plan.', ['plan' => __('Langganan Tahunan')]), 'label' => __('Langgan sekarang'), 'url' => route('pass.show')]" free />
+                        <p class="mt-2 text-center text-sm text-white/75">{{ __('Tonton percuma: :title', ['title' => $videoSample->title]) }}</p>
+                    </div>
+                @endif
+
+                <ul class="{{ $shelfRow }} mt-8">
+                    @foreach ($videoRow as $video)
+                        <li class="w-60 shrink-0 snap-start">
+                            <a href="{{ route('videos.index') }}" class="group block">
+                                <div class="relative aspect-video overflow-hidden rounded-2xl border-2 border-ink bg-ink shadow-[0_3px_0_var(--color-ink)]">
+                                    @if ($thumb($video))
+                                        <img src="{{ $thumb($video) }}" alt="" loading="lazy" class="h-full w-full object-cover transition group-hover:scale-105">
+                                    @endif
+                                    <span class="absolute bottom-2 left-2 grid size-9 place-items-center rounded-full border-2 border-ink bg-kuning text-ink" aria-hidden="true">▶</span>
+                                </div>
+                                <p class="mt-2 font-display leading-tight font-bold">{{ $video->title }}</p>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
         </section>
     @endif
 
@@ -167,7 +219,9 @@
                 ['🛡️', __('Disemak syariah'), __('Setiap buku mesti lulus semakan syariah sebelum diterbitkan.')],
                 ['🎯', __('Ikut umur anak'), __('Rak buku disusun untuk 6–9 tahun dan 10–13 tahun, jadi anak jumpa bacaan yang sesuai.')],
                 ['📖', __('Selak macam buku sebenar'), __('Mod flip dua muka di tablet dan komputer, satu muka di telefon. Tanpa perlu muat turun aplikasi.')],
-                ['⚡', __('Akses serta-merta'), __('Bayar melalui FPX, kad atau e-wallet dan buku terus terbuka dalam akaun anda.')],
+                $videoCount > 0
+                    ? ['🎬', __('Baca, kemudian tonton'), __('Video animasi pendek bagi kisah dalam buku ASUH, tanpa iklan. Ibu bapa tetapkan had tonton harian.')]
+                    : ['⚡', __('Akses serta-merta'), __('Bayar melalui FPX, kad atau e-wallet dan buku terus terbuka dalam akaun anda.')],
                 ['👨‍👩‍👧', __('Seisi keluarga'), __('Satu langganan untuk sehingga 4 profil anak, di telefon, tablet atau komputer.')],
                 ['🧒', __('Mod Anak yang selamat'), __('Tiada harga, butang beli atau tetapan. Keluar hanya melalui pintu ibu bapa.')],
             ] as [$icon, $title, $body])
@@ -223,12 +277,13 @@
             @endif
 
             <ul class="mt-6 space-y-3">
-                @foreach ([
+                @foreach (array_filter([
                     __('Akses semua e-book ASUH Digital selama 12 bulan'),
+                    $videoCount > 0 ? __('Semua :count video animasi ASUH dalam Mod Anak', ['count' => $videoCount]) : null,
                     __('Sehingga 4 profil anak dalam satu akaun'),
                     __('Mod Anak dengan pintu ibu bapa'),
                     __('Bayaran sekali sahaja, tiada caj automatik'),
-                ] as $benefit)
+                ]) as $benefit)
                     <li class="flex gap-3">
                         <span aria-hidden="true" class="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-biru text-sm font-bold text-white">✓</span>
                         <span>{{ $benefit }}</span>
@@ -293,7 +348,7 @@
         <section class="mx-auto max-w-6xl px-4 pb-4">
             <div class="rounded-3xl border-2 border-ink bg-kuning p-8 text-center shadow-[0_6px_0_var(--color-ink)]">
                 <h2 class="font-display text-3xl font-extrabold text-ink">{{ __('Jom Jadi Baik bersama ASUH!') }}</h2>
-                <p class="mt-2 font-semibold text-ink/80">{{ $earlyBird ? __('Tempah slot early bird sebelum habis.') : __('Satu langganan untuk seisi keluarga, semua e-book selama 12 bulan.') }}</p>
+                <p class="mt-2 font-semibold text-ink/80">{{ $earlyBird ? __('Tempah slot early bird sebelum habis.') : ($videoCount > 0 ? __('Satu langganan untuk seisi keluarga: semua e-book dan video animasi selama 12 bulan.') : __('Satu langganan untuk seisi keluarga, semua e-book selama 12 bulan.')) }}</p>
                 <a href="{{ $checkoutUrl }}" class="btn-gelap mt-6 text-lg">{{ $ctaLabel }}</a>
             </div>
         </section>

@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\Video;
 use App\Services\PlusOffer;
 use Database\Seeders\PlanSeeder;
+use Illuminate\Support\Facades\Cache;
 
 // User decision 2026-10-27: no separate Plus; every family subscription includes the videos.
 
@@ -77,7 +78,7 @@ it('tells the sales page the videos are included', function () {
         ->assertSee('Video animasi kisah buku');
 
     Setting::set('videos_open', false);
-    $this->get(route('pass.show'))->assertOk()->assertDontSee('video animasi termasuk');
+    $this->get(route('pass.show'))->assertOk()->assertDontSee('3 video animasi termasuk');
 });
 
 it('says on a book page that its animation comes with the yearly subscription', function () {
@@ -108,4 +109,33 @@ it('sells the yearly subscription at RM149 once the early bird is over', functio
 
     $this->get(route('pass.show'))->assertOk()
         ->assertSeeInOrder(['Langganan 12 bulan', 'RM12.41', 'sebulan', 'Dibayar sekali setahun:', 'RM149']);
+});
+
+it('shows the animated videos on the home page as part of the subscription', function () {
+    Video::factory()->published()->create(['title' => 'Animasi Percuma', 'is_free_sample' => true]);
+    Video::factory()->published()->create(['title' => 'Animasi Berkunci']);
+
+    $this->get('/')->assertOk()
+        ->assertSee('E-book dan video animasi Islamik untuk anak 6–13 tahun')
+        ->assertSee('Tonton video animasi')
+        ->assertSee('2 video animasi')
+        ->assertSee('Baca kisahnya, tonton animasinya')
+        ->assertSee('Tonton percuma: Animasi Percuma')
+        ->assertSee('Animasi Berkunci')
+        ->assertSee('Semua 2 video animasi ASUH dalam Mod Anak');
+
+    Setting::set('videos_open', false);
+    $this->get('/')->assertOk()->assertDontSee('Baca kisahnya, tonton animasinya');
+});
+
+it('updates the landing texts on the server only while they are still the old defaults', function () {
+    $migration = require database_path('migrations/2026_10_27_000003_landing_texts_mention_videos.php');
+
+    Setting::set('landing_headline', 'Rak buku Islamik digital untuk anak 6–13 tahun');
+    Setting::set('landing_subheadline', 'Teks sendiri admin');
+    $migration->up();
+    Cache::flush();
+
+    expect(Setting::get('landing_headline'))->toBe('E-book dan video animasi Islamik untuk anak 6–13 tahun')
+        ->and(Setting::get('landing_subheadline'))->toBe('Teks sendiri admin');
 });
