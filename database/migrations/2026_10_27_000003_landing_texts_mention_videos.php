@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
@@ -19,6 +20,9 @@ return new class extends Migration
                 DB::table('settings')->where('key', $key)->update(['value' => json_encode($new), 'updated_at' => now()]);
             }
         }
+
+        // Settings are cached forever (App\Models\Setting); drop the copy so the new texts show.
+        Cache::forget('asuh.settings');
     }
 
     public function down(): void
