@@ -242,6 +242,7 @@ return array(
     'App\\Services\\CatalogReadiness' => $baseDir . '/app/Services/CatalogReadiness.php',
     'App\\Services\\CatalogStats' => $baseDir . '/app/Services/CatalogStats.php',
     'App\\Services\\ChildMode' => $baseDir . '/app/Services/ChildMode.php',
+    'App\\Services\\ChildShelf' => $baseDir . '/app/Services/ChildShelf.php',
     'App\\Services\\Chip\\ChipClient' => $baseDir . '/app/Services/Chip/ChipClient.php',
     'App\\Services\\Chip\\ProcessingFee' => $baseDir . '/app/Services/Chip/ProcessingFee.php',
     'App\\Services\\ClassReport' => $baseDir . '/app/Services/ClassReport.php',

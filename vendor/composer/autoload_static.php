@@ -1032,6 +1032,7 @@ class ComposerStaticInitdd831e7fdde172bdfa9c4bc1ead60323
         'App\\Services\\CatalogReadiness' => __DIR__ . '/../..' . '/app/Services/CatalogReadiness.php',
         'App\\Services\\CatalogStats' => __DIR__ . '/../..' . '/app/Services/CatalogStats.php',
         'App\\Services\\ChildMode' => __DIR__ . '/../..' . '/app/Services/ChildMode.php',
+        'App\\Services\\ChildShelf' => __DIR__ . '/../..' . '/app/Services/ChildShelf.php',
         'App\\Services\\Chip\\ChipClient' => __DIR__ . '/../..' . '/app/Services/Chip/ChipClient.php',
         'App\\Services\\Chip\\ProcessingFee' => __DIR__ . '/../..' . '/app/Services/Chip/ProcessingFee.php',
         'App\\Services\\ClassReport' => __DIR__ . '/../..' . '/app/Services/ClassReport.php',
