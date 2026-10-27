@@ -78,6 +78,15 @@ class PupilAccessController extends Controller
         return redirect()->route('pupil.names');
     }
 
+    /** Leave the class on this device and go back to the main site. */
+    public function exit(Request $request): RedirectResponse
+    {
+        $this->childMode->leave();
+        $request->session()->forget(self::CLASS_KEY);
+
+        return redirect()->route('home');
+    }
+
     private function classroom(Request $request): ?Classroom
     {
         $id = $request->session()->get(self::CLASS_KEY);

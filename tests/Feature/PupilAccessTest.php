@@ -56,7 +56,7 @@ it('joins a class with the code and the pupil\'s own name, without an account', 
         ->assertSee('Buku Adik')
         ->assertDontSee('Buku Abang')
         ->assertSee('Tukar murid')
-        ->assertDontSee('Ibu bapa');
+        ->assertDontSee('Keluar Mod Anak');
 });
 
 it('rejects unknown codes', function () {
@@ -171,5 +171,28 @@ it('leaves a parent\'s Mod Anak unchanged', function () {
     $child = Child::factory()->create();
 
     $this->actingAs($child->user)->post("/akaun/anak/{$child->id}/mod-anak")->assertRedirect('/mod-anak');
-    $this->get('/mod-anak')->assertOk()->assertSee('Ibu bapa')->assertDontSee('Tukar murid');
+    $this->get('/mod-anak')->assertOk()->assertSee('Keluar')->assertSee(route('child-mode.gate'))->assertDontSee('Tukar murid');
+});
+
+it('keeps a family child out of the class pages, so only the parent gate ends Mod Anak', function () {
+    $child = Child::factory()->create();
+    $this->actingAs($child->user)->post("/akaun/anak/{$child->id}/mod-anak");
+
+    $this->get('/kelas')->assertRedirect('/mod-anak');
+    $this->post('/kelas/keluar')->assertRedirect('/mod-anak');
+    $this->post('/kelas/tutup')->assertRedirect('/mod-anak');
+    $this->get('/akaun')->assertRedirect('/mod-anak');
+});
+
+it('lets a class tablet go back to the main site from the class pages', function () {
+    $pupil = classWithPupil();
+
+    $this->get('/kelas')->assertOk()->assertSee('Laman utama');
+    joinAs($pupil);
+    $this->post('/kelas/keluar')->assertRedirect('/kelas/pilih');
+    $this->get('/kelas/pilih')->assertOk()->assertSee('Laman utama');
+
+    $this->post('/kelas/tutup')->assertRedirect('/');
+    $this->get('/kelas/pilih')->assertRedirect('/kelas');
+    $this->get('/')->assertOk();
 });

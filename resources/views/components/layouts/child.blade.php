@@ -1,4 +1,4 @@
-@props(['title' => null, 'child' => null])
+@props(['title' => null, 'child' => null, 'exitClass' => false])
 
 {{-- Mod Anak: no prices, buy buttons, account links or log out (CLAUDE.md). --}}
 <!DOCTYPE html>
@@ -25,12 +25,20 @@
                             <button type="submit" class="inline-flex min-h-11 items-center rounded-full border-2 border-white/40 px-4 text-sm font-bold hover:bg-white/10">Tukar murid</button>
                         </form>
                     @else
-                        <a href="{{ route('child-mode.gate') }}" class="inline-flex min-h-11 items-center rounded-full border-2 border-white/40 px-4 text-sm font-bold hover:bg-white/10">
-                            Ibu bapa
+                        {{-- The only way out, behind the parent gate. --}}
+                        <a href="{{ route('child-mode.gate') }}" class="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-ink bg-kuning px-4 text-sm font-bold text-ink shadow-[0_2px_0_var(--color-ink)] hover:bg-kuning/90">
+                            <span aria-hidden="true">🔒</span> Keluar<span class="hidden sm:inline">&nbsp;Mod Anak</span>
                         </a>
                     @endif
                 @else
                     <p class="flex-1 font-display text-xl font-extrabold">Mod Anak</p>
+                    @if ($exitClass)
+                        {{-- Class code and name list: a way back to the main site. --}}
+                        <form method="POST" action="{{ route('pupil.exit') }}">
+                            @csrf
+                            <button type="submit" class="inline-flex min-h-11 items-center rounded-full border-2 border-white/40 px-4 text-sm font-bold hover:bg-white/10">← Laman utama</button>
+                        </form>
+                    @endif
                 @endif
             </div>
         </header>

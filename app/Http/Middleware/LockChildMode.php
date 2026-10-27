@@ -41,6 +41,11 @@ class LockChildMode
             return $next($request);
         }
 
+        // The class pages are for pupils: a family's child leaves only through the parent gate.
+        if ($request->route()?->named('pupil.*') && ! $this->childMode->isPupil()) {
+            return redirect()->route('child-mode.home');
+        }
+
         if ($request->route()?->named(...self::ALLOWED)) {
             return $next($request);
         }
