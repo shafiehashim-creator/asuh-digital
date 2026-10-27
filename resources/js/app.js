@@ -9,8 +9,10 @@ export const images = import.meta.glob(['../images/**/*.webp']);
 import Alpine from 'alpinejs';
 import { installApp } from './install';
 import { countdown } from './countdown';
+import { registerGames } from './games';
 
 window.Alpine = Alpine;
 Alpine.data('installApp', installApp);
 Alpine.data('countdown', countdown);
+registerGames(Alpine);
 Alpine.start();

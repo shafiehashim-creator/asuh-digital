@@ -49,6 +49,24 @@
                 @error('avatar') <p class="mt-1 text-sm font-semibold text-magenta">{{ $message }}</p> @enderror
             </fieldset>
 
+            @if (app(App\Services\GamePlaying::class)->isOpen())
+                {{-- Mod Anak games: the parent's daily limit (20 minutes for a new child). --}}
+                <fieldset class="rounded-2xl bg-lavender p-4">
+                    <legend class="sr-only">Permainan</legend>
+                    <input type="hidden" name="game_settings" value="1">
+                    <p class="font-display font-bold text-plum">Permainan</p>
+                    <label for="daily_game_minutes" class="label mt-3">Had bermain sehari</label>
+                    <select id="daily_game_minutes" name="daily_game_minutes" class="input">
+                        <option value="">Tiada had</option>
+                        @foreach (App\Services\GamePlaying::LIMIT_CHOICES as $minutes)
+                            <option value="{{ $minutes }}" @selected((string) old('daily_game_minutes', $editing ? $child->daily_game_minutes : 20) === (string) $minutes)>{{ $minutes }} minit</option>
+                        @endforeach
+                    </select>
+                    <p class="mt-1 text-sm text-ink/75">Permainan Islamik dalam Mod Anak: padan kad, huruf hijaiyah, kisah nabi dan akhlak.</p>
+                    @error('daily_game_minutes') <p class="mt-1 text-sm font-semibold text-magenta">{{ $message }}</p> @enderror
+                </fieldset>
+            @endif
+
             @if (app(App\Services\VideoWatching::class)->isOpen())
                 {{-- Phase 2: parent controls for the animated videos. --}}
                 <fieldset class="rounded-2xl bg-lavender p-4">

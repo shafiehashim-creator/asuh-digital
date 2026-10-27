@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Enums\AgeGroup;
 use App\Enums\ChildAvatar;
+use App\Services\GamePlaying;
 use App\Services\VideoWatching;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -26,6 +27,7 @@ class ChildRequest extends FormRequest
             // Phase 2 parent controls for videos.
             'daily_video_minutes' => ['nullable', Rule::in(VideoWatching::LIMIT_CHOICES)],
             'read_before_watch' => ['sometimes', 'boolean'],
+            'daily_game_minutes' => ['nullable', Rule::in(GamePlaying::LIMIT_CHOICES)],
         ];
     }
 
@@ -39,6 +41,10 @@ class ChildRequest extends FormRequest
             $data['read_before_watch'] = $this->boolean('read_before_watch');
         }
 
+        if ($key === null && $this->has('game_settings')) {
+            $data['daily_game_minutes'] = $data['daily_game_minutes'] ?? null;
+        }
+
         return $data;
     }
 
@@ -50,6 +56,7 @@ class ChildRequest extends FormRequest
             'age_group' => 'kumpulan umur',
             'avatar' => 'avatar',
             'daily_video_minutes' => 'had masa menonton',
+            'daily_game_minutes' => 'had masa bermain',
         ];
     }
 }
