@@ -15,6 +15,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Services\GamePlaying;
 use App\Support\GameContent;
+use App\Support\HijaiyahQuestions;
 use App\Support\MathQuestions;
 use Database\Seeders\PlanSeeder;
 
@@ -125,16 +126,19 @@ it('gives every game content for both age groups at every level', function (Game
         foreach (array_keys(Game::LEVELS) as $level) {
             $content = GameContent::for($game, $age, $level);
 
-            match ($game) {
-                Game::Memory => expect(count($content['pairs']))->toBeGreaterThanOrEqual($content['count']),
-                Game::GoodChoice => expect(count($content['scenarios']))->toBeGreaterThanOrEqual($content['rounds']),
-                Game::Order => expect($content['sets'])->each(fn ($set) => $set->items->toBeArray()),
-                Game::WordSearch => expect(count($content['words']))->toBeGreaterThanOrEqual($content['count'])
+            // Pilih yang Baik plays as a quiz from Sederhana.
+            $component = $content['component'] ?? $game->component();
+
+            match (true) {
+                $component === 'gameMemory' => expect(count($content['pairs']))->toBeGreaterThanOrEqual($content['count']),
+                $component === 'gameGoodChoice' => expect(count($content['scenarios']))->toBeGreaterThanOrEqual($content['rounds']),
+                $component === 'gameOrder' => expect($content['sets'])->each(fn ($set) => $set->items->toBeArray()),
+                $component === 'gameWordSearch' => expect(count($content['words']))->toBeGreaterThanOrEqual($content['count'])
                     ->and(collect($content['words'])->every(fn ($w) => strlen($w) <= $content['size']))->toBeTrue(),
-                Game::Sliding => expect($content['size'])->toBeIn([3, 4])->and($content['images'])->toHaveCount(3),
-                Game::Sudoku => expect($content['size'])->toBeIn([4, 6])->and($content['blanks'])->toBeLessThan($content['size'] ** 2),
-                default => expect(count($content['questions']))->toBeGreaterThanOrEqual($content['rounds'])
-                    ->and(collect($content['questions'])->every(fn ($q) => in_array($q['answer'], $q['options'], true)
+                $component === 'gameSliding' => expect($content['size'])->toBeIn([3, 4, 5])->and($content['images'])->toHaveCount(3),
+                $component === 'gameSudoku' => expect($content['size'])->toBeIn([4, 6])->and($content['blanks'])->toBeLessThan($content['size'] ** 2),
+                default => expect(count($content['questions']))->toBeGreaterThanOrEqual($content['rounds'] ?? 1)
+                    ->and(collect($content['questions'])->every(fn ($q) => (isset($q['pick']) || in_array($q['answer'], $q['options'], true))
                         && count(array_unique(array_diff($q['options'], [$q['answer']]))) >= 1))->toBeTrue(),
             };
         }
@@ -145,12 +149,23 @@ it('makes sums with the right answers, harder for older children', function () {
     foreach ([false, true] as $older) {
         foreach ([1, 2, 3] as $level) {
             foreach (MathQuestions::make($older, $level, 40) as $q) {
-                if ($q['big'] !== null && ! str_contains($q['big'], '❓ ')) {
-                    $sum = str_replace(['×', '÷', '−', '= ❓'], ['*', '/', '-', ''], $q['big']);
-                    expect((string) eval("return {$sum};"))->toBe($q['answer']);
+                expect(count(array_unique($q['options'])))->toBeGreaterThanOrEqual(3);
+                // Stories and two-number targets are checked elsewhere.
+                if ($q['big'] === null || isset($q['pick'])) {
+                    continue;
                 }
-                expect((int) $q['answer'])->toBeGreaterThanOrEqual(0)
-                    ->and(count(array_unique($q['options'])))->toBeGreaterThanOrEqual(4);
+                $math = fn (string $side) => eval('return '.str_replace(['×', '÷', '−'], ['*', '/', '-'], $side).';');
+
+                if (in_array($q['answer'], ['<', '=', '>'], true)) {
+                    [$left, $right] = explode('❓', $q['big']);
+                    expect($math($left) <=> $math($right))->toBe(['<' => -1, '=' => 0, '>' => 1][$q['answer']]);
+
+                    continue;
+                }
+
+                [$left, $right] = explode('=', str_replace('❓', $q['answer'], $q['big']));
+                expect($math($left))->toEqual($math($right))
+                    ->and((int) $q['answer'])->toBeGreaterThanOrEqual(0);
             }
         }
     }
@@ -213,4 +228,57 @@ it('lets staff write game items, and only a Super Admin switches them on', funct
     Livewire\Livewire::test(ManageGameItems::class)
         ->callAction('create', ['game' => 'cari-perkataan', 'age_group' => 'both', 'prompt' => 'DUA KATA'])
         ->assertHasActionErrors(['prompt']);
+});
+
+it('plays a different kind of challenge at each level', function () {
+    $young = AgeGroup::SixToNine;
+    $old = AgeGroup::TenToThirteen;
+
+    expect(GameContent::for(Game::Memory, $young, 1)['preview'])->toBe(3)
+        ->and(GameContent::for(Game::Memory, $old, 3))->words->toBeTrue()->pairs->each->not->toContain('🕌')
+        ->and(GameContent::for(Game::GoodChoice, $young, 2))->component->toBe('gameQuiz')
+        ->and(GameContent::for(Game::GoodChoice, $young, 3)['questions'][0])->keepOrder->toBeTrue()->why->not->toBeEmpty()
+        ->and(GameContent::for(Game::Order, $young, 2))->impostor->toBeTrue()->reverse->toBeFalse()
+        ->and(GameContent::for(Game::Order, $old, 3))->reverse->toBeTrue()
+        ->and(GameContent::for(Game::Hijaiyah, $young, 2)['questions'][0]['answer'])->toMatch('/^\p{Arabic}$/u')
+        ->and(GameContent::for(Game::Hijaiyah, $old, 3)['questions'][0]['big'])->toContain('ـ')
+        ->and(GameContent::for(Game::WordSearch, $old, 3)['clues'])->not->toBeEmpty()
+        ->and(GameContent::for(Game::WordSearch, $old, 1)['clues'])->toBeNull()
+        ->and(GameContent::for(Game::QuickQuiz, $young, 3))->survival->toBe(15)->lives->toBe(3)
+        ->and(GameContent::for(Game::Science, $young, 2)['questions'][0]['prompt'])->toStartWith('Yang manakah BUKAN')
+        ->and(GameContent::for(Game::Science, $old, 3)['questions'][0])->keepOrder->toBeTrue()
+        ->and(GameContent::for(Game::Sudoku, $old, 3))->checkLater->toBeTrue()
+        ->and(GameContent::for(Game::Sliding, $old, 3))->size->toBe(5);
+
+    $prophets = collect(GameContent::for(Game::Prophets, $old, 3)['questions'])->pluck('prompt');
+    expect($prophets->contains(fn ($p) => str_contains($p, 'PALING')))->toBeTrue();
+});
+
+it('makes two-number targets that always have an answer', function () {
+    foreach ([false, true] as $older) {
+        $pairs = collect(MathQuestions::make($older, 3, 60))->filter(fn ($q) => isset($q['pick']));
+        expect($pairs)->not->toBeEmpty();
+        foreach ($pairs as $q) {
+            $numbers = array_map('intval', $q['options']);
+            $hits = 0;
+            foreach ($numbers as $i => $a) {
+                foreach (array_slice($numbers, $i + 1) as $b) {
+                    $hits += ($q['op'] === 'times' ? $a * $b : $a + $b) === $q['target'] ? 1 : 0;
+                }
+            }
+            expect($hits)->toBe(1);
+        }
+    }
+});
+
+it('names letters only once among their choices, and every story hides one wrong sentence', function () {
+    foreach ([1, 2, 3] as $level) {
+        foreach (HijaiyahQuestions::make(true, $level) as $q) {
+            expect($q['options'])->toBe(array_values(array_unique($q['options'])))->toContain($q['answer']);
+        }
+    }
+
+    $stories = GameItem::query()->where('variant', 'cerita')->get();
+    expect($stories)->not->toBeEmpty()
+        ->and($stories->every(fn ($story) => in_array($story->answer, $story->options, true)))->toBeTrue();
 });

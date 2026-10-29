@@ -8,12 +8,15 @@
         'csrf' => csrf_token(),
         'level' => $level,
         'unlocked' => $unlocked,
+        'game' => $game->value,
     ];
     $tile = 'rounded-2xl border-2 border-ink bg-white shadow-[0_3px_0_var(--color-ink)]';
+    // A level may be played by another component (Pilih yang Baik plays as a quiz from Sederhana).
+    $gameComponent = $content['component'] ?? $game->component();
 @endphp
 
 <x-layouts.child :title="$game->label()" :child="$child">
-    <div class="mx-auto max-w-3xl px-4 py-6" x-data="{{ $game->component() }}(@js($config))">
+    <div class="mx-auto max-w-3xl px-4 py-6" x-data="{{ $gameComponent }}(@js($config))">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <a href="{{ route('child-mode.home') }}" class="inline-flex min-h-11 items-center rounded-full border-2 border-ink bg-white px-4 font-bold shadow-[0_2px_0_var(--color-ink)]">← Rak</a>
             <div class="flex items-center gap-2">
@@ -65,9 +68,11 @@
         </div>
 
         <div x-show="!done && !timeUp" class="mt-6">
-            @switch($game)
-                @case(Game::Memory)
-                    <p class="font-semibold">Langkah: <span x-text="moves"></span> · Pasangan: <span x-text="matched.length"></span> / {{ $content['count'] }}</p>
+            <p class="mb-3 rounded-2xl bg-white/70 px-4 py-2 text-sm font-bold text-plum">🧠 {{ $game->levelHint($level) }}</p>
+            @switch($gameComponent)
+                @case('gameMemory')
+                    <p class="font-semibold">Langkah: <span x-text="moves"></span> · Pasangan: <span x-text="matched.length"></span> / {{ $content['count'] }}
+                        <span x-show="peeking" x-cloak class="ml-1 text-magenta">· Ingat kedudukan kad!</span></p>
                     <div @class(['mt-3 grid gap-3', 'grid-cols-3 sm:grid-cols-4' => $content['count'] <= 6, 'grid-cols-4' => $content['count'] > 6])>
                         <template x-for="card in cards" :key="card.key">
                             <button type="button" @click="flip(card)"
@@ -81,7 +86,7 @@
                     </div>
                     @break
 
-                @case(Game::GoodChoice)
+                @case('gameGoodChoice')
                     <p class="font-semibold">Soalan <span x-text="index + 1"></span> / <span x-text="items.length"></span></p>
                     <div class="mt-3 {{ $tile }} p-5">
                         <p class="font-display text-xl leading-snug font-bold" x-text="item?.text"></p>
@@ -100,8 +105,10 @@
                     </div>
                     @break
 
-                @case(Game::Order)
-                    <p class="font-semibold">Susun: <span class="font-display text-xl text-magenta" x-text="set?.title"></span></p>
+                @case('gameOrder')
+                    <p class="font-semibold">Susun: <span class="font-display text-xl text-magenta" x-text="set?.title"></span>
+                        <span x-show="reverse" x-cloak class="block text-sm text-biru">⬅️ Mulakan dari yang TERAKHIR, kembali ke yang pertama.</span>
+                        <span x-show="impostor" x-cloak class="block text-sm text-oren">🕵️ Ada satu penyusup yang bukan dari kumpulan ini. Jangan pilih!</span></p>
                     <ol class="mt-3 space-y-2">
                         <template x-for="(order, i) in placed" :key="order">
                             <li class="flex items-center gap-3 rounded-2xl border-2 border-ink bg-kuning px-4 py-2 font-bold">
@@ -119,17 +126,31 @@
                     </div>
                     <div x-show="setDone" x-cloak class="mt-4 text-center">
                         <p class="font-display text-2xl font-extrabold text-biru">Betul semuanya! 🎉</p>
+                        <p x-show="impostor" class="mt-1 font-semibold">Penyusupnya: <span class="text-oren" x-text="impostor"></span></p>
                         <button type="button" class="btn-utama mt-3" @click="nextSet()" x-text="setIndex + 1 < sets.length ? 'Seterusnya →' : 'Lihat markah'"></button>
                     </div>
                     @break
 
-                @case(Game::WordSearch)
+                @case('gameWordSearch')
                     <p class="font-semibold">Tekan huruf pertama, kemudian huruf terakhir perkataan.</p>
-                    <ul class="mt-3 flex flex-wrap gap-2">
-                        <template x-for="word in words" :key="word">
-                            <li class="rounded-full border-2 border-ink px-3 py-1 text-sm font-extrabold" :class="found.includes(word) ? 'bg-kuning line-through' : 'bg-white'" x-text="word"></li>
-                        </template>
-                    </ul>
+                    @if ($content['clues'] ?? null)
+                        {{-- Sukar: only clues, the word shows once found. --}}
+                        <ol class="mt-3 space-y-1">
+                            <template x-for="(word, i) in words" :key="word">
+                                <li class="rounded-xl border-2 border-ink/20 px-3 py-1 text-sm font-bold" :class="found.includes(word) ? 'bg-kuning' : 'bg-white'">
+                                    <span x-text="(i + 1) + '. ' + {{ Js::from($content['clues']) }}[word]"></span>
+                                    <span x-show="found.includes(word)" class="font-extrabold text-biru" x-text="'→ ' + word"></span>
+                                    <span x-show="!found.includes(word)" class="text-ink/60" x-text="'(' + word.length + ' huruf)'"></span>
+                                </li>
+                            </template>
+                        </ol>
+                    @else
+                        <ul class="mt-3 flex flex-wrap gap-2">
+                            <template x-for="word in words" :key="word">
+                                <li class="rounded-full border-2 border-ink px-3 py-1 text-sm font-extrabold" :class="found.includes(word) ? 'bg-kuning line-through' : 'bg-white'" x-text="word"></li>
+                            </template>
+                        </ul>
+                    @endif
                     <div class="mt-4 grid gap-1" :style="`grid-template-columns: repeat(${size}, minmax(0, 1fr))`">
                         <template x-for="(letter, cell) in grid" :key="cell">
                             <button type="button" @click="tapCell(cell)"
@@ -140,7 +161,7 @@
                     </div>
                     @break
 
-                @case(Game::Sliding)
+                @case('gameSliding')
                     <p class="font-semibold">Langkah: <span x-text="moves"></span> · Tekan kepingan di sebelah ruang kosong.</p>
                     <div class="mt-3 flex flex-wrap items-start gap-4">
                         <div class="grid w-full max-w-sm gap-1 rounded-2xl border-2 border-ink bg-ink p-1" :style="`grid-template-columns: repeat(${size}, minmax(0, 1fr))`">
@@ -161,13 +182,14 @@
                     </div>
                     @break
 
-                @case(Game::Sudoku)
-                    <p class="font-semibold">Tekan kotak kosong, kemudian pilih gambar. Setiap baris, lajur dan kotak tebal ada semua gambar sekali.</p>
+                @case('gameSudoku')
+                    <p class="font-semibold">Tekan kotak kosong, kemudian pilih gambar. Setiap baris, lajur dan kotak tebal ada semua gambar sekali.
+                        <span x-show="checkLater" x-cloak class="block text-sm text-biru">Tiada petunjuk salah di tahap ini. Bila penuh, tekan Semak.</span></p>
                     <div class="mx-auto mt-3 grid w-full max-w-sm overflow-hidden rounded-2xl border-4 border-ink bg-white" :style="`grid-template-columns: repeat(${size}, minmax(0, 1fr))`">
                         <template x-for="(entry, cell) in entries" :key="cell">
                             <button type="button" @click="pick(cell)"
                                 class="grid aspect-square place-items-center border border-ink/20 text-3xl"
-                                :class="[borderClass(cell), selected === cell ? 'bg-kuning' : (given[cell] ? 'bg-lavender' : 'bg-white')]"
+                                :class="[borderClass(cell), wrongCells.includes(cell) ? 'bg-magenta' : (selected === cell ? 'bg-kuning' : (given[cell] ? 'bg-lavender' : 'bg-white'))]"
                                 :aria-label="entry === null ? 'Kotak kosong' : symbols[entry]">
                                 <span x-text="entry === null ? '' : symbols[entry]"></span>
                             </button>
@@ -180,29 +202,43 @@
                                 :class="shaking === value && 'game-shake border-magenta'" x-text="symbol"></button>
                         </template>
                     </div>
-                    <p class="mt-2 text-center text-sm font-semibold">Silap: <span x-text="mistakes"></span></p>
+                    <div x-show="checkLater" x-cloak class="mt-4 text-center">
+                        <button type="button" class="btn-utama" :disabled="!full" :class="!full && 'opacity-50'" @click="check()">✅ Semak</button>
+                    </div>
+                    <p class="mt-2 text-center text-sm font-semibold"><span x-text="checkLater ? 'Semakan tidak lulus' : 'Silap'"></span>: <span x-text="mistakes"></span></p>
                     @break
 
                 @default
-                    {{-- Hijaiyah, prophets, manners, maths, science and patterns: multiple choice --}}
-                    <div class="flex items-center justify-between gap-3 font-semibold">
-                        <p>Soalan <span x-text="index + 1"></span> / <span x-text="questions.length"></span></p>
+                    {{-- Hijaiyah, prophets, manners, maths, science, patterns, best action and stories: multiple choice --}}
+                    <div class="flex flex-wrap items-center justify-between gap-2 font-semibold">
+                        <p x-show="!survival">Soalan <span x-text="index + 1"></span> / <span x-text="questions.length"></span></p>
+                        <p x-show="survival" x-cloak>Betul: <span x-text="correct"></span> · Sasaran <span x-text="survival"></span></p>
+                        <p x-show="maxLives !== null" x-cloak class="text-lg" :aria-label="'Nyawa: ' + lives" x-text="hearts"></p>
                         <p x-show="countdown !== null" x-cloak class="rounded-full bg-white px-3 py-1 font-display text-lg font-extrabold" :class="countdown <= 3 && 'text-magenta'">⏱️ <span x-text="countdown"></span></p>
                     </div>
                     <div class="mt-3 {{ $tile }} p-5 text-center">
                         <p class="font-display text-xl leading-snug font-bold" x-text="question?.prompt"></p>
-                        <p x-show="question?.big" class="mt-3 leading-tight font-display font-extrabold break-words"
+                        <p x-show="question?.big" class="mt-3 leading-tight font-display font-extrabold break-words whitespace-pre-wrap"
                             :class="question?.rtl ? 'text-8xl font-normal' : ((question?.big ?? '').length > 18 ? 'text-3xl sm:text-4xl' : 'text-4xl sm:text-5xl')"
                             :dir="question?.rtl ? 'rtl' : 'ltr'" :lang="question?.rtl ? 'ar' : 'ms'" x-text="question?.big"></p>
                     </div>
-                    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                    <p x-show="question?.pick" x-cloak class="mt-3 text-center text-sm font-bold text-biru">Tekan dua nombor. Tekan sekali lagi untuk batal.</p>
+                    <div class="mt-4 grid gap-3" :class="(question?.choices ?? []).some((c) => c.length > 24) ? 'grid-cols-1' : (question?.choices?.length === 3 && question?.keepOrder ? 'grid-cols-3' : 'sm:grid-cols-2')">
                         <template x-for="choice in question?.choices ?? []" :key="choice">
                             <button type="button" @click="choose(choice)"
                                 class="min-h-14 rounded-2xl border-2 border-ink px-4 py-2 font-display font-bold shadow-[0_3px_0_var(--color-ink)]"
-                                :class="[/^\p{Extended_Pictographic}/u.test(choice) ? 'text-4xl' : 'text-lg', picked === null ? 'bg-white' : (choice === question.answer ? 'bg-kuning' : (choice === picked ? 'bg-magenta text-white' : 'bg-white opacity-60'))]"
-                                x-text="choice"></button>
+                                :class="[
+                                    /^\p{Extended_Pictographic}\uFE0F?$/u.test(choice) ? 'text-4xl' : (/[\u0600-\u06FF]/.test(choice) ? 'text-5xl font-normal' : (choice.length > 24 ? 'text-left text-base' : 'text-lg')),
+                                    question.pick
+                                        ? (selection.includes(choice) ? (picked === null ? 'bg-kuning' : (lastOk ? 'bg-kuning' : 'bg-magenta text-white')) : 'bg-white')
+                                        : (picked === null ? 'bg-white' : (choice === question.answer ? 'bg-kuning' : (choice === picked ? 'bg-magenta text-white' : 'bg-white opacity-60'))),
+                                ]"
+                                :lang="/[\u0600-\u06FF]/.test(choice) ? 'ar' : null" x-text="choice"></button>
                         </template>
                     </div>
+                    {{-- Why, after answering: a best action, a story, or the right pair of numbers. --}}
+                    <p x-show="picked !== null && (question?.why || (question?.pick && !lastOk))" x-cloak class="mt-4 rounded-2xl border-2 border-ink bg-white p-3 font-semibold"
+                        x-text="(lastOk ? '✅ ' : '💡 ') + (question?.pick ? 'Contoh jawapan: ' + question.answer : question?.why)"></p>
             @endswitch
         </div>
     </div>
