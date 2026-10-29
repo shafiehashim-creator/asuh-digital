@@ -35,11 +35,22 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'must_change_password' => 'boolean',
             'parent_pin' => 'hashed',
             'weekly_report' => 'boolean',
             'weekly_report_sent_at' => 'datetime',
             'role' => Role::class,
         ];
+    }
+
+    protected static function booted(): void
+    {
+        // Setting a password of one's own (profile, reset link) ends a temporary one.
+        static::saving(function (User $user) {
+            if ($user->isDirty('password') && ! $user->isDirty('must_change_password')) {
+                $user->must_change_password = false;
+            }
+        });
     }
 
     public function canAccessPanel(Panel $panel): bool
