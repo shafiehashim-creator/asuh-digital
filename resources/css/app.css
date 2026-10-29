@@ -119,6 +119,21 @@ html {
     }
 }
 
+/* Home page: the WhatsApp button moves up while the sticky price bar shows. */
+[data-whatsapp] {
+    transition: bottom 0.2s ease;
+}
+
+body.has-sticky-cta [data-whatsapp] {
+    bottom: calc(9.5rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 64rem) {
+    body.has-sticky-cta [data-whatsapp] {
+        bottom: 5.5rem;
+    }
+}
+
 /* Mod Anak games: a wrong tap shakes the tile. */
 @keyframes game-shake {
     0%, 100% { transform: translateX(0); }

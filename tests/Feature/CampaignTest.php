@@ -129,7 +129,7 @@ it('sells the early bird only inside an early bird campaign, the normal price be
     $this->get(route('purchase.pass'))->assertOk()->assertSee('RM99');
 
     $this->travel(2)->days();
-    $this->get('/')->assertSee('Pre-order · Harga early bird')->assertSee('Tamat dalam');
+    $this->get('/')->assertSee('🔥 Pre-order early bird')->assertSee('Tamat dalam');
     $this->get(route('purchase.pass'))->assertRedirect(route('preorder.create'));
     $this->get(route('preorder.create'))->assertOk();
 

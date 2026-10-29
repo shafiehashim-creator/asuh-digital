@@ -1,4 +1,4 @@
-@props(['title' => null])
+@props(['title' => null, 'campaignBar' => true])
 
 @php
     use App\Http\Middleware\EnsureCatalogOpen;
@@ -106,7 +106,10 @@
                     <x-locale-switch />
                 </div>
             </div>
-            <x-campaign-bar />
+            {{-- The home page shows the campaign inside its hero instead. --}}
+            @if ($campaignBar)
+                <x-campaign-bar />
+            @endif
         </header>
 
         <main>
@@ -140,7 +143,7 @@
         @if ($whatsapp = App\Models\Setting::get('whatsapp_number'))
             <a href="https://wa.me/{{ $whatsapp }}?text={{ rawurlencode(__('Assalamualaikum, saya ada pertanyaan tentang ASUH Digital.')) }}"
                 target="_blank" rel="noopener" aria-label="{{ __('Tanya kami di WhatsApp') }}"
-                class="fixed right-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 grid size-14 place-items-center rounded-full border-2 border-ink bg-[#25D366] text-white shadow-[0_3px_0_var(--color-ink)] lg:bottom-6">
+                data-whatsapp class="fixed right-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 grid size-14 place-items-center rounded-full border-2 border-ink bg-[#25D366] text-white shadow-[0_3px_0_var(--color-ink)] lg:bottom-6">
                 <svg viewBox="0 0 24 24" class="size-7" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2m0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2m4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4a.5.5 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a.9.9 0 0 0-.7.3 2.8 2.8 0 0 0-.9 2.1 4.9 4.9 0 0 0 1 2.6 11.2 11.2 0 0 0 4.3 3.8c1.6.7 2.2.7 3 .6a2.6 2.6 0 0 0 1.7-1.2 2.1 2.1 0 0 0 .1-1.2c0-.1-.2-.2-.4-.3"/></svg>
             </a>
         @endif

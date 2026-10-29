@@ -36,12 +36,13 @@ function bookWithImages(int $pages = 8, array $attributes = []): Book
 it('shows book shelves on the landing page once the catalogue is open', function () {
     Book::factory()->published()->create(['title' => 'Buku Rak Utama']);
 
-    $this->get('/')->assertDontSee('Buku Rak Utama')->assertDontSee('Buku terkini');
+    $this->get('/')->assertDontSee('Buku Rak Utama')->assertDontSee('Pilihan kami');
 
     Setting::set('catalog_open', true);
     Cache::flush();
 
-    $this->get('/')->assertSee('Buku terkini')->assertSee('Buku Rak Utama')->assertSee('Pilihan kami')->assertSee('E-book Islamik');
+    // The newest books show in the "how old is your child?" tabs; the picks get a shelf of their own.
+    $this->get('/')->assertSee('Buku Rak Utama')->assertSee('Pilihan kami')->assertSee('E-book Islamik')->assertSee('Berapa umur anak anda?');
 });
 
 it('ranks the most read books once families start reading', function () {
@@ -57,12 +58,12 @@ it('ranks the most read books once families start reading', function () {
 });
 
 it('hides small family counts and shows real ones', function () {
-    $this->get('/')->assertDontSee('Keluarga melanggan');
+    $this->get('/')->assertDontSee('keluarga sudah melanggan');
 
     Order::factory()->paid()->count(20)->create();
     Cache::flush();
 
-    $this->get('/')->assertSee('Keluarga melanggan');
+    $this->get('/')->assertSee('20+ keluarga sudah melanggan');
 });
 
 it('does not count staff previews as readers', function () {
