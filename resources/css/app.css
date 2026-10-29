@@ -79,6 +79,46 @@ html {
     }
 }
 
+/*
+ * Filter chips: one row swiped sideways on phones (no long stack of chips),
+ * wrapped as before from sm up. The right edge fades to hint at more.
+ */
+.chip-row {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-padding-inline: 1rem;
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+    padding-bottom: 0.25rem;
+}
+
+.chip-row.chip-row-more {
+    mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+}
+
+.chip-row::-webkit-scrollbar {
+    display: none;
+}
+
+.chip-row > * {
+    flex-shrink: 0;
+}
+
+@media (min-width: 40rem) {
+    .chip-row {
+        flex-wrap: wrap;
+        overflow: visible;
+        margin-inline: 0;
+        padding-inline: 0;
+    }
+
+    .chip-row.chip-row-more {
+        mask-image: none;
+    }
+}
+
 /* Mod Anak games: a wrong tap shakes the tile. */
 @keyframes game-shake {
     0%, 100% { transform: translateX(0); }

@@ -47,7 +47,7 @@
     <div class="mx-auto max-w-6xl space-y-12 px-4 py-12">
         {{-- Category chips: jump to a category --}}
         @if (count($groups) > 1)
-            <nav aria-label="{{ __('Kategori') }}" class="flex flex-wrap gap-2">
+            <nav aria-label="{{ __('Kategori') }}" class="chip-row" x-data="chipRow" :class="more && 'chip-row-more'">
                 @foreach ($groups as $group)
                     <a href="#{{ $group['category'] ? 'kategori-'.$group['category']->slug : 'kategori-lain' }}"
                         class="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-ink/15 bg-white px-4 text-sm font-bold hover:border-ink">
