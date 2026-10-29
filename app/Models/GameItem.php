@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class GameItem extends Model
 {
-    protected $fillable = ['game', 'age_group', 'prompt', 'answer', 'is_good', 'explanation', 'options', 'is_active', 'sort_order'];
+    protected $fillable = ['game', 'age_group', 'variant', 'prompt', 'answer', 'is_good', 'explanation', 'options', 'is_active', 'sort_order'];
 
     protected function casts(): array
     {

@@ -15,4 +15,22 @@ window.Alpine = Alpine;
 Alpine.data('installApp', installApp);
 Alpine.data('countdown', countdown);
 registerGames(Alpine);
+
+// A row of filter chips swiped sideways on phones: the right edge fades only
+// while more chips are hidden there, and the chosen chip is scrolled into view.
+Alpine.data('chipRow', () => ({
+    more: false,
+
+    init() {
+        this.$el.querySelector('[aria-current]')?.scrollIntoView({ inline: 'center', block: 'nearest' });
+        this.check();
+        this.$el.addEventListener('scroll', () => this.check(), { passive: true });
+        window.addEventListener('resize', () => this.check());
+    },
+
+    check() {
+        const el = this.$el;
+        this.more = el.scrollLeft + el.clientWidth < el.scrollWidth - 4;
+    },
+}));
 Alpine.start();

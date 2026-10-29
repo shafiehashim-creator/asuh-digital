@@ -71,7 +71,7 @@
     "src": "node_modules/pdfjs-dist/build/pdf.worker.min.mjs"
   },
   "resources/css/app.css": {
-    "file": "assets/app-8pxg49N8.css",
+    "file": "assets/app-6XdZbkqq.css",
     "name": "app",
     "names": [
       "app.css"
@@ -112,7 +112,7 @@
     "src": "resources/images/games/puzzle-3.webp"
   },
   "resources/js/app.js": {
-    "file": "assets/app-BxBvOa2I.js",
+    "file": "assets/app-CSOVEZO-.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true

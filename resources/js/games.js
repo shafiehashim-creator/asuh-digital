@@ -68,6 +68,43 @@ export const sfx = {
     levelUp: () => play([[784, 0, 0.12], [988, 0.12, 0.12], [1175, 0.24, 0.12], [1568, 0.36, 0.45]]),
 };
 
+/*
+ * Questions not seen lately come first, so a child playing again meets new
+ * ones before old ones come back. Remembered per game and level on the device.
+ */
+const SEEN_LIMIT = 80;
+
+const seenKey = (cfg) => `asuh_seen_${cfg.game}_${cfg.level ?? 1}`;
+
+const readSeen = (cfg) => {
+    try {
+        return JSON.parse(localStorage.getItem(seenKey(cfg)) || '[]');
+    } catch {
+        return [];
+    }
+};
+
+const freshFirst = (cfg, list, key) => {
+    const seen = readSeen(cfg);
+    // Never seen first, then the ones seen longest ago.
+    const rank = (item) => {
+        const at = seen.indexOf(key(item));
+
+        return at === -1 ? Infinity : at;
+    };
+
+    return shuffle(list).sort((a, b) => rank(b) - rank(a));
+};
+
+const markSeen = (cfg, keys) => {
+    try {
+        const next = [...keys, ...readSeen(cfg).filter((k) => !keys.includes(k))].slice(0, SEEN_LIMIT);
+        localStorage.setItem(seenKey(cfg), JSON.stringify(next));
+    } catch {
+        // Private browsing: questions are still shuffled.
+    }
+};
+
 // Copies the shell in with its getters intact (a spread would freeze them).
 const withShell = (cfg, game) => Object.defineProperties(game, Object.getOwnPropertyDescriptors(shell(cfg)));
 
@@ -148,13 +185,14 @@ const shell = (cfg) => ({
     },
 });
 
-// 🃏 Match each picture to its word.
+// 🃏 Match each picture to its word (Sukar: pairs that need knowing).
 const gameMemory = (cfg) => withShell(cfg, {
     cards: [],
     open: [],
     matched: [],
     moves: 0,
     busy: false,
+    peeking: false,
 
     init() {
         this.startClock();
@@ -162,22 +200,29 @@ const gameMemory = (cfg) => withShell(cfg, {
     },
 
     restart() {
-        this.cards = shuffle(shuffle(cfg.content.pairs).slice(0, cfg.content.count).flatMap(([emoji, word], id) => [
-            { key: `${id}e`, id, face: emoji, word: false },
-            { key: `${id}w`, id, face: word, word: true },
+        const pairs = freshFirst(cfg, cfg.content.pairs, (pair) => pair[1]).slice(0, cfg.content.count);
+        markSeen(cfg, pairs.map((pair) => pair[1]));
+        this.cards = shuffle(pairs.flatMap(([first, second], id) => [
+            { key: `${id}a`, id, face: first, word: cfg.content.words ?? false },
+            { key: `${id}b`, id, face: second, word: true },
         ]));
         this.open = [];
         this.matched = [];
         this.moves = 0;
         this.done = false;
+        // Mudah shows every card for a moment first.
+        if (cfg.content.preview) {
+            this.peeking = true;
+            setTimeout(() => (this.peeking = false), cfg.content.preview * 1000);
+        }
     },
 
     isUp(card) {
-        return this.open.includes(card.key) || this.matched.includes(card.id);
+        return this.peeking || this.open.includes(card.key) || this.matched.includes(card.id);
     },
 
     flip(card) {
-        if (this.busy || this.isUp(card) || this.timeUp) {
+        if (this.busy || this.peeking || this.isUp(card) || this.timeUp) {
             return;
         }
         this.open.push(card.key);
@@ -219,7 +264,8 @@ const gameGoodChoice = (cfg) => withShell(cfg, {
     },
 
     restart() {
-        this.items = shuffle(cfg.content.scenarios).slice(0, cfg.content.rounds);
+        this.items = freshFirst(cfg, cfg.content.scenarios, (item) => item.text).slice(0, cfg.content.rounds);
+        markSeen(cfg, this.items.map((item) => item.text));
         this.index = 0;
         this.correct = 0;
         this.feedback = null;
@@ -249,7 +295,8 @@ const gameGoodChoice = (cfg) => withShell(cfg, {
     },
 });
 
-// 🔢 Tap the items in their right order, set after set.
+// 🔢 Tap the items in their right order, set after set. Sederhana hides a
+// stranger from another set among them; Sukar also asks for the order backwards.
 const gameOrder = (cfg) => withShell(cfg, {
     sets: [],
     setIndex: 0,
@@ -258,6 +305,8 @@ const gameOrder = (cfg) => withShell(cfg, {
     mistakes: 0,
     shaking: null,
     setDone: false,
+    impostor: null,
+    reverse: cfg.content.reverse ?? false,
 
     init() {
         this.startClock();
@@ -265,7 +314,8 @@ const gameOrder = (cfg) => withShell(cfg, {
     },
 
     restart() {
-        this.sets = shuffle(cfg.content.sets).slice(0, cfg.content.rounds);
+        this.sets = freshFirst(cfg, cfg.content.sets, (set) => set.title).slice(0, cfg.content.rounds);
+        markSeen(cfg, this.sets.map((set) => set.title));
         this.setIndex = 0;
         this.mistakes = 0;
         this.done = false;
@@ -277,16 +327,31 @@ const gameOrder = (cfg) => withShell(cfg, {
     },
 
     load() {
-        this.tiles = shuffle(this.set.items.map((text, order) => ({ text, order })));
+        const tiles = this.set.items.map((text, order) => ({ text, order }));
+        this.impostor = null;
+        if (cfg.content.impostor) {
+            const stranger = shuffle(cfg.content.sets.filter((set) => set.title !== this.set.title).flatMap((set) => set.items))
+                .find((text) => !this.set.items.includes(text));
+            if (stranger) {
+                this.impostor = stranger;
+                tiles.push({ text: stranger, order: -1 });
+            }
+        }
+        this.tiles = shuffle(tiles);
         this.placed = [];
         this.setDone = false;
+    },
+
+    // The position the next tap must be.
+    get expected() {
+        return this.reverse ? this.set.items.length - 1 - this.placed.length : this.placed.length;
     },
 
     tap(tile) {
         if (this.setDone || this.timeUp || this.placed.includes(tile.order)) {
             return;
         }
-        if (tile.order === this.placed.length) {
+        if (tile.order === this.expected) {
             this.placed.push(tile.order);
             if (this.placed.length === this.set.items.length) {
                 this.setDone = true;
@@ -312,14 +377,22 @@ const gameOrder = (cfg) => withShell(cfg, {
     },
 });
 
-// ب 🌙 ⏱️ Multiple choice: hijaiyah letters, prophets, quick manners quiz.
+// ب 🌙 ⏱️ Multiple choice for most games. Questions may keep their choices in
+// order (a story, signs, groups), ask for two numbers that make a target, or
+// explain the answer afterwards. Lives end the round after three misses, and
+// survival keeps asking until then.
 const gameQuiz = (cfg) => withShell(cfg, {
     questions: [],
     index: 0,
     correct: 0,
     picked: null,
+    lastOk: null,
+    selection: [],
     timer: null,
     countdown: null,
+    lives: null,
+    maxLives: cfg.content.lives ?? null,
+    survival: cfg.content.survival ?? null,
 
     init() {
         this.startClock();
@@ -327,25 +400,42 @@ const gameQuiz = (cfg) => withShell(cfg, {
     },
 
     restart() {
-        this.questions = shuffle(cfg.content.questions).slice(0, cfg.content.rounds).map((q) => {
-            // Up to 3 other choices, never one with the same name as the answer.
-            const others = shuffle([...new Set(q.options)].filter((o) => o !== q.answer)).slice(0, 3);
-
-            return { ...q, choices: shuffle([q.answer, ...others]) };
-        });
+        const key = (q) => `${q.prompt}|${q.big ?? ''}|${q.answer}`;
+        const pool = freshFirst(cfg, cfg.content.questions, key);
+        const count = this.survival ? pool.length : Math.min(cfg.content.rounds ?? pool.length, pool.length);
+        this.questions = pool.slice(0, count).map((q) => ({ ...q, choices: this.choicesFor(q) }));
+        markSeen(cfg, this.questions.slice(0, cfg.content.rounds ?? 15).map(key));
         this.index = 0;
         this.correct = 0;
         this.picked = null;
+        this.lastOk = null;
+        this.selection = [];
+        this.lives = this.maxLives;
         this.done = false;
         this.startTimer();
+    },
+
+    choicesFor(q) {
+        if (q.keepOrder || q.pick) {
+            return [...new Set(q.options)];
+        }
+        // Up to 3 other choices, never one with the same name as the answer.
+        const others = shuffle([...new Set(q.options)].filter((o) => o !== q.answer)).slice(0, 3);
+
+        return shuffle([q.answer, ...others]);
     },
 
     get question() {
         return this.questions[this.index];
     },
 
+    get hearts() {
+        return this.maxLives === null ? '' : '❤️'.repeat(this.lives) + '🤍'.repeat(this.maxLives - this.lives);
+    },
+
     startTimer() {
         clearInterval(this.timer);
+        this.countdown = null;
         if (!cfg.content.seconds) {
             return;
         }
@@ -358,27 +448,64 @@ const gameQuiz = (cfg) => withShell(cfg, {
             }
             this.countdown--;
             if (this.countdown <= 0) {
-                this.choose(null);
+                this.settle(false, null);
             }
         }, 1000);
     },
 
     choose(choice) {
-        if (this.picked !== null || this.timeUp) {
+        if (this.picked !== null || this.timeUp || this.done) {
+            return;
+        }
+        const q = this.question;
+        if (q.pick) {
+            if (this.selection.includes(choice)) {
+                this.selection = this.selection.filter((c) => c !== choice);
+
+                return;
+            }
+            this.selection.push(choice);
+            sfx.tap();
+            if (this.selection.length < q.pick) {
+                return;
+            }
+            const [a, b] = this.selection.map(Number);
+
+            return this.settle(q.op === 'times' ? a * b === q.target : a + b === q.target, 'pick');
+        }
+
+        this.settle(choice === q.answer, choice);
+    },
+
+    settle(ok, choice) {
+        if (this.picked !== null) {
             return;
         }
         clearInterval(this.timer);
         this.picked = choice ?? '';
-        this.correct += choice === this.question.answer ? 1 : 0;
-        choice === this.question.answer ? sfx.right() : sfx.wrong();
-        setTimeout(() => this.next(), choice === this.question.answer ? 700 : 1600);
+        this.lastOk = ok;
+        if (ok) {
+            this.correct++;
+            sfx.right();
+        } else {
+            sfx.wrong();
+            if (this.lives !== null) {
+                this.lives--;
+            }
+        }
+        const q = this.question;
+        // Time to read why, or the right pair.
+        const wait = q.why || (q.pick && !ok) ? 2800 : ok ? 700 : 1600;
+        setTimeout(() => this.next(), wait);
     },
 
     next() {
         this.picked = null;
+        this.lastOk = null;
+        this.selection = [];
         this.index++;
-        if (this.index >= this.questions.length) {
-            this.finish((this.correct / this.questions.length) * 100);
+        if (this.lives === 0 || this.index >= this.questions.length) {
+            this.finish(this.survival ? (this.correct / this.survival) * 100 : (this.correct / this.questions.length) * 100);
         } else {
             this.startTimer();
         }
@@ -406,7 +533,7 @@ const gameWordSearch = (cfg) => withShell(cfg, {
         const grid = Array(size * size).fill(null);
         const placed = [];
 
-        for (const word of shuffle(cfg.content.words.filter((w) => w.length <= size))) {
+        for (const word of freshFirst(cfg, cfg.content.words.filter((w) => w.length <= size), (w) => w)) {
             if (placed.length === cfg.content.count) {
                 break;
             }
@@ -428,6 +555,7 @@ const gameWordSearch = (cfg) => withShell(cfg, {
         const filler = 'ABDEGHIJKLMNOPRSTUWYZ';
         this.grid = grid.map((letter) => letter ?? filler[Math.floor(Math.random() * filler.length)]);
         this.words = placed;
+        markSeen(cfg, placed);
         this.found = [];
         this.foundCells = [];
         this.start = null;
@@ -562,6 +690,8 @@ const gameSudoku = (cfg) => withShell(cfg, {
     selected: null,
     mistakes: 0,
     shaking: null,
+    checkLater: cfg.content.checkLater ?? false,
+    wrongCells: [],
 
     init() {
         this.startClock();
@@ -569,6 +699,7 @@ const gameSudoku = (cfg) => withShell(cfg, {
     },
 
     restart() {
+        this.wrongCells = [];
         const n = this.size;
         // Boxes are 2×2 for a 4×4 grid and 2 rows × 3 columns for 6×6.
         const [boxRows, boxCols] = n === 6 ? [2, 3] : [2, 2];
@@ -639,15 +770,49 @@ const gameSudoku = (cfg) => withShell(cfg, {
     },
 
     pick(cell) {
-        if (!this.given[cell] && this.entries[cell] === null) {
+        // In Sukar a filled square can be changed until the grid is checked.
+        if (!this.given[cell] && (this.entries[cell] === null || this.checkLater)) {
             this.selected = cell;
             sfx.tap();
         }
     },
 
+    get full() {
+        return this.entries.every((entry) => entry !== null);
+    },
+
+    // Sukar: check the whole grid; wrong squares flash and empty again.
+    check() {
+        if (!this.full || this.done) {
+            return;
+        }
+        this.wrongCells = this.entries.map((entry, cell) => (entry !== this.solution[cell] ? cell : -1)).filter((cell) => cell !== -1);
+        if (this.wrongCells.length === 0) {
+            sfx.right();
+            setTimeout(() => this.finish(100 - this.mistakes * 15), 300);
+
+            return;
+        }
+        this.mistakes++;
+        sfx.wrong();
+        setTimeout(() => {
+            this.wrongCells.forEach((cell) => (this.entries[cell] = null));
+            this.selected = this.wrongCells[0];
+            this.wrongCells = [];
+        }, 1200);
+    },
+
     place(value) {
         const cell = this.selected;
         if (cell === null || this.done || this.timeUp) {
+            return;
+        }
+        if (this.checkLater) {
+            this.entries[cell] = value;
+            sfx.tap();
+            const next = this.entries.findIndex((entry) => entry === null);
+            this.selected = next === -1 ? cell : next;
+
             return;
         }
         if (this.solution[cell] !== value) {

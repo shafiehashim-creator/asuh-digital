@@ -85,6 +85,25 @@ enum Game: string
         return in_array($this, [self::Memory, self::GoodChoice, self::Order, self::WordSearch, self::Prophets, self::QuickQuiz, self::Science], true);
     }
 
+    /** What is different at each level, shown above the game. */
+    public function levelHint(int $level): string
+    {
+        return match ($this) {
+            self::Memory => ['Kad dibuka sekejap di awal. Ingat kedudukannya!', 'Lebih banyak kad, tiada intai.', 'Padan ilmu: Subuh dengan rakaatnya, nabi dengan kitabnya.'][$level - 1],
+            self::GoodChoice => ['Baik atau tidak baik?', 'Pilih tindakan yang PALING baik.', 'Baca cerita. Cari ayat bisikan penggoda!'][$level - 1],
+            self::Order => ['Tekan ikut urutan.', 'Ada penyusup dalam senarai!', 'Susun terbalik, dan awas penyusup!'][$level - 1],
+            self::Hijaiyah => ['Lihat huruf, pilih namanya.', 'Cari huruf yang betul antara huruf yang seakan sama.', 'Kenal huruf di awal, tengah atau akhir perkataan.'][$level - 1],
+            self::WordSearch => ['Cari perkataan mendatar dan menegak.', 'Perkataan boleh menyerong dan terbalik.', 'Tiada senarai perkataan, hanya petunjuk!'][$level - 1],
+            self::Prophets => ['Baca petunjuk, teka nabinya.', 'Pilih petunjuk yang betul untuk nabi itu.', 'Siapa diutus dahulu? Dan petunjuk yang betul.'][$level - 1],
+            self::QuickQuiz => ['Jawab sebelum masa tamat.', 'Ada 3 nyawa. Masa lebih singkat!', 'Kuiz kilat: jawab sebanyak mungkin sebelum 3 nyawa habis.'][$level - 1],
+            self::Math => ['Tambah, tolak, darab dan bahagi.', 'Banding nombor dan cari nombor yang hilang.', 'Capai sasaran dan seimbangkan persamaan.'][$level - 1],
+            self::Science => ['Kenali alam ciptaan Allah.', 'Cari yang bukan dari kumpulannya.', 'Asingkan dengan pantas. Ada 3 nyawa!'][$level - 1],
+            self::Pattern => ['Apa yang datang seterusnya?', 'Cari yang tidak ikut corak.', 'Grid misteri: cari peraturan setiap baris.'][$level - 1],
+            self::Sliding => ['Ada nombor bantuan pada kepingan.', 'Tiada nombor. Lihat gambar!', 'Lebih banyak kepingan. Sabar dan fikir!'][$level - 1],
+            self::Sudoku => ['Isi kotak kosong.', 'Lebih banyak kotak kosong.', 'Tiada petunjuk salah. Semak di akhir!'][$level - 1],
+        };
+    }
+
     /** The Alpine component that plays it (resources/js/games.js). */
     public function component(): string
     {

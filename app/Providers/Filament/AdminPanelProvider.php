@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Http\Middleware\AuthenticateAdmin;
+use App\Http\Middleware\EnsurePasswordChanged;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -76,6 +77,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 AuthenticateAdmin::class,
+                EnsurePasswordChanged::class,
             ]);
     }
 }

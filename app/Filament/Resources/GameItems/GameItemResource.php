@@ -72,6 +72,8 @@ class GameItemResource extends Resource
     public static function form(Schema $schema): Schema
     {
         $is = fn (Game ...$games) => fn (Get $get) => in_array(Game::tryFrom((string) $get('game')), $games, true);
+        // Pilih yang Baik has a kind of item for each level.
+        $choice = fn (?string $variant) => fn (Get $get) => Game::tryFrom((string) $get('game')) === Game::GoodChoice && $get('variant') === $variant;
 
         return $schema->columns(2)->components([
             Select::make('game')->label('Permainan')->options(self::gameOptions())->required()->live(),
@@ -82,9 +84,29 @@ class GameItemResource extends Resource
                 ->helperText('Satu emoji, contohnya 🕌'),
             TextInput::make('answer')->label('Perkataan pada kad')->visible($is(Game::Memory))->required()->maxLength(20),
 
-            Textarea::make('prompt')->label('Situasi')->visible($is(Game::GoodChoice))->required()->rows(2)->maxLength(200)->columnSpanFull()
+            Select::make('variant')->label('Jenis soalan')->visible($is(Game::GoodChoice))->live()->columnSpanFull()
+                ->placeholder('Baik atau tidak baik (tahap Mudah)')
+                ->options(['tindakan' => 'Pilih tindakan terbaik (tahap Sederhana)', 'cerita' => 'Cari ayat bisikan penggoda dalam cerita (tahap Sukar)']),
+
+            Textarea::make('prompt')->label('Situasi')->visible($choice(null))->required()->rows(2)->maxLength(200)->columnSpanFull()
                 ->helperText('Contoh: Anas memberi salam ketika masuk ke rumah.'),
-            Toggle::make('is_good')->label('Ini perbuatan baik')->visible($is(Game::GoodChoice))->inline(false),
+            Toggle::make('is_good')->label('Ini perbuatan baik')->visible($choice(null))->inline(false),
+
+            Textarea::make('prompt')->label('Situasi dan soalan')->visible($choice('tindakan'))->required()->rows(2)->maxLength(200)->columnSpanFull()
+                ->helperText('Contoh: Anas terjumpa dompet di padang sekolah. Apa patut dia buat?'),
+            TextInput::make('answer')->label('Tindakan terbaik')->visible($choice('tindakan'))->required()->maxLength(80),
+            TagsInput::make('options')->label('Tindakan lain (kurang baik)')->visible($choice('tindakan'))->required()
+                ->rules(['array', 'min:1', 'max:3'])
+                ->helperText('1 hingga 3 pilihan. Taip dan tekan Enter.'),
+
+            TextInput::make('prompt')->label('Tajuk cerita')->visible($choice('cerita'))->required()->maxLength(60)
+                ->helperText('Contoh: Di kantin'),
+            TagsInput::make('options')->label('Ayat cerita, ikut urutan')->visible($choice('cerita'))->required()->reorderable()->live()->columnSpanFull()
+                ->rules(['array', 'min:3', 'max:5'])
+                ->helperText('3 hingga 5 ayat pendek. Satu daripadanya perbuatan yang salah.'),
+            Select::make('answer')->label('Ayat bisikan penggoda (yang salah)')->visible($choice('cerita'))->required()->columnSpanFull()
+                ->options(fn (Get $get) => collect($get('options') ?? [])->mapWithKeys(fn ($sentence) => [$sentence => $sentence])->all()),
+
             Textarea::make('explanation')->label('Penjelasan selepas anak menjawab')->visible($is(Game::GoodChoice))->required()->rows(2)->maxLength(200)->columnSpanFull(),
 
             TextInput::make('prompt')->label('Tajuk')->visible($is(Game::Order))->required()->maxLength(60)
@@ -96,6 +118,8 @@ class GameItemResource extends Resource
             TextInput::make('prompt')->label('Perkataan')->visible($is(Game::WordSearch))->required()->maxLength(10)
                 ->rules(['regex:/^[A-Za-z]{3,10}$/'])
                 ->helperText('Huruf sahaja, 3 hingga 10 huruf, tanpa jarak. Umur 6–9 hanya guna perkataan hingga 8 huruf.'),
+            TextInput::make('explanation')->label('Petunjuk (tahap Sukar)')->visible($is(Game::WordSearch))->maxLength(80)
+                ->helperText('Di tahap Sukar, anak hanya nampak petunjuk ini, bukan perkataannya. Contoh: Rukun Islam kedua'),
 
             Textarea::make('prompt')->label('Petunjuk')->visible($is(Game::Prophets))->required()->rows(2)->maxLength(200)->columnSpanFull(),
             TextInput::make('answer')->label('Nama nabi')->visible($is(Game::Prophets))->required()->maxLength(40)
@@ -126,7 +150,12 @@ class GameItemResource extends Resource
                 TextColumn::make('prompt')->label('Kandungan')->limit(70)->searchable()->wrap()
                     ->description(fn (GameItem $record) => match ($record->game) {
                         Game::Memory, Game::Prophets => $record->answer,
-                        Game::GoodChoice => $record->is_good ? '👍 Baik' : '👎 Tak baik',
+                        Game::GoodChoice => match ($record->variant) {
+                            'tindakan' => 'Tindakan terbaik: '.$record->answer,
+                            'cerita' => 'Cerita · penggoda: '.$record->answer,
+                            default => $record->is_good ? '👍 Baik' : '👎 Tak baik',
+                        },
+                        Game::WordSearch => $record->explanation,
                         Game::Order => implode(' → ', $record->options ?? []),
                         Game::QuickQuiz, Game::Science => '✔ '.$record->answer.' · ✘ '.implode(', ', $record->options ?? []),
                         default => null,

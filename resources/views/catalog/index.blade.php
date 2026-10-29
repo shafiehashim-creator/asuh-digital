@@ -10,13 +10,13 @@
 @endphp
 
 <x-layouts.app :title="__('Katalog buku')">
-    <div class="mx-auto max-w-6xl px-4 py-10">
+    <div class="mx-auto max-w-6xl px-4 py-6 sm:py-10">
         <x-catalog-preview-notice />
 
         <h1 class="font-display text-3xl font-extrabold text-magenta sm:text-4xl">{{ __('Katalog buku') }}</h1>
         <p class="mt-2 text-ink/80">{{ __('Semua buku telah disemak syariah. Pilih ikut umur anak atau kategori.') }}</p>
 
-        <form method="GET" action="{{ route('catalog.index') }}" class="mt-6 flex gap-2" role="search">
+        <form method="GET" action="{{ route('catalog.index') }}" class="mt-5 flex gap-2" role="search">
             @if ($activeCategory) <input type="hidden" name="kategori" value="{{ $activeCategory->slug }}"> @endif
             @if ($activeAge) <input type="hidden" name="umur" value="{{ $activeAge->value }}"> @endif
             <label for="cari" class="sr-only">{{ __('Cari tajuk atau penulis') }}</label>
@@ -24,17 +24,18 @@
             <button type="submit" class="btn-gelap">{{ __('Cari') }}</button>
         </form>
 
-        <nav aria-label="{{ __('Umur') }}" class="mt-6 flex flex-wrap gap-2">
-            <a href="{{ $filterUrl(['umur' => null]) }}" @class([$chip, 'border-plum bg-plum text-white' => ! $activeAge, 'border-ink/20 bg-white' => $activeAge])>{{ __('Semua umur') }}</a>
+        <nav aria-label="{{ __('Umur') }}" class="chip-row mt-5" x-data="chipRow" :class="more && 'chip-row-more'">
+            <a href="{{ $filterUrl(['umur' => null]) }}" @class([$chip, 'border-plum bg-plum text-white' => ! $activeAge, 'border-ink/20 bg-white' => $activeAge]) @if (! $activeAge) aria-current="page" @endif>{{ __('Semua umur') }}</a>
             @foreach ([AgeGroup::SixToNine, AgeGroup::TenToThirteen] as $age)
-                <a href="{{ $filterUrl(['umur' => $age->value]) }}" @class([$chip, 'border-plum bg-plum text-white' => $activeAge === $age, 'border-ink/20 bg-white' => $activeAge !== $age])>{{ $age->getLabel() }}</a>
+                <a href="{{ $filterUrl(['umur' => $age->value]) }}" @class([$chip, 'border-plum bg-plum text-white' => $activeAge === $age, 'border-ink/20 bg-white' => $activeAge !== $age]) @if ($activeAge === $age) aria-current="page" @endif>{{ $age->getLabel() }}</a>
             @endforeach
         </nav>
 
-        <nav aria-label="{{ __('Kategori') }}" class="mt-3 flex flex-wrap gap-2">
+        {{-- On a phone the chosen category is scrolled into view. --}}
+        <nav aria-label="{{ __('Kategori') }}" class="chip-row mt-2" x-data="chipRow" :class="more && 'chip-row-more'">
             <a href="{{ $filterUrl(['kategori' => null]) }}" @class([$chip, 'border-biru bg-biru text-white' => ! $activeCategory, 'border-ink/20 bg-white' => $activeCategory])>{{ __('Semua kategori') }}</a>
             @foreach ($categories as $category)
-                <a href="{{ $filterUrl(['kategori' => $category->slug]) }}" @class([$chip, 'border-biru bg-biru text-white' => $activeCategory?->is($category), 'border-ink/20 bg-white' => ! $activeCategory?->is($category)])>{{ __($category->name) }}</a>
+                <a href="{{ $filterUrl(['kategori' => $category->slug]) }}" @class([$chip, 'border-biru bg-biru text-white' => $activeCategory?->is($category), 'border-ink/20 bg-white' => ! $activeCategory?->is($category)]) @if ($activeCategory?->is($category)) aria-current="page" @endif>{{ __($category->name) }}</a>
             @endforeach
         </nav>
 

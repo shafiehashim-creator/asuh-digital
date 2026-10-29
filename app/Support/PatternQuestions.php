@@ -15,15 +15,23 @@ class PatternQuestions
     public static function make(bool $older, int $level, int $count): array
     {
         $kinds = $older
-            ? [1 => ['step', 'abcd', 'aabb'], 2 => ['double', 'down', 'alternate'], 3 => ['growing', 'triple', 'squares', 'woven', 'fibonacci']][$level]
-            : [1 => ['ab', 'abc'], 2 => ['aab', 'abb', 'count1', 'count2'], 3 => ['abcd', 'count5', 'down', 'step']][$level];
+            ? [1 => ['step', 'abcd', 'aabb', 'double'], 2 => ['down', 'alternate', 'wrong', 'wrong', 'triple'], 3 => ['growing', 'squares', 'woven', 'fibonacci', 'matrix', 'numgrid', 'numgrid']][$level]
+            : [1 => ['ab', 'abc', 'aab'], 2 => ['abb', 'count2', 'count5', 'wrong', 'wrong'], 3 => ['matrix', 'matrix', 'numgrid', 'down', 'step']][$level];
 
         $questions = [];
-        for ($i = 0; $i < $count; $i++) {
-            $questions[] = self::question($kinds[array_rand($kinds)]);
+        for ($i = 0; $i < $count * 3 && count($questions) < $count; $i++) {
+            $kind = $kinds[array_rand($kinds)];
+            $question = match ($kind) {
+                'wrong' => self::wrong($older),
+                'matrix' => self::matrix(),
+                'numgrid' => self::numberGrid($older),
+                default => self::question($kind),
+            };
+            // Never the same pattern twice in one game.
+            $questions[$question['big']] = $question;
         }
 
-        return $questions;
+        return array_values($questions);
     }
 
     /** @return array{prompt: string, big: string, answer: string, options: list<string>} */
@@ -67,6 +75,62 @@ class PatternQuestions
             ->filter(fn (int $n) => $n >= 0 && $n !== $answer)->unique()->shuffle()->take(4);
 
         return self::shape($sequence, $answer, $others->all());
+    }
+
+    /** @return array<string, mixed> one number breaks the pattern: find it */
+    private static function wrong(bool $older): array
+    {
+        $step = $older ? random_int(3, 9) : random_int(2, 5);
+        $sequence = self::arithmetic(random_int(1, 20), $step, 5);
+        $at = random_int(2, 5);
+        $sequence[$at] += random_int(1, $step - 1) * (random_int(0, 1) ? 1 : -1);
+
+        return [
+            'prompt' => 'Nombor manakah yang TIDAK ikut corak?',
+            'big' => implode('  ', $sequence),
+            'answer' => (string) $sequence[$at],
+            'options' => array_map('strval', $sequence),
+            'keepOrder' => true,
+        ];
+    }
+
+    /** @return array<string, mixed> each row and column has every picture once */
+    private static function matrix(): array
+    {
+        [$a, $b, $c] = collect(self::EMOJI)->shuffle()->take(3)->all();
+        $rows = random_int(0, 1) ? [[$a, $b, $c], [$b, $c, $a], [$c, $a, $b]] : [[$a, $b, $c], [$c, $a, $b], [$b, $c, $a]];
+        $answer = $rows[2][2];
+        $rows[2][2] = '❓';
+        $others = collect(self::EMOJI)->diff([$a, $b, $c])->random(1)->all();
+
+        return [
+            'prompt' => 'Setiap baris dan lajur ada semua gambar sekali. Apa yang hilang?',
+            'big' => implode("\n", array_map(fn (array $row) => implode('  ', $row), $rows)),
+            'answer' => $answer,
+            'options' => collect([$a, $b, $c])->merge($others)->shuffle()->values()->all(),
+        ];
+    }
+
+    /** @return array<string, mixed> each row follows the same rule: find the missing number */
+    private static function numberGrid(bool $older): array
+    {
+        $times = $older && random_int(0, 1);
+        $rows = [];
+        foreach (range(1, 3) as $i) {
+            [$a, $b] = $times ? [random_int(2, 6), random_int(2, 6)] : [random_int(1, $older ? 20 : 9), random_int(1, $older ? 20 : 9)];
+            $rows[] = [$a, $b, $times ? $a * $b : $a + $b];
+        }
+        $answer = $rows[2][2];
+        $rows[2][2] = '❓';
+        $others = collect([$answer + 1, $answer - 1, $answer + 2, $times ? $rows[2][0] + $rows[2][1] : $answer + 10])
+            ->filter(fn ($n) => $n >= 0 && $n !== $answer)->unique()->take(3);
+
+        return [
+            'prompt' => 'Lihat setiap baris. Nombor apakah yang hilang?',
+            'big' => implode("\n", array_map(fn (array $row) => implode('   ', $row), $rows)),
+            'answer' => (string) $answer,
+            'options' => $others->prepend($answer)->map(fn ($n) => (string) $n)->shuffle()->values()->all(),
+        ];
     }
 
     /** @return array{prompt: string, big: string, answer: string, options: list<string>} */
