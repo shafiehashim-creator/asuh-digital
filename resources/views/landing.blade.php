@@ -513,7 +513,12 @@
             class="fixed inset-x-0 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 border-t-2 border-ink bg-white lg:bottom-0">
             <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2">
                 <p class="min-w-0 leading-tight">
-                    <span class="block truncate text-xs font-bold text-ink/70">{{ $campaign ? $campaign->localized('title') : __('Langganan Tahunan') }}</span>
+                    <span class="block truncate text-xs font-bold text-ink/70">
+                        @if ($earlyBird && $offer->slotsRemaining() < $offer->slotLimit())
+                            <span class="text-magenta">🔥 {{ __('Tinggal :count slot', ['count' => $offer->slotsRemaining()]) }}</span> ·
+                        @endif
+                        {{ $campaign ? $campaign->localized('title') : __('Langganan Tahunan') }}
+                    </span>
                     <span class="font-display text-2xl font-extrabold text-magenta">{{ Money::short($price) }}</span>
                     @if ($compareAt)
                         <span class="text-sm font-bold text-ink/50 line-through">{{ Money::short($compareAt) }}</span>

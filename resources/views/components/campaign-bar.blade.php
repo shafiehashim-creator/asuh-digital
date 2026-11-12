@@ -16,6 +16,10 @@
         $seconds = $campaign->secondsLeft();
         $prices = $campaigns->prices($campaign);
         $key = 'asuh-campaign-'.$campaign->id.'-'.$campaign->updated_at?->timestamp;
+        // While the early bird sells, how many slots are left (once someone has taken one).
+        $offer = app(App\Services\PassOffer::class);
+        $slotsLeft = ! $soon && $campaign->offer === App\Enums\CampaignOffer::EarlyBird && $offer->earlyBird() && $offer->slotsRemaining() < $offer->slotLimit()
+            ? $offer->slotsRemaining() : null;
         $days = intdiv($seconds, 86400);
         $clock = sprintf('%02d:%02d:%02d', intdiv($seconds % 86400, 3600), intdiv($seconds % 3600, 60), $seconds % 60);
     @endphp
@@ -38,6 +42,9 @@
                     <span class="rounded-md bg-ink/30 px-1.5 py-0.5 font-mono font-bold tabular-nums"
                         x-text="(days > 0 ? days + ' {{ __('hari') }} ' : '') + hours + ':' + minutes + ':' + seconds">{{ $days > 0 ? $days.' '.__('hari').' ' : '' }}{{ $clock }}</span>
                 </span>
+                @if ($slotsLeft !== null)
+                    <span class="rounded-md bg-kuning px-1.5 py-0.5 font-extrabold whitespace-nowrap text-ink">{{ __('Tinggal :count slot', ['count' => $slotsLeft]) }}</span>
+                @endif
                 {{-- The code shows on bigger screens; on a phone the bar stays two lines. --}}
                 @if ($campaign->promo_code && ! $soon)
                     <span class="hidden whitespace-nowrap sm:inline">{{ __('Kod') }} <b class="rounded-md border border-white/60 px-1.5 py-0.5 tracking-wide">{{ $campaign->promo_code }}</b></span>

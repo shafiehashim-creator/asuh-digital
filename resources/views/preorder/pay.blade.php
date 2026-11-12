@@ -95,6 +95,12 @@
         @elseif ($order->payment_method === PaymentMethod::Chip)
             <section class="{{ $cardClass }}">
                 @if ($preorder)
+                    <p x-data="countdown({{ max(0, (int) now()->diffInSeconds($preorder->reserved_until, false)) }})" x-show="! ended"
+                        class="mb-3 flex flex-wrap items-center gap-2 rounded-xl bg-kuning/40 px-3 py-2 font-bold">
+                        ⏳ {{ __('Slot anda disimpan untuk') }}
+                        <span class="rounded-lg bg-ink px-2 py-0.5 font-mono text-kuning tabular-nums" x-text="(Number(hours) * 60 + Number(minutes)) + ':' + seconds"></span>
+                        <span class="text-sm font-semibold">{{ __('minit lagi') }}</span>
+                    </p>
                     <p>{!! __('Slot anda ditempah sehingga :time. Selesaikan bayaran sebelum masa itu.', ['time' => '<strong>'.e($preorder->reserved_until->translatedFormat('g:i A, j F Y')).'</strong>']) !!}</p>
                 @endif
                 @if ($chipUrl && $chipOptions->isNotEmpty())
@@ -124,6 +130,12 @@
         @else
             <section class="{{ $cardClass }} space-y-4">
                 @if ($preorder)
+                    <p x-data="countdown({{ max(0, (int) now()->diffInSeconds($preorder->reserved_until, false)) }})" x-show="! ended"
+                        class="mb-3 flex flex-wrap items-center gap-2 rounded-xl bg-kuning/40 px-3 py-2 font-bold">
+                        ⏳ {{ __('Slot anda disimpan untuk') }}
+                        <span class="rounded-lg bg-ink px-2 py-0.5 font-mono text-kuning tabular-nums" x-text="(Number(hours) * 60 + Number(minutes)) + ':' + seconds"></span>
+                        <span class="text-sm font-semibold">{{ __('minit lagi') }}</span>
+                    </p>
                     <p>{!! __('Slot anda ditempah sehingga :time. Pindahkan bayaran dan muat naik resit sebelum masa itu.', ['time' => '<strong>'.e($preorder->reserved_until->translatedFormat('g:i A, j F Y')).'</strong>']) !!}</p>
                 @else
                     <p>{{ __('Pindahkan bayaran ke akaun di bawah, kemudian muat naik resit.') }}</p>
