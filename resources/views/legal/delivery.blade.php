@@ -2,7 +2,7 @@
     <section>
         <h2>1. Produk digital sahaja</h2>
         <p>
-            Semua produk ASUH Digital ialah produk digital: Langganan Tahunan, Langganan Plus dan e-book single.
+            Semua produk ASUH Digital ialah produk digital: Langganan Tahunan, Langganan Bulanan dan e-book single.
             <strong>Tiada barang fizikal dihantar</strong>, jadi tiada caj penghantaran.
         </p>
     </section>

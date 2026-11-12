@@ -8,7 +8,7 @@
     <section>
         <h2>2. What it covers</h2>
         <ul>
-            <li>The Yearly Subscription and the Plus Subscription, including the early bird pre-order.</li>
+            <li>The Yearly Subscription and the Monthly Subscription, including the early bird pre-order.</li>
             <li>E-books bought singly.</li>
             <li>Double or excess payments caused by technical problems are refunded in full.</li>
         </ul>

@@ -25,7 +25,7 @@
         </p>
         <p>
             When a child reads in Kids Mode, we record minutes read, the last page, the books read, quiz results and
-            badges earned, and minutes of animated video watched (for the Plus Subscription). These records are used to
+            badges earned, and minutes of animated video watched. These records are used to
             continue reading, award badges and send parents a weekly reading report (which can be stopped at any time).
             Parents can delete a child profile on the My account page, and all of that child's reading records are deleted with it.
         </p>

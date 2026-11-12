@@ -12,6 +12,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Models\Video;
 use App\Services\PlusOffer;
+use App\Support\Package;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Support\Facades\Cache;
 
@@ -73,7 +74,7 @@ it('tells the sales page the videos are included', function () {
     Video::factory()->published()->count(3)->create();
 
     $this->get(route('pass.show'))->assertOk()
-        ->assertSee('Semua 2 e-book Islamik dan 3 video animasi ASUH')
+        ->assertSee('Satu langganan untuk seisi keluarga: e-book dan video animasi Islamik ASUH')
         ->assertSee('3 video animasi termasuk')
         ->assertSee('Video animasi kisah buku');
 
@@ -122,7 +123,7 @@ it('shows the animated videos on the home page as part of the subscription', fun
         ->assertSee('Baca kisahnya, tonton animasinya')
         ->assertSee('Tonton percuma: Animasi Percuma')
         ->assertSee('Animasi Berkunci')
-        ->assertSee('Semua 2 video animasi ASUH dalam Mod Anak');
+        ->assertSee('Semua video animasi ASUH');
 
     Setting::set('videos_open', false);
     $this->get('/')->assertOk()->assertDontSee('Baca kisahnya, tonton animasinya');
@@ -147,4 +148,21 @@ it('shows the new landing headline straight after the migration, even with the s
     (require database_path('migrations/2026_10_27_000004_refresh_landing_texts_cache.php'))->up();
 
     $this->get('/')->assertOk()->assertSee('E-book dan video animasi Islamik untuk anak 6–13 tahun');
+});
+
+it('describes the same package on the home page, the sales page, the pre-order form and the checkout', function () {
+    Setting::set('games_open', true);
+    Video::factory()->published()->create();
+    $package = Package::contents();
+    expect($package)->toContain('Semua e-book Islamik ASUH Digital', 'Semua video animasi ASUH', '12 permainan minda dengan tiga tahap');
+
+    // The early bird sells first (the pre-order form); then the regular checkout.
+    $pages = ['/', route('pass.show'), route('preorder.create')];
+    foreach ($pages as $url) {
+        $this->get($url)->assertOk()->assertSeeInOrder($package);
+    }
+
+    Setting::set('preorder_slot_limit', 0);
+    $this->get(route('purchase.pass'))->assertOk()->assertSeeInOrder($package);
+    $this->get('/')->assertSee('RM149')->assertDontSee('RM99');
 });

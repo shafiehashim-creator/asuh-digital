@@ -18,6 +18,11 @@
                     <p class="text-sm font-semibold">{{ __('12 bulan · sekali bayar, tiada caj automatik') }}</p>
                 </div>
                 <p class="font-display text-3xl font-extrabold">{{ Money::short($plan->price_sen) }}</p>
+                <ul class="w-full space-y-1 border-t-2 border-ink/20 pt-3 text-sm font-semibold">
+                    @foreach (App\Support\Package::contents() as $item)
+                        <li class="flex gap-2"><span aria-hidden="true">✓</span>{{ $item }}</li>
+                    @endforeach
+                </ul>
             </div>
         @endif
 

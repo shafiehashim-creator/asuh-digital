@@ -26,13 +26,7 @@
             <p class="mt-3 inline-block rounded-full border-2 border-ink bg-white px-3 py-1 text-sm font-extrabold text-plum">{{ __('Langganan Tahunan ASUH Digital') }}</p>
             <h1 class="mt-3 font-display text-4xl leading-tight font-extrabold text-magenta sm:text-5xl">{{ __('Tukar masa skrin jadi masa membaca.') }}</h1>
             <p class="mt-3 text-lg text-ink/80">
-                @if ($bookCount > 0 && $videoCount > 0)
-                    {{ __('Semua :books e-book Islamik dan :videos video animasi ASUH, disemak syariah, untuk seisi keluarga selama 12 bulan. Buku dan video baharu terus termasuk.', ['books' => $bookCount, 'videos' => $videoCount]) }}
-                @elseif ($bookCount > 0)
-                    {{ __('Semua :count e-book Islamik ASUH, disemak syariah, untuk seisi keluarga selama 12 bulan. Buku baharu terus termasuk.', ['count' => $bookCount]) }}
-                @else
-                    {{ __('Semua e-book Islamik ASUH untuk anak 6–13 tahun, disemak syariah, untuk seisi keluarga selama 12 bulan.') }}
-                @endif
+                {{ __('Satu langganan untuk seisi keluarga: :contents Islamik ASUH, disemak syariah. Kandungan baharu terus termasuk.', ['contents' => App\Support\Package::summary()]) }}
             </p>
 
             @if ($onSale)
@@ -56,6 +50,13 @@
                             <strong class="text-ink">{{ __('Jimat :amount.', ['amount' => Money::format($yearAgainst['sen'] - $price)]) }}</strong>
                         </p>
                     @endif
+
+                    {{-- The same package checklist as the home page, pre-order form and checkout. --}}
+                    <ul class="mt-4 space-y-1.5 font-semibold">
+                        @foreach (App\Support\Package::contents() as $item)
+                            <li class="flex gap-2"><span class="text-biru" aria-hidden="true">✓</span>{{ $item }}</li>
+                        @endforeach
+                    </ul>
 
                     @if ($offer->earlyBird())
                         <x-slot-counter :limit="$offer->slotLimit()" :remaining="$offer->slotsRemaining()" class="mt-4" />
