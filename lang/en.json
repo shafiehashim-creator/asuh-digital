@@ -786,5 +786,11 @@
     "Video animasi pendek, seronok walaupun belum lancar membaca": "Short animations, fun even before reading fluently",
     "Anda masih boleh membeli sekarang pada harga biasa.": "You can still buy now at the normal price.",
     ":count keluarga sudah melanggan": ":count families already subscribe",
-    "Setahun untuk seisi keluarga, hanya :price sebulan": "A year for the whole family, only :price a month"
+    "Setahun untuk seisi keluarga, hanya :price sebulan": "A year for the whole family, only :price a month",
+    "Hampir habis! Tinggal :count slot sahaja": "Almost gone! Only :count places left",
+    ":taken keluarga sudah menempah · tinggal :remaining slot": ":taken families have booked · :remaining places left",
+    "Slot anda disimpan untuk": "Your place is held for",
+    "minit lagi": "more minutes",
+    "Slot anda disimpan 30 minit sementara anda membuat bayaran.": "Your place is held for 30 minutes while you pay.",
+    "Tinggal :count slot": "Only :count places left"
 }

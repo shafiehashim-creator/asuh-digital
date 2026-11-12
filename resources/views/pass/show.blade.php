@@ -404,11 +404,15 @@
                     <span class="whitespace-nowrap">{{ $offer->ctaLabel() }} &rarr;</span>
                     <span class="font-sans text-xs font-bold text-ink/70">{{ __('Serendah :month sebulan', ['month' => Money::format($perMonth)]) }}</span>
                 </a>
-                <div class="mt-8 space-y-2 text-left text-white/85">
-                    <p><strong>P.S.</strong> {{ __('Tiada caj automatik. Bayar sekali untuk 12 bulan, dan kami ingatkan anda sebelum tamat.') }}</p>
-                    <p><strong>P.P.S.</strong> {{ __(':price setahun ialah :month sebulan untuk seisi keluarga.', ['price' => Money::short($price), 'month' => Money::format($perMonth)]) }}</p>
-                    <p><strong>P.P.P.S.</strong> {{ __('Satu langganan untuk sehingga 4 anak, di telefon, tablet dan komputer.') }}</p>
-                </div>
+                <ul class="mt-8 space-y-2 text-left text-white/85">
+                    @foreach ([
+                        __('Tiada caj automatik. Bayar sekali untuk 12 bulan, dan kami ingatkan anda sebelum tamat.'),
+                        __(':price setahun ialah :month sebulan untuk seisi keluarga.', ['price' => Money::short($price), 'month' => Money::format($perMonth)]),
+                        __('Satu langganan untuk sehingga 4 anak, di telefon, tablet dan komputer.'),
+                    ] as $point)
+                        <li class="flex gap-2"><span aria-hidden="true">✅</span><span>{{ $point }}</span></li>
+                    @endforeach
+                </ul>
             </div>
         </section>
 

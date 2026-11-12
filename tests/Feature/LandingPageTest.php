@@ -40,7 +40,16 @@ it('counts down the remaining slots, ignoring expired reservations', function ()
     Preorder::factory()->status(PreorderStatus::AwaitingConfirmation)->create();
     Preorder::factory()->expiredReservation()->count(5)->create();
 
-    $this->get('/')->assertSeeInOrder(['Tinggal', '97', 'daripada 100 slot']);
+    $this->get('/')->assertSeeInOrder(['3', 'keluarga sudah menempah', 'tinggal', '97', 'slot'])
+        ->assertDontSee('Hampir habis');
+});
+
+it('warns in red when the last fifth of the slots is left', function () {
+    Setting::set('preorder_slot_limit', 20);
+    Preorder::factory()->status(PreorderStatus::Paid)->count(16)->create();
+
+    $this->get('/')->assertSee('Hampir habis! Tinggal 4 slot sahaja')->assertSee('Tinggal 4 slot');
+    $this->get(route('preorder.create'))->assertSee('Hampir habis! Tinggal 4 slot sahaja')->assertSee('Slot anda disimpan 30 minit');
 });
 
 it('switches to the regular pass at full price once every slot is taken', function () {

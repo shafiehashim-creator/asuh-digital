@@ -124,6 +124,8 @@
                     </label>
                     @error('pdpa_consent') <p class="text-sm font-semibold text-magenta">{{ $message }}</p> @enderror
 
+                    <x-slot-counter :limit="$slotLimit" :remaining="$slotsRemaining" />
+                    <p class="-mt-2 text-sm font-semibold text-ink/70">{{ __('Slot anda disimpan 30 minit sementara anda membuat bayaran.') }}</p>
                     <button type="submit" class="btn-utama w-full text-lg">{{ __('Tempah slot & teruskan ke bayaran') }}</button>
                 </div>
             </form>

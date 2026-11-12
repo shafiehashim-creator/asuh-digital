@@ -262,3 +262,12 @@ it('serves receipts only to admins', function () {
     $this->actingAs(User::factory()->role(Role::Editor)->create())->get(route('admin.receipt', $order))->assertForbidden();
     $this->actingAs(User::factory()->admin()->create())->get(route('admin.receipt', $order))->assertOk();
 });
+
+it('counts down the time the slot is still held on the payment page', function () {
+    $this->freezeSecond();
+    $order = bankOrder(preorder: ['reserved_until' => now()->addMinutes(29)]);
+
+    $this->actingAs($order->user)->get(route('preorder.pay', $order))->assertOk()
+        ->assertSee('Slot anda disimpan untuk')
+        ->assertSee('countdown(1740)', false);
+});
