@@ -52,7 +52,7 @@
         <div class="mt-6 grid gap-4 md:grid-cols-2">
             <div class="rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)]">
                 <h3 class="font-display text-xl font-bold">{{ __('Keluarga') }}</h3>
-                <p class="mt-2 text-ink/80">{{ __('Satu Langganan Tahunan membuka semua e-book ASUH untuk sehingga 4 anak, setiap seorang dengan rak ikut umur sendiri.') }}</p>
+                <p class="mt-2 text-ink/80">{{ __('Satu Langganan Tahunan membuka semua :contents ASUH untuk sehingga 4 anak, setiap seorang dengan rak ikut umur sendiri.', ['contents' => App\Support\Package::summary()]) }}</p>
                 <a href="{{ route('pass.show') }}" class="btn-utama mt-4">{{ __('Lihat Langganan Tahunan') }}</a>
             </div>
             <div class="rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)]">

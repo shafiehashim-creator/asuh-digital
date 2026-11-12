@@ -1081,6 +1081,7 @@ class ComposerStaticInitdd831e7fdde172bdfa9c4bc1ead60323
         'App\\Support\\MarkdownText' => __DIR__ . '/../..' . '/app/Support/MarkdownText.php',
         'App\\Support\\MathQuestions' => __DIR__ . '/../..' . '/app/Support/MathQuestions.php',
         'App\\Support\\Money' => __DIR__ . '/../..' . '/app/Support/Money.php',
+        'App\\Support\\Package' => __DIR__ . '/../..' . '/app/Support/Package.php',
         'App\\Support\\PatternQuestions' => __DIR__ . '/../..' . '/app/Support/PatternQuestions.php',
         'App\\Support\\Phone' => __DIR__ . '/../..' . '/app/Support/Phone.php',
         'App\\Support\\ProphetQuestions' => __DIR__ . '/../..' . '/app/Support/ProphetQuestions.php',

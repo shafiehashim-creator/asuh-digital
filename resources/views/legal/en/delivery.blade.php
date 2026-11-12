@@ -2,7 +2,7 @@
     <section>
         <h2>1. Digital products only</h2>
         <p>
-            Every ASUH Digital product is digital: the Yearly Subscription, the Plus Subscription and single e-books.
+            Every ASUH Digital product is digital: the Yearly Subscription, the Monthly Subscription and single e-books.
             <strong>Nothing physical is shipped</strong>, so there are no delivery charges.
             If this English version and the Bahasa Melayu version differ, the Bahasa Melayu version prevails.
         </p>

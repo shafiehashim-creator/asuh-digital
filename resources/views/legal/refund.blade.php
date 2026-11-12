@@ -7,7 +7,7 @@
     <section>
         <h2>2. Apa yang dilindungi</h2>
         <ul>
-            <li>Langganan Tahunan dan Langganan Plus, termasuk pre-order early bird.</li>
+            <li>Langganan Tahunan dan Langganan Bulanan, termasuk pre-order early bird.</li>
             <li>E-book yang dibeli secara single.</li>
             <li>Bayaran berganda atau bayaran yang terlebih kerana masalah teknikal akan dipulangkan sepenuhnya.</li>
         </ul>

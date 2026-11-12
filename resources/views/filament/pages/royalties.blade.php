@@ -29,7 +29,7 @@
             </label>
         </div>
         <p style="margin-top: .75rem; font-size: .8125rem; opacity: .75; max-width: 60rem;">
-            Pendapatan langganan diagihkan ikut hari: RM99 setahun dikira lebih kurang RM8.25 sebulan, bukan RM99 pada bulan dibayar. Untuk Langganan Plus, hanya bahagian e-book dikira.
+            Pendapatan langganan diagihkan ikut hari: RM149 setahun dikira lebih kurang RM12.42 sebulan, bukan RM149 pada bulan dibayar. Untuk Langganan Plus, hanya bahagian e-book dikira.
             Satu bacaan = seorang anak keluarga membaca buku itu sekurang-kurangnya {{ App\Models\Setting::get('royalty_min_minutes') }} minit dalam bulan tersebut (murid lesen sekolah tidak dikira).
             Jualan e-book single: {{ rtrim(rtrim(number_format((float) App\Models\Setting::get('royalty_single_percent'), 2), '0'), '.') }}% daripada harga. Kadar lalai diubah di Tetapan → Royalti; kadar khas setiap buku di halaman buku.
         </p>

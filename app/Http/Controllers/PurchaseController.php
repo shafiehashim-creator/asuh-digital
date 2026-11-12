@@ -11,6 +11,7 @@ use App\Services\PlusOffer;
 use App\Services\Purchases;
 use App\Services\SubscriptionPlans;
 use App\Support\Money;
+use App\Support\Package;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -36,7 +37,7 @@ class PurchaseController extends Controller
         return view('purchase.create', [
             'title' => __('Beli Langganan'),
             'periods' => $this->periodChoices($plans),
-            'details' => [__('Semua e-book ASUH Digital'), __('Sehingga 4 profil anak'), __('Tiada caj automatik')],
+            'details' => Package::contents(),
             'note' => $request->user()?->activePass()
                 ? __('Anda masih ada langganan aktif. Langganan baharu bermula sebaik langganan semasa tamat, jadi tiada hari yang hilang.')
                 : null,

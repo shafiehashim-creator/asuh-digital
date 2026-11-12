@@ -291,6 +291,7 @@ return array(
     'App\\Support\\MarkdownText' => $baseDir . '/app/Support/MarkdownText.php',
     'App\\Support\\MathQuestions' => $baseDir . '/app/Support/MathQuestions.php',
     'App\\Support\\Money' => $baseDir . '/app/Support/Money.php',
+    'App\\Support\\Package' => $baseDir . '/app/Support/Package.php',
     'App\\Support\\PatternQuestions' => $baseDir . '/app/Support/PatternQuestions.php',
     'App\\Support\\Phone' => $baseDir . '/app/Support/Phone.php',
     'App\\Support\\ProphetQuestions' => $baseDir . '/app/Support/ProphetQuestions.php',

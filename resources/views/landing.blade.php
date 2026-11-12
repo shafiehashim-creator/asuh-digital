@@ -428,14 +428,7 @@
             @endif
 
             <ul class="mt-6 space-y-3">
-                @foreach (array_filter([
-                    __('Akses semua e-book ASUH Digital selama 12 bulan'),
-                    $videoCount > 0 ? __('Semua :count video animasi ASUH dalam Mod Anak', ['count' => $videoCount]) : null,
-                    $gamesOpen ? __(':count permainan minda dengan tiga tahap', ['count' => $gameCount]) : null,
-                    __('Sehingga 4 profil anak dalam satu akaun'),
-                    __('Mod Anak dengan pintu ibu bapa'),
-                    __('Bayaran sekali sahaja, tiada caj automatik'),
-                ]) as $benefit)
+                @foreach ([...App\Support\Package::contents(), __('Mod Anak dengan pintu ibu bapa')] as $benefit)
                     <li class="flex gap-3">
                         <span aria-hidden="true" class="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-biru text-sm font-bold text-white">✓</span>
                         <span>{{ $benefit }}</span>
