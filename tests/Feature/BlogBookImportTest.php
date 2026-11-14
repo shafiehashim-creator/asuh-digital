@@ -1,7 +1,9 @@
 <?php
 
+use App\Enums\BookStatus;
 use App\Enums\Role;
 use App\Filament\Resources\Books\Pages\CreateBook;
+use App\Filament\Resources\Books\Pages\ListBooks;
 use App\Models\Book;
 use App\Models\Category;
 use App\Models\User;
@@ -100,5 +102,42 @@ it('tells staff when the blog cannot be reached', function () {
     Livewire::test(CreateBook::class)
         ->callAction('importFromBlog', data: ['post' => '986341215997817318'])
         ->assertNotified('Tidak dapat membaca blog')
+        ->assertSchemaStateSet(['title' => null]);
+});
+
+it('creates several draft books at once and never imports a post twice', function () {
+    fakeBlog();
+    $komik = Category::query()->where('slug', 'komik')->first();
+    $this->actingAs(User::factory()->role(Role::Editor)->create());
+    BlogBooks::search('yeah');
+
+    Livewire::test(ListBooks::class)
+        ->callAction('importManyFromBlog', data: ['posts' => ['986341215997817318'], 'age_group' => '6-9'])
+        ->assertHasNoActionErrors()
+        ->assertNotified('Buku ditarik dari blog');
+
+    $book = Book::query()->sole();
+    expect($book->title)->toBe('Yeah, Dah Solat 2')
+        ->and($book->blog_post_id)->toBe('986341215997817318')
+        ->and($book->status)->toBe(BookStatus::Draft)
+        ->and($book->age_group->value)->toBe('6-9')
+        ->and($book->categories->pluck('id')->all())->toBe([$komik->id])
+        ->and(Storage::disk('public')->exists($book->cover_path))->toBeTrue();
+
+    // Imported posts drop out of the bulk search, and a second import is refused.
+    Livewire::test(ListBooks::class)
+        ->callAction('importManyFromBlog', data: ['posts' => ['986341215997817318'], 'age_group' => '6-9'])
+        ->assertNotified('Tiada buku dicipta');
+    expect(Book::count())->toBe(1);
+});
+
+it('marks posts that are already books in the single search and refuses to fill a duplicate', function () {
+    fakeBlog();
+    Book::factory()->create(['title' => 'Yeah, Dah Solat 2', 'blog_post_id' => '986341215997817318']);
+    $this->actingAs(User::factory()->role(Role::Editor)->create());
+
+    Livewire::test(CreateBook::class)
+        ->callAction('importFromBlog', data: ['post' => '986341215997817318'])
+        ->assertNotified('Buku ini sudah ada')
         ->assertSchemaStateSet(['title' => null]);
 });

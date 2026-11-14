@@ -18,6 +18,7 @@ use App\Models\Setting;
 use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -30,6 +31,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -85,6 +87,8 @@ class BookResource extends Resource
                     ->columnSpan(2)
                     ->columns(2)
                     ->schema([
+                        // Set by "Tarik dari blog", so the same post is not imported twice.
+                        Hidden::make('blog_post_id'),
                         TextInput::make('title')->label('Tajuk')->required()->maxLength(200)->columnSpanFull(),
                         TextInput::make('title_en')->label('Tajuk (English, pilihan)')->maxLength(200)->columnSpanFull()
                             ->helperText('Dipaparkan apabila pelawat memilih EN. Kosongkan untuk memaparkan tajuk BM.'),
@@ -152,7 +156,9 @@ class BookResource extends Resource
             ->defaultSort('updated_at', 'desc')
             ->columns([
                 ImageColumn::make('cover_path')->label('Kaver')->disk('public')->imageHeight(56),
-                TextColumn::make('title')->label('Tajuk')->searchable()->description(fn (Book $record) => $record->author),
+                TextColumn::make('title')->label('Tajuk')->searchable()->description(fn (Book $record) => $record->author)
+                    ->icon(fn (Book $record) => $record->blog_post_id ? Heroicon::OutlinedArrowDownTray : null)
+                    ->tooltip(fn (Book $record) => $record->blog_post_id ? 'Ditarik dari blog' : null),
                 TextColumn::make('categories.name')->label('Kategori')->badge(),
                 TextColumn::make('age_group')->label('Umur'),
                 TextColumn::make('status')->label('Status')->badge(),
@@ -161,6 +167,8 @@ class BookResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('status')->label('Status')->options(BookStatus::class),
+                TernaryFilter::make('blog_post_id')->label('Dari blog')->nullable()
+                    ->trueLabel('Ditarik dari blog')->falseLabel('Dimasukkan sendiri'),
                 SelectFilter::make('categories')->label('Kategori')->relationship('categories', 'name')->multiple(),
                 SelectFilter::make('age_group')->label('Umur')->options(AgeGroup::class),
                 SelectFilter::make('review')->label('Semakan syariah')->options(ReviewStatus::class)

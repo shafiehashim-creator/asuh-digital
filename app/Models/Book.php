@@ -19,7 +19,7 @@ use Illuminate\Support\Str;
 
 #[Fillable([
     'title', 'title_en', 'slug', 'author', 'synopsis', 'synopsis_en', 'age_group', 'single_price_sen', 'royalty_single_percent',
-    'is_enhanced_edition', 'cover_path', 'status', 'published_at',
+    'is_enhanced_edition', 'cover_path', 'status', 'published_at', 'blog_post_id',
 ])]
 class Book extends Model
 {
