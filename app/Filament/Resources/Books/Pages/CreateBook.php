@@ -2,12 +2,18 @@
 
 namespace App\Filament\Resources\Books\Pages;
 
+use App\Filament\Resources\Books\Actions\ImportFromBlogAction;
 use App\Filament\Resources\Books\BookResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateBook extends CreateRecord
 {
     protected static string $resource = BookResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [ImportFromBlogAction::make()];
+    }
 
     /** A new PDF goes straight on to "versi pantas" so phones open it quickly. */
     protected function getRedirectUrl(): string
