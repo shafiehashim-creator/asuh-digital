@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Books\Pages;
 use App\Enums\BookStatus;
 use App\Enums\ReviewStatus;
 use App\Exceptions\BookNotApproved;
+use App\Filament\Resources\Books\Actions\ImportFromBlogAction;
 use App\Filament\Resources\Books\BookResource;
 use App\Models\Book;
 use App\Services\ContentWorkflow;
@@ -31,6 +32,8 @@ class EditBook extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            ImportFromBlogAction::make(),
+
             Action::make('preview')
                 ->label('Pratonton')
                 ->icon(Heroicon::OutlinedEye)

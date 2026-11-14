@@ -48,6 +48,11 @@ return [
     ],
 
     // Phase 2 videos on Bunny Stream (optional; YouTube needs no keys).
+    // Galeri Ilmu book blog, read by the "Tarik dari blog" action in the book admin.
+    'book_blog' => [
+        'url' => env('BOOK_BLOG_URL', 'https://bukugaleri.blogspot.com'),
+    ],
+
     'bunny_stream' => [
         'library_id' => env('BUNNY_STREAM_LIBRARY_ID'),
         'token_key' => env('BUNNY_STREAM_TOKEN_KEY'),
