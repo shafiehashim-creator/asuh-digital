@@ -47,7 +47,7 @@ class ChildModeController extends Controller
             return redirect()->route('account');
         }
 
-        $books = $this->childMode->shelf($child)->load('categories');
+        $books = $this->childMode->shelf($child)->load(['categories', 'series']);
         // Phase 2 animated videos, each with the reason it is locked (if any).
         $videos = $watching->hasAccess($child)
             ? $watching->shelf($child)->load('categories')->map(fn ($video) => ['video' => $video, 'locked' => $watching->lockReason($child, $video)])

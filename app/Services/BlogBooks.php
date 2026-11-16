@@ -78,7 +78,7 @@ class BlogBooks
      *
      * @return array{book: Book, notes: list<string>}
      */
-    public static function import(string $id, string $ageGroup): array
+    public static function import(string $id, string $ageGroup, ?int $seriesId = null): array
     {
         if ($title = self::importedIds([$id])[$id] ?? null) {
             throw new RuntimeException("Sudah ada: {$title}");
@@ -118,10 +118,26 @@ class BlogBooks
             'cover_path' => $cover['path'] ?? null,
             'status' => BookStatus::Draft,
             'blog_post_id' => $id,
+            'book_series_id' => $seriesId,
+            'series_position' => $seriesId
+                ? (self::seriesNumber($data['title']) ?? (int) Book::query()->where('book_series_id', $seriesId)->max('series_position') + 1)
+                : null,
         ]);
         $book->categories()->sync($data['category_ids']);
 
         return ['book' => $book, 'notes' => $notes];
+    }
+
+    /** The book's number in its series from titles like "(Buku 3)", "(No 6)", "Jilid 11" or "Yeah, Dah Solat 2". */
+    public static function seriesNumber(string $title): ?int
+    {
+        if (preg_match('/\b(?:buku|no|jilid|bil|vol|siri|episod)\.?\s*(\d{1,3})\b/iu', $title, $m)
+            || preg_match('/#\s*(\d{1,3})\b/u', $title, $m)
+            || preg_match('/\s(\d{1,2})\s*\)?\s*$/u', $title, $m)) {
+            return (int) $m[1] ?: null;
+        }
+
+        return null;
     }
 
     public static function label(string $id): ?string

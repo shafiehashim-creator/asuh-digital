@@ -129,6 +129,9 @@
                             @else
                                 <a href="{{ route('reader.show', $item['book']) }}" class="group block w-36 shrink-0 snap-start sm:w-44">
                                     <x-book-cover :book="$item['book']" class="transition group-hover:-translate-y-1" />
+                                    @if ($item['book']->seriesLabel())
+                                        <p class="mt-2 text-xs font-extrabold text-biru">{{ $item['book']->seriesLabel() }}</p>
+                                    @endif
                                     <p class="mt-2 font-display text-lg leading-tight font-bold group-hover:text-plum">{{ $item['book']->title }}</p>
                                 </a>
                             @endif
@@ -146,6 +149,9 @@
                 @foreach ($books as $book)
                     <a href="{{ route('reader.show', $book) }}" class="group block">
                         <x-book-cover :book="$book" class="transition group-hover:-translate-y-1" />
+                        @if ($book->series)
+                            <p class="mt-2 text-xs font-extrabold text-biru">{{ $book->series->name }}@if ($book->seriesLabel()) · {{ $book->seriesLabel() }}@endif</p>
+                        @endif
                         <p class="mt-2 font-display text-lg leading-tight font-bold group-hover:text-plum">{{ $book->title }}</p>
                     </a>
                 @endforeach

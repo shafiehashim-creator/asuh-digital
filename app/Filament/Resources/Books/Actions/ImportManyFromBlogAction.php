@@ -3,9 +3,11 @@
 namespace App\Filament\Resources\Books\Actions;
 
 use App\Enums\AgeGroup;
+use App\Models\BookSeries;
 use App\Services\BlogBooks;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\HtmlString;
@@ -54,6 +56,13 @@ class ImportManyFromBlogAction
                         ->mapWithKeys(fn ($id) => [$id => BlogBooks::label((string) $id) ?? (string) $id])->all())
                     ->maxItems(self::MAX_PER_BATCH)
                     ->required(),
+                Select::make('series')->label('Masukkan ke siri (pilihan)')
+                    ->options(fn () => BookSeries::query()->orderBy('name')->pluck('name', 'id'))
+                    ->searchable()->native(false)
+                    ->createOptionForm([TextInput::make('name')->label('Nama siri baharu')->required()->maxLength(150)])
+                    ->createOptionUsing(fn (array $data) => BookSeries::create(['name' => $data['name']])->getKey())
+                    ->createOptionModalHeading('Siri baharu')
+                    ->helperText('Untuk buku bersiri. Nombor buku diambil daripada tajuk, contohnya "(Buku 3)" atau "(No 6)"; susunan boleh diubah di Siri buku.'),
                 Select::make('age_group')->label('Umur pembaca (untuk semua buku ini)')
                     ->options(AgeGroup::class)->required()->native(false)
                     ->helperText('Boleh diubah setiap buku kemudian.'),
@@ -65,7 +74,7 @@ class ImportManyFromBlogAction
                 foreach (array_map('strval', $data['posts']) as $id) {
                     $label = BlogBooks::label($id) ?? $id;
                     try {
-                        $result = BlogBooks::import($id, $age);
+                        $result = BlogBooks::import($id, $age, filled($data['series'] ?? null) ? (int) $data['series'] : null);
                         $done[] = e($result['book']->title).($result['notes'] ? ' <span style="opacity:.7">('.e(implode(', ', $result['notes'])).')</span>' : '');
                     } catch (Throwable $e) {
                         report($e);

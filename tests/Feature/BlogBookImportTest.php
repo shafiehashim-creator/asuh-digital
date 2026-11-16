@@ -5,6 +5,7 @@ use App\Enums\Role;
 use App\Filament\Resources\Books\Pages\CreateBook;
 use App\Filament\Resources\Books\Pages\ListBooks;
 use App\Models\Book;
+use App\Models\BookSeries;
 use App\Models\Category;
 use App\Models\User;
 use App\Services\BlogBooks;
@@ -140,4 +141,19 @@ it('marks posts that are already books in the single search and refuses to fill 
         ->callAction('importFromBlog', data: ['post' => '986341215997817318'])
         ->assertNotified('Buku ini sudah ada')
         ->assertSchemaStateSet(['title' => null]);
+});
+
+it('puts bulk-imported books in a series, numbered from the title', function () {
+    fakeBlog();
+    $series = BookSeries::factory()->create(['name' => 'Yeah, Dah Solat']);
+    $this->actingAs(User::factory()->role(Role::Editor)->create());
+    BlogBooks::search('yeah');
+
+    Livewire::test(ListBooks::class)
+        ->callAction('importManyFromBlog', data: ['posts' => ['986341215997817318'], 'series' => $series->id, 'age_group' => '6-9'])
+        ->assertNotified('Buku ditarik dari blog');
+
+    expect(Book::query()->sole())
+        ->book_series_id->toBe($series->id)
+        ->series_position->toBe(2);
 });

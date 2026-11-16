@@ -111,7 +111,7 @@ it('has an English line for every text on the public pages', function () {
     $en = json_decode(file_get_contents(lang_path('en.json')), true);
 
     $files = collect([
-        'landing', 'about', 'pass/show', 'catalog/index', 'catalog/show', 'purchase/create',
+        'landing', 'about', 'pass/show', 'catalog/index', 'catalog/show', 'series/show', 'components/series-card', 'purchase/create',
         'preorder/create', 'preorder/pay', 'preorder/receipt', 'pilot/create', 'pilot/thanks',
         'auth/login', 'auth/register', 'auth/forgot-password', 'auth/reset-password',
         'auth/verify-email', 'auth/confirm-password', 'auth/switch-account',
