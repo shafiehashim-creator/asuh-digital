@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\Books\Actions;
 
+use App\Models\Book;
 use App\Services\BlogBooks;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -38,19 +40,32 @@ class ImportFromBlogAction
                     ->noSearchResultsMessage('Tiada buku dijumpai. Cuba perkataan lain dari tajuk.')
                     ->getSearchResultsUsing(function (string $search): array {
                         try {
-                            return BlogBooks::search($search);
+                            $results = BlogBooks::search($search);
                         } catch (Throwable $e) {
                             report($e);
 
                             return [];
                         }
+                        $imported = BlogBooks::importedIds(array_map('strval', array_keys($results)));
+
+                        return collect($results)->map(fn (string $label, $id) => isset($imported[$id]) ? "{$label} — ✓ sudah ada" : $label)->all();
                     })
                     ->getOptionLabelUsing(fn ($value) => BlogBooks::label((string) $value) ?? (string) $value)
                     ->required(),
             ])
             ->action(function (array $data, Component $livewire): void {
+                $id = (string) $data['post'];
+                $current = $livewire instanceof EditRecord ? $livewire->getRecord()->getKey() : null;
+                $existing = Book::query()->where('blog_post_id', $id)->when($current, fn ($q) => $q->whereKeyNot($current))->first();
+                if ($existing) {
+                    Notification::make()->warning()->title('Buku ini sudah ada')
+                        ->body("“{$existing->title}” sudah ditarik dari catatan blog ini. Buka buku itu untuk menyuntingnya.")->send();
+
+                    return;
+                }
+
                 try {
-                    $book = BlogBooks::find((string) $data['post']);
+                    $book = BlogBooks::find($id);
                 } catch (Throwable $e) {
                     report($e);
                     Notification::make()->danger()->title('Tidak dapat membaca blog')
@@ -73,6 +88,7 @@ class ImportFromBlogAction
                 }
 
                 $livewire->data['title'] = $book['title'];
+                $livewire->data['blog_post_id'] = $id;
                 if ($book['author']) {
                     $livewire->data['author'] = $book['author'];
                 }

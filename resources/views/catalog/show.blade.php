@@ -33,7 +33,10 @@
                     @endforeach
                     <span class="rounded-full bg-kuning px-3 py-1">✓ {{ __('Disemak syariah') }}</span>
                 </p>
-                <h1 class="mt-4 font-display text-3xl font-extrabold text-magenta sm:text-4xl">{{ $book->localTitle() }}</h1>
+                @if ($book->series)
+                    <a href="{{ route('series.show', $book->series) }}" class="mt-4 inline-block text-sm font-extrabold tracking-wide text-biru uppercase hover:underline">📚 {{ $book->series->localName() }}@if ($book->seriesLabel()) · {{ $book->seriesLabel() }}@endif</a>
+                @endif
+                <h1 @class(['font-display text-3xl font-extrabold text-magenta sm:text-4xl', 'mt-4' => ! $book->series, 'mt-1' => $book->series])>{{ $book->localTitle() }}</h1>
                 <p class="mt-1 text-lg text-ink/80">{{ __('oleh :author', ['author' => $book->author]) }}</p>
 
                 @if ($book->readers_count >= App\Services\CatalogStats::MIN_READERS)
@@ -98,6 +101,39 @@
                 </div>
             </div>
         </div>
+
+        {{-- The other books of its series, in reading order. --}}
+        @if ($seriesBooks->isNotEmpty())
+            @php
+                $at = $seriesBooks->search(fn ($b) => $b->is($book));
+                $next = $at === false ? null : $seriesBooks->get($at + 1);
+            @endphp
+            <section class="mt-12 rounded-3xl border-2 border-ink bg-white p-5 shadow-[0_4px_0_var(--color-ink)] sm:p-6" aria-labelledby="series-heading">
+                <div class="flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                        <p class="text-sm font-extrabold tracking-wide text-biru uppercase">📚 {{ __('Siri · :count buku', ['count' => $seriesBooks->count()]) }}</p>
+                        <h2 id="series-heading" class="font-display text-2xl font-extrabold text-plum">{{ $book->series->localName() }}</h2>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        @if ($next)
+                            <a href="{{ route('catalog.show', $next) }}" class="btn-utama">{{ __('Seterusnya: :title', ['title' => $next->localTitle()]) }} &rarr;</a>
+                        @endif
+                        <a href="{{ route('series.show', $book->series) }}" class="inline-flex min-h-11 items-center rounded-full border-2 border-ink/20 bg-white px-4 font-bold hover:border-ink">{{ __('Lihat semua dalam siri') }}</a>
+                    </div>
+                </div>
+                <ol class="-mx-5 mt-5 flex snap-x gap-3 overflow-x-auto px-5 pb-2 sm:-mx-6 sm:px-6">
+                    @foreach ($seriesBooks as $other)
+                        <li class="w-28 shrink-0 snap-start sm:w-32">
+                            <a href="{{ route('catalog.show', $other) }}" class="group block" @if ($other->is($book)) aria-current="page" @endif>
+                                <x-book-cover :book="$other" size="sm" @class(['transition group-hover:-translate-y-1', 'outline-4 outline-offset-2 outline-kuning' => $other->is($book)]) />
+                                <p class="mt-2 text-xs font-extrabold text-biru">{{ $other->seriesLabel() ?? __('Buku :number', ['number' => $loop->iteration]) }}</p>
+                                <p @class(['text-sm leading-tight font-bold', 'text-plum' => $other->is($book)])>{{ $other->localTitle() }}</p>
+                            </a>
+                        </li>
+                    @endforeach
+                </ol>
+            </section>
+        @endif
 
         {{-- Phase 2: the book's animated version (free sample plays, others locked) --}}
         @if ($videos->isNotEmpty())

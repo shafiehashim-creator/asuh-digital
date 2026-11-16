@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Books\Pages;
 
+use App\Filament\Resources\Books\Actions\ImportManyFromBlogAction;
 use App\Filament\Resources\Books\BookResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
@@ -13,6 +14,7 @@ class ListBooks extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            ImportManyFromBlogAction::make(),
             CreateAction::make(),
         ];
     }

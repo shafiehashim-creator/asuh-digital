@@ -18,6 +18,7 @@ use App\Models\Setting;
 use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -25,11 +26,14 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -85,6 +89,8 @@ class BookResource extends Resource
                     ->columnSpan(2)
                     ->columns(2)
                     ->schema([
+                        // Set by "Tarik dari blog", so the same post is not imported twice.
+                        Hidden::make('blog_post_id'),
                         TextInput::make('title')->label('Tajuk')->required()->maxLength(200)->columnSpanFull(),
                         TextInput::make('title_en')->label('Tajuk (English, pilihan)')->maxLength(200)->columnSpanFull()
                             ->helperText('Dipaparkan apabila pelawat memilih EN. Kosongkan untuk memaparkan tajuk BM.'),
@@ -94,6 +100,23 @@ class BookResource extends Resource
                             ->multiple()->preload()->required()->native(false)
                             ->helperText('Boleh pilih lebih daripada satu.'),
                         Select::make('age_group')->label('Umur pembaca')->options(AgeGroup::class)->required()->native(false),
+                        Select::make('book_series_id')->label('Siri (jika buku bersiri)')
+                            ->relationship('series', 'name')
+                            ->searchable()->preload()->native(false)
+                            ->createOptionForm([TextInput::make('name')->label('Nama siri baharu')->required()->maxLength(150)])
+                            ->createOptionModalHeading('Siri baharu')
+                            ->live()
+                            ->afterStateUpdated(function (Set $set, Get $get, $state) {
+                                // Suggest the next number in the series.
+                                if ($state && blank($get('series_position'))) {
+                                    $set('series_position', (int) Book::query()->where('book_series_id', $state)->max('series_position') + 1);
+                                }
+                            })
+                            ->helperText('Buku dalam siri yang sama dikumpul dalam satu halaman siri.'),
+                        TextInput::make('series_position')->label('Buku ke-')
+                            ->integer()->minValue(1)->maxValue(999)
+                            ->visible(fn (Get $get) => filled($get('book_series_id')))
+                            ->required(fn (Get $get) => filled($get('book_series_id'))),
                         TextInput::make('single_price_sen')->label('Harga single (RM)')
                             ->helperText('Kosongkan jika buku hanya melalui Langganan Tahunan.')
                             ->numeric()->minValue(0)->step(0.01)->prefix('RM')
@@ -152,8 +175,12 @@ class BookResource extends Resource
             ->defaultSort('updated_at', 'desc')
             ->columns([
                 ImageColumn::make('cover_path')->label('Kaver')->disk('public')->imageHeight(56),
-                TextColumn::make('title')->label('Tajuk')->searchable()->description(fn (Book $record) => $record->author),
+                TextColumn::make('title')->label('Tajuk')->searchable()->description(fn (Book $record) => $record->author)
+                    ->icon(fn (Book $record) => $record->blog_post_id ? Heroicon::OutlinedArrowDownTray : null)
+                    ->tooltip(fn (Book $record) => $record->blog_post_id ? 'Ditarik dari blog' : null),
                 TextColumn::make('categories.name')->label('Kategori')->badge(),
+                TextColumn::make('series.name')->label('Siri')->placeholder('-')
+                    ->description(fn (Book $record) => $record->seriesLabel())->toggleable(),
                 TextColumn::make('age_group')->label('Umur'),
                 TextColumn::make('status')->label('Status')->badge(),
                 TextColumn::make('latestReview.status')->label('Semakan syariah')->badge()->placeholder('Belum dihantar'),
@@ -161,6 +188,9 @@ class BookResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('status')->label('Status')->options(BookStatus::class),
+                TernaryFilter::make('blog_post_id')->label('Dari blog')->nullable()
+                    ->trueLabel('Ditarik dari blog')->falseLabel('Dimasukkan sendiri'),
+                SelectFilter::make('series')->label('Siri')->relationship('series', 'name')->searchable()->preload(),
                 SelectFilter::make('categories')->label('Kategori')->relationship('categories', 'name')->multiple(),
                 SelectFilter::make('age_group')->label('Umur')->options(AgeGroup::class),
                 SelectFilter::make('review')->label('Semakan syariah')->options(ReviewStatus::class)

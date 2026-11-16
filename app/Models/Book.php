@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -19,7 +20,7 @@ use Illuminate\Support\Str;
 
 #[Fillable([
     'title', 'title_en', 'slug', 'author', 'synopsis', 'synopsis_en', 'age_group', 'single_price_sen', 'royalty_single_percent',
-    'is_enhanced_edition', 'cover_path', 'status', 'published_at',
+    'is_enhanced_edition', 'cover_path', 'status', 'published_at', 'blog_post_id', 'book_series_id', 'series_position',
 ])]
 class Book extends Model
 {
@@ -31,6 +32,7 @@ class Book extends Model
             'age_group' => AgeGroup::class,
             'status' => BookStatus::class,
             'single_price_sen' => 'integer',
+            'series_position' => 'integer',
             'royalty_single_percent' => 'float',
             'is_enhanced_edition' => 'boolean',
             'published_at' => 'datetime',
@@ -114,6 +116,17 @@ class Book extends Model
     }
 
     /** A book may sit in several categories, shown in the admin's order. */
+    public function series(): BelongsTo
+    {
+        return $this->belongsTo(BookSeries::class, 'book_series_id');
+    }
+
+    /** "Buku 2" in its series, or null outside a series. */
+    public function seriesLabel(): ?string
+    {
+        return $this->book_series_id && $this->series_position ? __('Buku :number', ['number' => $this->series_position]) : null;
+    }
+
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class)->orderBy('sort_order');

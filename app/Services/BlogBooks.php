@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\BookStatus;
+use App\Models\Book;
 use App\Models\Category;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -57,6 +59,85 @@ class BlogBooks
         }
 
         return $results;
+    }
+
+    /**
+     * Posts that already became books, so they are not imported twice.
+     *
+     * @param  list<string>  $ids
+     * @return array<string, string> post id => book title
+     */
+    public static function importedIds(array $ids): array
+    {
+        return $ids === [] ? [] : Book::query()->whereIn('blog_post_id', $ids)->pluck('title', 'blog_post_id')->all();
+    }
+
+    /**
+     * Creates a draft book from a blog post, with its cover. The PDF and the
+     * syariah review still follow the usual steps.
+     *
+     * @return array{book: Book, notes: list<string>}
+     */
+    public static function import(string $id, string $ageGroup, ?int $seriesId = null): array
+    {
+        if ($title = self::importedIds([$id])[$id] ?? null) {
+            throw new RuntimeException("Sudah ada: {$title}");
+        }
+
+        $data = self::find($id);
+        $notes = [];
+        $cover = null;
+        if ($data['cover_url']) {
+            try {
+                $cover = self::downloadCover($data['cover_url'], $data['title']);
+                if ($cover['width'] < self::SMALL_COVER_WIDTH) {
+                    $notes[] = 'kaver kecil';
+                }
+            } catch (\Throwable $e) {
+                report($e);
+                $notes[] = 'tiada kaver';
+            }
+        } else {
+            $notes[] = 'tiada kaver';
+        }
+        if (! $data['synopsis']) {
+            $notes[] = 'tiada sinopsis';
+        }
+        if (! $data['author']) {
+            $notes[] = 'tiada penulis';
+        }
+        if (! $data['category_ids']) {
+            $notes[] = 'tiada kategori';
+        }
+
+        $book = Book::create([
+            'title' => Str::limit($data['title'], 200, ''),
+            'author' => Str::limit((string) $data['author'], 150, ''),
+            'synopsis' => (string) $data['synopsis'],
+            'age_group' => $ageGroup,
+            'cover_path' => $cover['path'] ?? null,
+            'status' => BookStatus::Draft,
+            'blog_post_id' => $id,
+            'book_series_id' => $seriesId,
+            'series_position' => $seriesId
+                ? (self::seriesNumber($data['title']) ?? (int) Book::query()->where('book_series_id', $seriesId)->max('series_position') + 1)
+                : null,
+        ]);
+        $book->categories()->sync($data['category_ids']);
+
+        return ['book' => $book, 'notes' => $notes];
+    }
+
+    /** The book's number in its series from titles like "(Buku 3)", "(No 6)", "Jilid 11" or "Yeah, Dah Solat 2". */
+    public static function seriesNumber(string $title): ?int
+    {
+        if (preg_match('/\b(?:buku|no|jilid|bil|vol|siri|episod)\.?\s*(\d{1,3})\b/iu', $title, $m)
+            || preg_match('/#\s*(\d{1,3})\b/u', $title, $m)
+            || preg_match('/\s(\d{1,2})\s*\)?\s*$/u', $title, $m)) {
+            return (int) $m[1] ?: null;
+        }
+
+        return null;
     }
 
     public static function label(string $id): ?string
@@ -256,13 +337,28 @@ class BlogBooks
         return is_string($host) && (str_ends_with($host, '.googleusercontent.com') || preg_match('/^\d?\.?bp\.blogspot\.com$/', $host) || str_ends_with($host, '.bp.blogspot.com'));
     }
 
+    /** Words in blog labels that point to one of our categories (by slug). */
+    private const CATEGORY_WORDS = [
+        'komik' => ['komik'],
+        'kisah-nabi' => ['nabi', 'rasul', 'anbia'],
+        'akhlak' => ['akhlak', 'adab'],
+        'doa-harian' => ['doa', 'zikir'],
+        'cerita-bergambar' => ['cerita bergambar', 'buku bergambar', 'picture book'],
+        'novel-kanak-kanak' => ['novel'],
+        'sirah' => ['sirah', 'sahabat', 'khulafa'],
+    ];
+
     /** @param list<string> $words blog labels and the "Kategori:" line */
     private static function categoryIds(array $words): array
     {
         $haystack = mb_strtolower(implode(' | ', $words));
+        if ($haystack === '') {
+            return [];
+        }
 
-        return Category::query()->get(['id', 'name'])
-            ->filter(fn (Category $c) => $haystack !== '' && str_contains($haystack, mb_strtolower($c->name)))
+        return Category::query()->get(['id', 'name', 'slug'])
+            ->filter(fn (Category $c) => collect([mb_strtolower($c->name), ...(self::CATEGORY_WORDS[$c->slug] ?? [])])
+                ->contains(fn (string $word) => str_contains($haystack, $word)))
             ->pluck('id')->values()->all();
     }
 }

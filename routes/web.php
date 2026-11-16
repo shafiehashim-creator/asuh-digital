@@ -28,6 +28,7 @@ use App\Http\Controllers\ReaderController;
 use App\Http\Controllers\ReadingProgressController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\RewardPromiseController;
+use App\Http\Controllers\SeriesController;
 use App\Http\Controllers\SwitchAccountController;
 use App\Http\Controllers\Teacher;
 use App\Http\Controllers\VideoPageController;
@@ -75,6 +76,7 @@ Route::post('/beli/langganan-plus', [PurchaseController::class, 'storePlus'])
 Route::middleware(EnsureCatalogOpen::class)->group(function () {
     Route::get('/buku', [CatalogController::class, 'index'])->name('catalog.index');
     Route::get('/buku/{book:slug}', [CatalogController::class, 'show'])->name('catalog.show');
+    Route::get('/siri/{series:slug}', [SeriesController::class, 'show'])->name('series.show');
     // Free preview of the first pages, no login needed.
     Route::get('/buku/{book:slug}/pratonton', [PreviewController::class, 'show'])->name('catalog.preview');
     Route::get('/buku/{book:slug}/pratonton/{page}', [PreviewController::class, 'page'])

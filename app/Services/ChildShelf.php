@@ -10,7 +10,9 @@ use Illuminate\Support\Collection;
  * The Mod Anak shelf (families and pupils) as rows by category, like a
  * streaming app: each row mixes the books and animated videos of one
  * category, a book's videos right after it. Small categories join a
- * "Lain-lain" row, and a small shelf stays one simple grid.
+ * "Lain-lain" row, and a small shelf stays one simple grid. A series
+ * (two or more of its books on the shelf) comes first, as its own row in
+ * reading order.
  */
 class ChildShelf
 {
@@ -42,7 +44,30 @@ class ChildShelf
         $videosByBook = $videos->filter(fn (array $item) => $item['video']->book_id)->groupBy(fn (array $item) => $item['video']->book_id);
         $placed = [];
 
+        // A series with two or more books on the shelf gets its own row, in reading order.
+        $seriesRows = [];
+        $inSeries = [];
+        foreach ($books->whereNotNull('book_series_id')->groupBy('book_series_id') as $members) {
+            if ($members->count() < 2) {
+                continue;
+            }
+            $items = [];
+            foreach ($members->sortBy(fn (Book $b) => [$b->series_position ?? PHP_INT_MAX, $b->id]) as $book) {
+                $inSeries[$book->id] = true;
+                $items[] = ['type' => 'book', 'book' => $book];
+                foreach ($videosByBook->get($book->id, []) as $item) {
+                    $items[] = ['type' => 'video', ...$item];
+                    $placed[$item['video']->id] = true;
+                }
+            }
+            $series = $members->first()->series;
+            $seriesRows[] = ['title' => $series?->localName() ?? __('Siri'), 'emoji' => '📚', 'items' => $items];
+        }
+
         foreach ($books as $book) {
+            if (isset($inSeries[$book->id])) {
+                continue;
+            }
             $category = $book->categories->first();
             $add($category, ['type' => 'book', 'book' => $book]);
 
@@ -63,15 +88,15 @@ class ChildShelf
             ->sortBy(fn (array $row) => [$row['category']->sort_order, $row['category']->name]);
         $others = collect($rows)->diffKeys($named)->flatMap(fn (array $row) => $row['items'])->values()->all();
 
-        if ($named->count() < 2 && $others === []) {
+        if ($named->count() + count($seriesRows) < 2 && $others === []) {
             return null;
         }
 
-        $result = $named->map(fn (array $row) => [
+        $result = [...$seriesRows, ...$named->map(fn (array $row) => [
             'title' => $row['category']->name,
             'emoji' => $row['category']->emoji(),
             'items' => $row['items'],
-        ])->values()->all();
+        ])->values()->all()];
 
         if ($others !== []) {
             $result[] = ['title' => 'Lain-lain', 'emoji' => '✨', 'items' => $others];

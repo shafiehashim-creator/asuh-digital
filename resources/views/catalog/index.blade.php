@@ -39,31 +39,39 @@
             @endforeach
         </nav>
 
-        @if ($books->isEmpty())
+        @if ($items->isEmpty())
             <div class="mt-10 rounded-3xl border-2 border-dashed border-ink/30 p-10 text-center">
                 <p class="font-display text-xl font-bold text-plum">{{ __('Tiada buku ditemui') }}</p>
                 <p class="mt-1 text-ink/80">{{ __('Cuba kategori atau umur lain.') }}</p>
             </div>
         @else
             <ul class="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
-                @foreach ($books as $book)
+                @foreach ($items as $item)
                     <li>
-                        <a href="{{ route('catalog.show', $book) }}" class="group block rounded-2xl focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-biru">
-                            <x-book-cover :book="$book" class="transition group-hover:-translate-y-1" />
-                            <p class="mt-3 font-display text-lg leading-tight font-bold group-hover:text-plum">{{ $book->localTitle() }}</p>
-                            <p class="text-sm text-ink/70">{{ $book->author }}</p>
-                            <p class="mt-1 flex flex-wrap gap-1 text-xs font-bold">
-                                <span class="rounded-full bg-lavender px-2 py-0.5">{{ $book->age_group->getLabel() }}</span>
-                                @foreach ($book->categories as $category)
-                                    <span class="rounded-full bg-biru/10 px-2 py-0.5 text-biru">{{ __($category->name) }}</span>
-                                @endforeach
-                            </p>
-                        </a>
+                        @isset($item['series'])
+                            <x-series-card :series="$item['series']" :books="$item['books']" />
+                        @else
+                            @php($book = $item['book'])
+                            <a href="{{ route('catalog.show', $book) }}" class="group block rounded-2xl focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-biru">
+                                <x-book-cover :book="$book" class="transition group-hover:-translate-y-1" />
+                                @if ($book->series)
+                                    <p class="mt-3 text-xs font-extrabold tracking-wide text-biru uppercase">{{ $book->series->localName() }}@if ($book->seriesLabel()) · {{ $book->seriesLabel() }}@endif</p>
+                                @endif
+                                <p @class(['font-display text-lg leading-tight font-bold group-hover:text-plum', 'mt-3' => ! $book->series])>{{ $book->localTitle() }}</p>
+                                <p class="text-sm text-ink/70">{{ $book->author }}</p>
+                                <p class="mt-1 flex flex-wrap gap-1 text-xs font-bold">
+                                    <span class="rounded-full bg-lavender px-2 py-0.5">{{ $book->age_group->getLabel() }}</span>
+                                    @foreach ($book->categories as $category)
+                                        <span class="rounded-full bg-biru/10 px-2 py-0.5 text-biru">{{ __($category->name) }}</span>
+                                    @endforeach
+                                </p>
+                            </a>
+                        @endisset
                     </li>
                 @endforeach
             </ul>
 
-            <div class="mt-10">{{ $books->links() }}</div>
+            <div class="mt-10">{{ $items->links() }}</div>
         @endif
     </div>
 </x-layouts.app>
