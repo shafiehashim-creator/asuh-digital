@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\BookFile;
+use App\Models\BookPage;
+use App\Services\Audio\BookAudio;
 use App\Services\ChildMode;
 use App\Services\ReadingLog;
 use Illuminate\Http\RedirectResponse;
@@ -29,7 +31,7 @@ class ReaderController extends Controller
      */
     public const LINK_MINUTES = 180;
 
-    public function show(Request $request, Book $book, ChildMode $childMode, ReadingLog $log): View|RedirectResponse
+    public function show(Request $request, Book $book, ChildMode $childMode, ReadingLog $log, BookAudio $audio): View|RedirectResponse
     {
         $user = $request->user();
         $child = $childMode->child($user);
@@ -57,8 +59,15 @@ class ReaderController extends Controller
         $expires = now()->addMinutes(self::LINK_MINUTES);
         $link = ['book' => $book->slug, 'file' => $file->id] + ($pupil ? ['p' => $pupil->id] : ['u' => $user->id]);
 
+        // Audiobook ("Baca bersama"): each page's voice behind its own signed link, and the word times.
+        $audioPages = $audio->availableFor($book, $user, $child) ? $audio->readerPages($book) : [];
+
         return view('reader.show', [
             'book' => $book,
+            'audio' => $audioPages ? collect($audioPages)->map(fn (array $words, int $page) => [
+                'url' => URL::temporarySignedRoute('reader.audio', $expires, ['book' => $book->slug, 'page' => $page] + ($pupil ? ['p' => $pupil->id] : ['u' => $user->id])),
+                'words' => $words,
+            ])->all() : null,
             'fileUrl' => URL::temporarySignedRoute('reader.file', $expires, $link),
             // "Versi pantas": light page images, one signed link per page; the PDF stays the fallback.
             'pageImages' => $file->hasPageImages() ? [
@@ -115,13 +124,31 @@ class ReaderController extends Controller
         ]);
     }
 
+    public function audio(Request $request, Book $book, int $page, BookAudio $audio): BinaryFileResponse
+    {
+        $this->authorizeLink($request, $book);
+        $child = app(ChildMode::class)->child($request->user());
+        abort_unless($audio->availableFor($book, $request->user(), $child), 404);
+
+        $row = $book->pages()->where('page', $page)->first();
+        abort_unless($row?->hasAudio() && Storage::disk(BookPage::DISK)->exists($row->audio_path), 404);
+
+        // A file response answers Range requests, so the phone can start playing at once.
+        return response()->file(Storage::disk(BookPage::DISK)->path($row->audio_path), [
+            'Content-Type' => 'audio/mpeg',
+            'Cache-Control' => 'private, max-age=3600',
+            'X-Content-Type-Options' => 'nosniff',
+            'X-Robots-Tag' => 'noindex, nofollow',
+        ]);
+    }
+
     /**
      * The signature proves the link is ours and fresh; these prove it is being
      * used by the person it was made for, who may still read it.
      */
-    private function authorizeLink(Request $request, Book $book, BookFile $file): void
+    private function authorizeLink(Request $request, Book $book, ?BookFile $file = null): void
     {
-        abort_unless($file->book_id === $book->id, 404);
+        abort_unless($file === null || $file->book_id === $book->id, 404);
 
         if ($request->has('p')) {
             $childMode = app(ChildMode::class);

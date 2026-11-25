@@ -3,6 +3,7 @@
     $preview ??= null;
     $closeUrl ??= route('catalog.show', $book);
     $progress ??= null;
+    $audio ??= null;
 @endphp
 
 <!DOCTYPE html>
@@ -21,6 +22,7 @@
         <div id="reader" class="flex h-dvh flex-col"
             data-src="{{ $fileUrl }}" data-book="{{ $book->slug }}" data-watermark="{{ $watermark }}"
             @if ($pageImages) data-pages="{{ json_encode($pageImages) }}" @endif
+            @if ($audio) data-audio="{{ json_encode($audio) }}" @endif
             @if ($preview) data-preview @endif
             @if ($progress) data-progress-url="{{ $progress['url'] }}" data-csrf="{{ csrf_token() }}" @if ($progress['startPage']) data-start-page="{{ $progress['startPage'] }}" @endif @endif>
 
@@ -41,14 +43,28 @@
                 <button type="button" data-zoom-in class="min-h-11 min-w-11 rounded-full font-display text-xl font-bold hover:bg-white/10" aria-label="Besarkan">+</button>
             </header>
 
-            <main data-stage class="flex-1 overflow-auto px-2 py-4 [@media(max-height:800px)]:py-1">
+            <main data-stage class="relative flex-1 overflow-auto px-2 py-4 [@media(max-height:800px)]:py-1">
                 <div data-status role="status" class="mx-auto mt-8 w-40 text-center font-semibold sm:mt-16 sm:w-52">
                     <x-book-cover :book="$book" class="animate-pulse" />
                     <p class="mt-4">Membuka buku…</p>
                 </div>
                 <canvas data-canvas hidden class="mx-auto block rounded-lg bg-white shadow-[0_4px_0_var(--color-ink)]"></canvas>
                 <div data-flip hidden class="h-full items-center [&:not([hidden])]:flex"></div>
+                @if ($audio)
+                    {{-- The word being read, drawn over the page. --}}
+                    <div data-highlight hidden class="pointer-events-none absolute rounded-md bg-kuning/60 mix-blend-multiply ring-2 ring-kuning transition-all duration-150"></div>
+                @endif
             </main>
+
+            @if ($audio)
+                {{-- Audiobook: the words of the page when the PDF has no text to highlight on the page itself. --}}
+                <p data-audio-text hidden class="max-h-32 overflow-y-auto border-t-2 border-ink/10 bg-white px-4 py-3 text-lg leading-relaxed font-bold"></p>
+                <div data-audio-bar class="flex items-center justify-center gap-3 border-t-2 border-ink/10 bg-lavender px-3 py-2">
+                    <button type="button" data-listen class="btn-utama min-h-12 px-6 text-lg">🎧 Dengar</button>
+                    <button type="button" data-listen-again hidden class="min-h-11 min-w-11 rounded-full border-2 border-ink bg-white text-xl font-bold" aria-label="Ulang halaman ini">↺</button>
+                    <label class="flex items-center gap-2 text-sm font-bold"><input type="checkbox" data-auto-turn class="size-5 accent-plum" checked> Selak sendiri</label>
+                </div>
+            @endif
 
             @if ($preview)
                 {{-- Shown once the last preview page is on screen. --}}

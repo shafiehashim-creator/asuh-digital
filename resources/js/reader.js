@@ -210,6 +210,7 @@ if (root) {
             seenPage = first;
             lastActivity = Date.now();
         }
+        listen?.onPage(first);
     };
 
     // --- Single page mode -----------------------------------------------------
@@ -227,6 +228,7 @@ if (root) {
             const done = await doc.draw(canvas, page, cssWidth, (task) => { single.rendering = task; });
             if (!done) return;
             updateNav(page, page);
+            listen?.layout();
             // Fetch the next page in the background so turning is quick.
             if (page < doc.numPages) doc.prefetch(page + 1);
         },
@@ -421,6 +423,148 @@ if (root) {
             stage.classList.remove('overflow-hidden');
         },
     };
+
+    // --- Audiobook ("Baca bersama") ---------------------------------------------
+    // Each page with a voice plays when 🎧 is pressed; the word being read is
+    // lit up on the page (or in a strip below when the PDF has no text) and the
+    // page turns by itself when its voice ends. Listening counts as reading.
+
+    const listen = root.dataset.audio ? (() => {
+        const pages = JSON.parse(root.dataset.audio);
+        const button = root.querySelector('[data-listen]');
+        const again = root.querySelector('[data-listen-again]');
+        const autoTurn = root.querySelector('[data-auto-turn]');
+        const strip = root.querySelector('[data-audio-text]');
+        const mark = root.querySelector('[data-highlight]');
+        const audio = new Audio();
+        const autoKey = 'asuh.reader.autoTurn';
+        let playing = false;
+        let current = 0; // page whose voice is loaded
+        let words = [];
+        let spans = [];
+        let lit = -1;
+        let frame = 0;
+        let waiting = null;
+
+        autoTurn.checked = load(autoKey) !== '0';
+        autoTurn.addEventListener('change', () => store(autoKey, autoTurn.checked ? '1' : '0'));
+
+        const onPageHasBoxes = () => words.length > 0 && words.filter((w) => w.b).length >= words.length / 2;
+
+        const fillStrip = () => {
+            strip.textContent = '';
+            spans = [];
+            const show = words.length > 0 && !onPageHasBoxes();
+            if (show) {
+                words.forEach((word) => {
+                    const span = document.createElement('span');
+                    span.textContent = word.t;
+                    span.className = 'cursor-pointer rounded px-0.5 transition-colors';
+                    span.addEventListener('click', () => { audio.currentTime = word.s; if (!playing) start(); });
+                    strip.append(span, ' ');
+                    spans.push(span);
+                });
+            }
+            if (strip.hidden === show) {
+                strip.hidden = !show;
+                window.dispatchEvent(new Event('resize'));
+            }
+        };
+
+        const placeMark = (word) => {
+            if (!word?.b || mode !== 'single' || canvas.hidden) { mark.hidden = true; return; }
+            const [x, y, w, h] = word.b;
+            const pad = 3;
+            mark.style.left = `${canvas.offsetLeft + x * canvas.clientWidth - pad}px`;
+            mark.style.top = `${canvas.offsetTop + y * canvas.clientHeight - pad}px`;
+            mark.style.width = `${w * canvas.clientWidth + pad * 2}px`;
+            mark.style.height = `${h * canvas.clientHeight + pad * 2}px`;
+            mark.hidden = false;
+        };
+
+        const light = (index) => {
+            if (index === lit) return;
+            spans[lit]?.classList.remove('bg-kuning');
+            lit = index;
+            spans[lit]?.classList.add('bg-kuning');
+            spans[lit]?.scrollIntoView({ block: 'nearest' });
+            placeMark(words[lit]);
+        };
+
+        const tick = () => {
+            const t = audio.currentTime;
+            let index = -1;
+            words.forEach((word, k) => { if (t >= word.s) index = k; });
+            if (index >= 0 && t > words[index].e + 0.6) index = -1;
+            light(index);
+            lastActivity = Date.now(); // listening counts as reading
+            if (playing) frame = requestAnimationFrame(tick);
+        };
+
+        const loadPage = (n) => {
+            clearTimeout(waiting);
+            current = n;
+            words = pages[n]?.words ?? [];
+            lit = -1;
+            mark.hidden = true;
+            fillStrip();
+            if (pages[n]) audio.src = pages[n].url;
+            else audio.removeAttribute('src');
+        };
+
+        const turn = () => {
+            if (!autoTurn.checked || page >= doc.numPages) { stop(); return; }
+            single.go(page + 1);
+        };
+
+        const playCurrent = () => {
+            if (!pages[current]) {
+                // A page without a voice (cover, pictures only): a short look, then on.
+                waiting = setTimeout(turn, 2500);
+                return;
+            }
+            audio.play().catch(() => stop());
+        };
+
+        const start = () => {
+            if (mode !== 'single') setMode('single'); // the highlight follows one page at a time
+            if (current !== page) loadPage(page);
+            playing = true;
+            button.textContent = '⏸ Jeda';
+            again.hidden = false;
+            cancelAnimationFrame(frame);
+            frame = requestAnimationFrame(tick);
+            playCurrent();
+        };
+
+        function stop() {
+            playing = false;
+            clearTimeout(waiting);
+            cancelAnimationFrame(frame);
+            audio.pause();
+            button.textContent = '🎧 Dengar';
+        }
+
+        audio.addEventListener('ended', () => {
+            light(-1);
+            if (playing) setTimeout(turn, 600);
+        });
+        button.addEventListener('click', () => (playing ? stop() : start()));
+        again.addEventListener('click', () => {
+            if (current !== page) loadPage(page);
+            audio.currentTime = 0;
+            if (!playing) start();
+        });
+
+        return {
+            onPage(n) {
+                if (n === current) return;
+                loadPage(n);
+                if (playing) playCurrent();
+            },
+            layout() { placeMark(words[lit]); },
+        };
+    })() : null;
 
     // --- Controls -------------------------------------------------------------
 

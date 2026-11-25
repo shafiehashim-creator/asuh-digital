@@ -28,6 +28,7 @@ class ChildRequest extends FormRequest
             'daily_video_minutes' => ['nullable', Rule::in(VideoWatching::LIMIT_CHOICES)],
             'read_before_watch' => ['sometimes', 'boolean'],
             'daily_game_minutes' => ['nullable', Rule::in(GamePlaying::LIMIT_CHOICES)],
+            'allow_audio' => ['sometimes', 'boolean'],
         ];
     }
 
@@ -39,6 +40,10 @@ class ChildRequest extends FormRequest
         if ($key === null && $this->has('video_settings')) {
             $data['daily_video_minutes'] = $data['daily_video_minutes'] ?? null;
             $data['read_before_watch'] = $this->boolean('read_before_watch');
+        }
+
+        if ($key === null && $this->has('audio_settings')) {
+            $data['allow_audio'] = $this->boolean('allow_audio');
         }
 
         if ($key === null && $this->has('game_settings')) {

@@ -6,6 +6,7 @@ use App\Enums\Game;
 use App\Models\Book;
 use App\Models\Child;
 use App\Models\Quiz;
+use App\Services\Audio\BookAudio;
 use App\Services\ChildMode;
 use App\Services\ChildShelf;
 use App\Services\GamePlaying;
@@ -59,6 +60,8 @@ class ChildModeController extends Controller
             // Rows by category once the shelf is big enough, else null for one grid.
             'rows' => $shelf->rows($books, $videos),
             'badges' => $child->badges()->get(),
+            // Audiobook: books the child can listen to (🎧 on the cover).
+            'audioBookIds' => $child->allow_audio ? app(BookAudio::class)->bookIdsWithAudio($books->pluck('id')) : [],
             // The parent's reward promises not yet kept, for the child to aim for.
             'promises' => $child->rewardPromises()->whereNull('fulfilled_at')->orderByDesc('achieved_at')->get(),
             'videos' => $videos,

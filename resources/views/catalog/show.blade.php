@@ -32,6 +32,9 @@
                         <a href="{{ route('catalog.index', ['kategori' => $category->slug]) }}" class="rounded-full bg-biru/10 px-3 py-1 text-biru hover:bg-biru/20">{{ __($category->name) }}</a>
                     @endforeach
                     <span class="rounded-full bg-kuning px-3 py-1">✓ {{ __('Disemak syariah') }}</span>
+                    @if ($hasAudio)
+                        <span class="rounded-full bg-plum px-3 py-1 text-white">🎧 {{ __('Ada audiobook') }}</span>
+                    @endif
                 </p>
                 @if ($book->series)
                     <a href="{{ route('series.show', $book->series) }}" class="mt-4 inline-block text-sm font-extrabold tracking-wide text-biru uppercase hover:underline">📚 {{ $book->series->localName() }}@if ($book->seriesLabel()) · {{ $book->seriesLabel() }}@endif</a>

@@ -1,7 +1,7 @@
 // "Versi pantas" (admin): renders every PDF page to a light image in this
 // browser and uploads it, so readers on phones get small images instead of
 // print-resolution PDF pages. See App\Http\Controllers\Admin\PageImageController.
-import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
+import { GlobalWorkerOptions, getDocument, Util } from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 GlobalWorkerOptions.workerSrc = workerUrl;
@@ -9,6 +9,41 @@ GlobalWorkerOptions.workerSrc = workerUrl;
 const MAX_UPLOADS = 3; // uploads in flight while the next pages render
 
 const toBlob = (canvas, type, quality) => new Promise((resolve) => canvas.toBlob(resolve, type, quality));
+
+// Audiobook word highlight: every word printed on the page with its box, as
+// fractions of the page. A PDF whose text was turned into pictures has none.
+const measurer = document.createElement('canvas').getContext('2d');
+
+const pageWords = async (page) => {
+    const viewport = page.getViewport({ scale: 1 });
+    const content = await page.getTextContent();
+    const words = [];
+    for (const item of content.items) {
+        if (!item.str || !item.str.trim()) continue;
+        const tx = Util.transform(viewport.transform, item.transform);
+        const height = Math.hypot(tx[2], tx[3]);
+        if (Math.abs(tx[1]) > 0.01) continue; // rotated text is left out
+        // Measure each piece in a similar font, then scale to the run's real width.
+        const family = content.styles[item.fontName]?.fontFamily || 'sans-serif';
+        measurer.font = `${height}px ${family}`;
+        const total = measurer.measureText(item.str).width || 1;
+        const scale = item.width / total;
+        let before = '';
+        for (const part of item.str.split(/(\s+)/)) {
+            if (part.trim()) {
+                words.push({
+                    t: part,
+                    x: +((tx[4] + measurer.measureText(before).width * scale) / viewport.width).toFixed(4),
+                    y: +((tx[5] - height) / viewport.height).toFixed(4),
+                    w: +((measurer.measureText(part).width * scale) / viewport.width).toFixed(4),
+                    h: +(height / viewport.height).toFixed(4),
+                });
+            }
+            before += part;
+        }
+    }
+    return words;
+};
 
 const setup = (item) => {
     const status = item.querySelector('[data-prep-status]');
@@ -29,9 +64,10 @@ const setup = (item) => {
         return response;
     };
 
-    const upload = async (page, blob, extension) => {
+    const upload = async (page, blob, extension, words) => {
         const body = new FormData();
         body.append('image', blob, `${page}.${extension}`);
+        body.append('words', JSON.stringify(words));
         const url = item.dataset.store.replace('__PAGE__', page);
         try {
             await post(url, body);
@@ -71,6 +107,7 @@ const setup = (item) => {
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 await page.render({ canvasContext: ctx, viewport }).promise;
+                const words = await pageWords(page).catch(() => []);
                 page.cleanup();
 
                 // WebP where the browser can make it (Chrome, Edge, Firefox), JPEG otherwise.
@@ -79,7 +116,7 @@ const setup = (item) => {
                 format ??= blob.type === 'image/webp' ? 'webp' : 'jpg';
                 size ??= { width: canvas.width, height: canvas.height };
 
-                const job = upload(n, blob, format);
+                const job = upload(n, blob, format, words);
                 uploads.add(job);
                 job.then(() => uploads.delete(job), () => {});
                 if (uploads.size >= MAX_UPLOADS) await Promise.race(uploads);

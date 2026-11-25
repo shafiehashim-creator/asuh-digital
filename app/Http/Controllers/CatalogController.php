@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\AgeGroup;
 use App\Models\Book;
 use App\Models\Category;
+use App\Services\Audio\BookAudio;
 use App\Services\BookRecommendations;
 use App\Services\CatalogStats;
 use App\Services\PassOffer;
@@ -105,6 +106,7 @@ class CatalogController extends Controller
         return view('catalog.show', [
             'book' => $book,
             'seriesBooks' => $seriesBooks->count() > 1 ? $seriesBooks : collect(),
+            'hasAudio' => app(BookAudio::class)->bookIdsWithAudio([$book->id]) !== [],
             'canRead' => $user?->canReadBook($book) ?? false,
             'recommended' => $recommendations->for($book, $user),
             'hasPass' => $user && ($user->isStaff() || $user->passes()->active()->exists()),
