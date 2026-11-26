@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin;
+use App\Http\Controllers\Admin\BookAudioController;
 use App\Http\Controllers\Admin\PageImageController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\ChildController;
@@ -99,6 +100,10 @@ Route::middleware(EnsureCatalogOpen::class)->group(function () {
             ->whereNumber('page')
             ->middleware(['signed', 'throttle:600,1'])
             ->name('reader.page');
+        Route::get('/baca/{book:slug}/audio/{page}', [ReaderController::class, 'audio'])
+            ->whereNumber('page')
+            ->middleware(['signed', 'throttle:600,1'])
+            ->name('reader.audio');
     });
 });
 
@@ -133,6 +138,9 @@ Route::middleware('auth')->group(function () {
 
     // Admin only (checked in the controller); used by the Filament order page.
     Route::get('/admin/resit/{order:reference}', [ReceiptController::class, 'show'])->name('admin.receipt');
+
+    // Staff only (checked in the controller): listen to a book page's audiobook voice.
+    Route::get('/admin/audio/{page}', [BookAudioController::class, 'page'])->middleware('signed')->name('admin.audio.page');
 
     // Staff only (checked in the controller): "versi pantas" page images made in the admin's browser.
     Route::prefix('/admin/versi-pantas/{file}')->name('admin.pages.')->controller(PageImageController::class)->group(function () {

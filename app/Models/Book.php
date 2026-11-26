@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 
 #[Fillable([
     'title', 'title_en', 'slug', 'author', 'synopsis', 'synopsis_en', 'age_group', 'single_price_sen', 'royalty_single_percent',
-    'is_enhanced_edition', 'cover_path', 'status', 'published_at', 'blog_post_id', 'book_series_id', 'series_position',
+    'is_enhanced_edition', 'cover_path', 'status', 'published_at', 'blog_post_id', 'book_series_id', 'series_position', 'audio_published_at',
 ])]
 class Book extends Model
 {
@@ -33,6 +33,7 @@ class Book extends Model
             'status' => BookStatus::class,
             'single_price_sen' => 'integer',
             'series_position' => 'integer',
+            'audio_published_at' => 'datetime',
             'royalty_single_percent' => 'float',
             'is_enhanced_edition' => 'boolean',
             'published_at' => 'datetime',
@@ -116,6 +117,12 @@ class Book extends Model
     }
 
     /** A book may sit in several categories, shown in the admin's order. */
+    /** Audiobook pages (text, voice, word timings), in page order. */
+    public function pages(): HasMany
+    {
+        return $this->hasMany(BookPage::class)->orderBy('page');
+    }
+
     public function series(): BelongsTo
     {
         return $this->belongsTo(BookSeries::class, 'book_series_id');

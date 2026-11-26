@@ -128,7 +128,12 @@
                                 @include('child-mode.partials.video-card', ['video' => $item['video'], 'locked' => $item['locked']])
                             @else
                                 <a href="{{ route('reader.show', $item['book']) }}" class="group block w-36 shrink-0 snap-start sm:w-44">
-                                    <x-book-cover :book="$item['book']" class="transition group-hover:-translate-y-1" />
+                                    <div class="relative">
+                                        <x-book-cover :book="$item['book']" class="transition group-hover:-translate-y-1" />
+                                        @if (in_array($item['book']->id, $audioBookIds ?? [], true))
+                                            <span class="absolute top-2 right-2 rounded-full border-2 border-ink bg-kuning px-2 py-0.5 text-sm font-extrabold" title="Boleh didengar">🎧</span>
+                                        @endif
+                                    </div>
                                     @if ($item['book']->seriesLabel())
                                         <p class="mt-2 text-xs font-extrabold text-biru">{{ $item['book']->seriesLabel() }}</p>
                                     @endif
@@ -148,7 +153,12 @@
             <div class="mt-6 grid grid-cols-2 gap-5 sm:grid-cols-4 lg:grid-cols-5">
                 @foreach ($books as $book)
                     <a href="{{ route('reader.show', $book) }}" class="group block">
-                        <x-book-cover :book="$book" class="transition group-hover:-translate-y-1" />
+                        <div class="relative">
+                            <x-book-cover :book="$book" class="transition group-hover:-translate-y-1" />
+                            @if (in_array($book->id, $audioBookIds ?? [], true))
+                                <span class="absolute top-2 right-2 rounded-full border-2 border-ink bg-kuning px-2 py-0.5 text-sm font-extrabold" title="Boleh didengar">🎧</span>
+                            @endif
+                        </div>
                         @if ($book->series)
                             <p class="mt-2 text-xs font-extrabold text-biru">{{ $book->series->name }}@if ($book->seriesLabel()) · {{ $book->seriesLabel() }}@endif</p>
                         @endif

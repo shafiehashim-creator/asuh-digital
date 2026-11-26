@@ -49,6 +49,19 @@
                 @error('avatar') <p class="mt-1 text-sm font-semibold text-magenta">{{ $message }}</p> @enderror
             </fieldset>
 
+            @if (App\Models\Setting::get('audio_open'))
+                {{-- Audiobook: the parent can turn the 🎧 voice off for this child. --}}
+                <fieldset class="rounded-2xl bg-lavender p-4">
+                    <legend class="sr-only">Audiobook</legend>
+                    <input type="hidden" name="audio_settings" value="1">
+                    <p class="font-display font-bold text-plum">Audiobook</p>
+                    <label class="mt-3 flex items-start gap-3">
+                        <input type="checkbox" name="allow_audio" value="1" @checked(old('allow_audio', $editing ? $child->allow_audio : true)) class="mt-1 size-5 accent-plum">
+                        <span><span class="font-semibold">Benarkan dengar (🎧)</span><br><span class="text-sm text-ink/75">Buku yang ada suara boleh dibacakan kepada anak, dengan perkataan diserlahkan dan halaman diselak sendiri. Masa mendengar dikira sebagai masa membaca.</span></span>
+                    </label>
+                </fieldset>
+            @endif
+
             @if (app(App\Services\GamePlaying::class)->isOpen())
                 {{-- Mod Anak games: the parent's daily limit (20 minutes for a new child). --}}
                 <fieldset class="rounded-2xl bg-lavender p-4">

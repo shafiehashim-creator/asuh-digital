@@ -53,6 +53,14 @@ return [
         'url' => env('BOOK_BLOG_URL', 'https://bukugaleri.blogspot.com'),
     ],
 
+    // ElevenLabs: AI voices for the audiobook and word timings for recorded voices.
+    'elevenlabs' => [
+        'key' => env('ELEVENLABS_API_KEY'),
+        'voice_id' => env('ELEVENLABS_VOICE_ID', 'z1NdRG7n6lCfAj99gcgs'),
+        'model_id' => env('ELEVENLABS_MODEL_ID', 'eleven_multilingual_v2'),
+        'url' => env('ELEVENLABS_URL', 'https://api.elevenlabs.io'),
+    ],
+
     'bunny_stream' => [
         'library_id' => env('BUNNY_STREAM_LIBRARY_ID'),
         'token_key' => env('BUNNY_STREAM_TOKEN_KEY'),

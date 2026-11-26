@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BookFile;
+use App\Services\Audio\BookAudio;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -41,17 +42,23 @@ class PageImageController extends Controller
         return response()->json(['ok' => true]);
     }
 
-    public function store(Request $request, BookFile $file, int $page): JsonResponse
+    public function store(Request $request, BookFile $file, int $page, BookAudio $audio): JsonResponse
     {
         $this->authorizeStaff($request);
         abort_unless($page >= 1 && $page <= self::MAX_PAGES, 404);
 
         $request->validate([
             'image' => ['required', 'file', 'mimetypes:'.implode(',', BookFile::PAGE_FORMATS), 'max:5120'],
+            'words' => ['nullable', 'string', 'max:500000'],
         ]);
 
         $format = array_search($request->file('image')->getMimeType(), BookFile::PAGE_FORMATS, true);
         $request->file('image')->storeAs($file->pageDirectory(), $page.'.'.$format, BookFile::DISK);
+
+        // Audiobook: the page's words and where they sit, from the edition readers see.
+        if ($request->filled('words') && $file->book->readableFile()?->is($file)) {
+            $audio->savePdfWords($file->book, $page, self::cleanWords(json_decode($request->string('words'), true)));
+        }
 
         return response()->json(['ok' => true]);
     }
@@ -82,6 +89,21 @@ class PageImageController extends Controller
         ])->save();
 
         return response()->json(['ok' => true]);
+    }
+
+    /** @return list<array{t: string, x: float, y: float, w: float, h: float}> */
+    private static function cleanWords(mixed $words): array
+    {
+        return collect(is_array($words) ? $words : [])
+            ->filter(fn ($w) => is_array($w) && is_string($w['t'] ?? null) && trim($w['t']) !== '')
+            ->take(3000)
+            ->map(fn ($w) => [
+                't' => mb_substr(trim($w['t']), 0, 80),
+                'x' => min(max((float) ($w['x'] ?? 0), 0), 1),
+                'y' => min(max((float) ($w['y'] ?? 0), 0), 1),
+                'w' => min(max((float) ($w['w'] ?? 0), 0), 1),
+                'h' => min(max((float) ($w['h'] ?? 0), 0), 1),
+            ])->values()->all();
     }
 
     private function authorizeStaff(Request $request): void

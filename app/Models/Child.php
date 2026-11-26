@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['nickname', 'age_group', 'avatar', 'daily_video_minutes', 'read_before_watch', 'daily_game_minutes'])]
+#[Fillable(['nickname', 'age_group', 'avatar', 'daily_video_minutes', 'read_before_watch', 'daily_game_minutes', 'allow_audio'])]
 class Child extends Model
 {
     /** @use HasFactory<ChildFactory> */
@@ -28,6 +28,7 @@ class Child extends Model
             'daily_video_minutes' => 'integer',
             'daily_game_minutes' => 'integer',
             'read_before_watch' => 'boolean',
+            'allow_audio' => 'boolean',
         ];
     }
 
