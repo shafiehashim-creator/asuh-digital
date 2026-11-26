@@ -248,3 +248,71 @@ body.has-sticky-cta [data-whatsapp] {
 .video-big.video-zoomed [data-zoom] {
     background: var(--color-kuning);
 }
+
+/*
+ * Kuiz Interaktif (quiz-game.js): the question drops in, answer tiles pop in
+ * one after another, the mascot jumps or wobbles, points float up and
+ * confetti falls. All of it is skipped for people who ask for less motion.
+ */
+@keyframes qz-drop {
+    0% { opacity: 0; transform: translateY(-24px) scale(0.96); }
+    100% { opacity: 1; transform: none; }
+}
+
+@keyframes qz-pop {
+    0% { opacity: 0; transform: scale(0.6); }
+    70% { opacity: 1; transform: scale(1.06); }
+    100% { transform: scale(1); }
+}
+
+@keyframes qz-jump {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    30% { transform: translateY(-22px) rotate(-6deg); }
+    60% { transform: translateY(0) rotate(4deg); }
+    80% { transform: translateY(-8px); }
+}
+
+@keyframes qz-wobble {
+    0%, 100% { transform: rotate(0); }
+    25% { transform: rotate(-8deg); }
+    75% { transform: rotate(8deg); }
+}
+
+@keyframes qz-float {
+    0% { opacity: 0; transform: translateY(10px) scale(0.8); }
+    20% { opacity: 1; transform: translateY(0) scale(1.15); }
+    100% { opacity: 0; transform: translateY(-60px) scale(1); }
+}
+
+@keyframes qz-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.12); }
+}
+
+@keyframes qz-fall {
+    0% { transform: translate3d(0, -10vh, 0) rotate(0); opacity: 1; }
+    100% { transform: translate3d(var(--qz-drift, 0), 105vh, 0) rotate(var(--qz-spin, 540deg)); opacity: 0.9; }
+}
+
+.qz-drop { animation: qz-drop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.qz-pop { animation: qz-pop 0.35s cubic-bezier(0.2, 0.8, 0.2, 1.2) both; }
+.qz-jump { animation: qz-jump 0.8s ease-in-out; }
+.qz-wobble { animation: qz-wobble 0.3s ease-in-out 3; }
+.qz-float { animation: qz-float 1.2s ease-out forwards; }
+.qz-pulse { animation: qz-pulse 0.5s ease-in-out infinite; }
+
+.qz-confetti {
+    position: fixed;
+    top: 0;
+    z-index: 60;
+    width: 10px;
+    height: 14px;
+    border-radius: 2px;
+    pointer-events: none;
+    animation: qz-fall var(--qz-time, 2.4s) cubic-bezier(0.25, 0.6, 0.4, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .qz-drop, .qz-pop, .qz-jump, .qz-wobble, .qz-float, .qz-pulse { animation: none; }
+    .qz-confetti { display: none; }
+}

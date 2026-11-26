@@ -11,6 +11,7 @@ use App\Services\ChildMode;
 use App\Services\ChildShelf;
 use App\Services\GamePlaying;
 use App\Services\ParentGate;
+use App\Services\QuizGames;
 use App\Services\ReadingLog;
 use App\Services\VideoWatching;
 use App\Support\BrandVideo;
@@ -40,7 +41,7 @@ class ChildModeController extends Controller
         return redirect()->route('child-mode.home');
     }
 
-    public function home(Request $request, ReadingLog $log, VideoWatching $watching, ChildShelf $shelf, GamePlaying $playing): View|RedirectResponse
+    public function home(Request $request, ReadingLog $log, VideoWatching $watching, ChildShelf $shelf, GamePlaying $playing, QuizGames $quizGames): View|RedirectResponse
     {
         $child = $this->childMode->child($request->user());
 
@@ -61,6 +62,9 @@ class ChildModeController extends Controller
             'rows' => $shelf->rows($books, $videos),
             'badges' => $child->badges()->get(),
             // Audiobook: books the child can listen to (🎧 on the cover).
+            // Kuiz Interaktif: published ones for the child's age, or the class's for a pupil.
+            'quizGames' => $quizGames->hasAccess($child) ? $quizGames->available($child)->take(12) : collect(),
+            'quizBest' => $quizGames->hasAccess($child) ? $quizGames->bestScores($child) : [],
             'audioBookIds' => $child->allow_audio ? app(BookAudio::class)->bookIdsWithAudio($books->pluck('id')) : [],
             // The parent's reward promises not yet kept, for the child to aim for.
             'promises' => $child->rewardPromises()->whereNull('fulfilled_at')->orderByDesc('achieved_at')->get(),

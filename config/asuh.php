@@ -37,6 +37,8 @@ return [
         'games_open' => false,
         // Audiobook "Baca bersama" in the reader; on once the first books' voices are checked.
         'audio_open' => false,
+        // Kuiz Interaktif (made by ASUH) for families and assigned classes; on once checked.
+        'quiz_games_open' => false,
         'plus_opens_on' => null,
         // Pages anyone may read free from a book's "versi pantas" (0 turns previews off).
         'preview_pages' => 5,

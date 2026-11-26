@@ -9,6 +9,8 @@
         ['Rak buku saya', 'account.shelf', ['account.shelf'], ['M4 4h5a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z', 'M20 4h-5a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h6z'], $shelfOpen],
         ['Anak-anak', 'account.children', ['account.children', 'children.*'], ['M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8', 'M2 21a7 7 0 0 1 14 0', 'M16 3.5a4 4 0 0 1 0 7.5', 'M22 21a7 7 0 0 0-4-6.3'], $shelfOpen],
         ['Pencapaian', 'account.progress', ['account.progress'], ['M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12', 'm8.5 13.5-1.5 8 5-3 5 3-1.5-8'], $shelfOpen],
+        ['Kuiz Interaktif', 'child-mode.quiz-games.index', ['child-mode.quiz-games.*'], ['M13 2 3 14h9l-1 8 10-12h-9z'],
+            $shelfOpen && app(App\Services\QuizGames::class)->hasAccess(auth()->user()) && App\Models\QuizGame::query()->published()->exists()],
         ['Langganan dan pesanan', 'account.billing', ['account.billing'], ['M6 2h12v20l-3-2-3 2-3-2-3 2z', 'M9 7h6', 'M9 11h6', 'M9 15h4'], true],
         ['Panduan', 'account.guide', ['account.guide'], ['M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20', 'M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3', 'M12 17h.01'], true],
         ['Profil dan keselamatan', 'account.profile', ['account.profile'], ['M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8', 'M5 21a7 7 0 0 1 14 0'], true],

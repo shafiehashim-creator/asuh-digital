@@ -67,7 +67,7 @@ class Settings extends Page
         'bank_name', 'bank_account_name', 'bank_account_number',
         'contact_email', 'company_name', 'company_ssm_no', 'company_address', 'company_sst_no',
         'admin_notification_emails',
-        'catalog_open', 'preview_pages', 'whatsapp_number', 'videos_open', 'yearly_includes_videos', 'games_open', 'audio_open', 'plus_sales_open', 'plus_opens_on',
+        'catalog_open', 'preview_pages', 'whatsapp_number', 'videos_open', 'yearly_includes_videos', 'games_open', 'audio_open', 'quiz_games_open', 'plus_sales_open', 'plus_opens_on',
         'chip_fee_fpx_fixed', 'chip_fee_fpx_percent', 'chip_fee_ewallet_fixed', 'chip_fee_ewallet_percent',
         'affiliates_open', 'affiliate_commission_percent', 'affiliate_hold_days', 'affiliate_cookie_days',
         'royalty_pool_percent', 'royalty_plus_ebook_share', 'royalty_min_minutes', 'royalty_single_percent',
@@ -153,6 +153,12 @@ class Settings extends Page
                 ->schema([
                     Toggle::make('games_open')->label('Buka permainan dalam Mod Anak')
                         ->helperText('7 permainan (padan kad, pilih yang baik, susun ikut tertib, huruf hijaiyah, cari perkataan, teka nabi, kuiz pantas akhlak) untuk anak keluarga yang melanggan, dengan had masa harian ibu bapa (lalai 20 minit). Semak kandungan dengan panel syariah sebelum dibuka; staf sentiasa boleh pratonton.'),
+                ]),
+
+            Section::make('Kuiz Interaktif')
+                ->schema([
+                    Toggle::make('quiz_games_open')->label('Buka Kuiz Interaktif')
+                        ->helperText('Kuiz gaya Wayground yang dicipta di Kandungan → Kuiz interaktif: dimainkan anak dalam Mod Anak dan ibu bapa yang melanggan, dan murid bila cikgu memberikannya kepada kelas di portal guru. Hanya kuiz yang diterbitkan dipaparkan. Staf sentiasa boleh mencuba.'),
                 ]),
 
             Section::make('Audiobook (Baca bersama)')
