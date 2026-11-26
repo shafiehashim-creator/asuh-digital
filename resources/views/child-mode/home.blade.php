@@ -60,6 +60,26 @@
             </div>
         @endif
 
+        @if ($quizGames->isNotEmpty())
+            {{-- Kuiz Interaktif: ASUH quizzes for the child's age, or the ones a pupil's teacher gave. --}}
+            <section class="mt-8" aria-labelledby="quiz-games-heading">
+                <div class="flex flex-wrap items-end justify-between gap-2">
+                    <h2 id="quiz-games-heading" class="flex items-center gap-2 font-display text-2xl font-bold text-plum">
+                        <span class="flex size-11 items-center justify-center rounded-full border-2 border-ink bg-kuning text-2xl" aria-hidden="true">🧠</span>
+                        {{ $child->isPupil() ? 'Kuiz daripada cikgu' : 'Kuiz Interaktif' }}
+                    </h2>
+                    <a href="{{ route('child-mode.quiz-games.index') }}" class="text-sm font-bold text-biru underline">Lihat semua</a>
+                </div>
+                <div class="-mx-4 mt-3 flex snap-x scroll-px-4 items-stretch gap-4 overflow-x-auto px-4 pb-3">
+                    @foreach ($quizGames as $quiz)
+                        <div class="w-64 shrink-0 snap-start">
+                            @include('quiz-games.partials.card', ['quiz' => $quiz, 'best' => $quizBest[$quiz->id] ?? null])
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
         @if (! empty($games))
             {{-- Games for subscribed families, under the videos. --}}
             <section class="mt-8" aria-labelledby="games-heading">

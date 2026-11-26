@@ -10,11 +10,13 @@ import Alpine from 'alpinejs';
 import { installApp } from './install';
 import { countdown } from './countdown';
 import { registerGames } from './games';
+import { quizGame } from './quiz-game';
 
 window.Alpine = Alpine;
 Alpine.data('installApp', installApp);
 Alpine.data('countdown', countdown);
 registerGames(Alpine);
+Alpine.data('quizGame', quizGame);
 
 // A row of filter chips swiped sideways on phones: the right edge fades only
 // while more chips are hidden there, and the chosen chip is scrolled into view.

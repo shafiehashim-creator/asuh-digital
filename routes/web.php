@@ -25,6 +25,7 @@ use App\Http\Controllers\PreorderController;
 use App\Http\Controllers\PreviewController;
 use App\Http\Controllers\PupilAccessController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\QuizGameController;
 use App\Http\Controllers\ReaderController;
 use App\Http\Controllers\ReadingProgressController;
 use App\Http\Controllers\ReceiptController;
@@ -215,6 +216,15 @@ Route::middleware(['auth', 'verified', EnsureInstitutionStaff::class])->prefix('
     Route::post('/kelas/{classroom}/murid', [Teacher\PupilController::class, 'store'])->middleware('throttle:20,1')->name('pupils.store');
     Route::delete('/kelas/{classroom}/murid/{pupil}', [Teacher\PupilController::class, 'destroy'])->name('pupils.destroy');
 
+    // Kuiz Interaktif: the ASUH library, giving one to a class, and its results.
+    Route::controller(Teacher\QuizGameController::class)->prefix('/kuiz')->name('quiz-games.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/{quizGame:slug}/beri', 'assign')->middleware('throttle:30,1')->name('assign');
+        Route::get('/tugasan/{assignment}', 'results')->name('results');
+        Route::get('/tugasan/{assignment}/csv', 'export')->name('export');
+        Route::delete('/tugasan/{assignment}', 'destroy')->name('destroy');
+    });
+
     Route::post('/guru', [Teacher\TeacherController::class, 'store'])->middleware('throttle:10,1')->name('teachers.store');
     Route::delete('/guru/{teacher}', [Teacher\TeacherController::class, 'destroy'])->name('teachers.destroy');
 });
@@ -240,6 +250,15 @@ Route::middleware([EnsureCatalogOpen::class, AuthenticateOrPupil::class])->group
     Route::post('/mod-anak/permainan/{game}/masa', [ChildGameController::class, 'progress'])
         ->middleware('throttle:30,1')
         ->name('child-mode.game.progress');
+
+    // Kuiz Interaktif (2026-11-26): children, pupils with a class assignment, and parents or teachers trying one.
+    Route::prefix('/mod-anak/kuiz-interaktif')->name('child-mode.quiz-games.')->controller(QuizGameController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/{quizGame:slug}', 'show')->name('show');
+        Route::post('/{quizGame:slug}/mula', 'start')->middleware('throttle:20,1')->name('start');
+        Route::post('/main/{play}/jawab', 'answer')->middleware('throttle:120,1')->name('answer');
+        Route::post('/main/{play}/tamat', 'finish')->middleware('throttle:30,1')->name('finish');
+    });
 
     // Phase 2 animated videos.
     Route::get('/mod-anak/video/{video:slug}', [ChildVideoController::class, 'show'])->name('child-mode.video');

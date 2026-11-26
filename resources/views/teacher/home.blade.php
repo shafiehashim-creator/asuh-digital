@@ -5,6 +5,18 @@
             <h1 class="font-display text-3xl font-extrabold text-magenta sm:text-4xl">Assalamualaikum, {{ $user->name }}</h1>
         </div>
 
+        @if (app(App\Services\QuizGames::class)->hasAccess($user))
+            {{-- Kuiz Interaktif made by ASUH, to give to a class. --}}
+            <a href="{{ route('teacher.quiz-games.index') }}" class="flex items-center gap-4 rounded-3xl border-2 border-ink bg-kuning p-5 shadow-[0_4px_0_var(--color-ink)] transition hover:-translate-y-0.5">
+                <span class="text-4xl" aria-hidden="true">🧠</span>
+                <span class="min-w-0 flex-1">
+                    <span class="block font-display text-xl font-bold">Kuiz Interaktif</span>
+                    <span class="block text-ink/80">Beri kuiz bermasa ASUH kepada kelas anda dan lihat papan markah murid.</span>
+                </span>
+                <span class="font-bold" aria-hidden="true">→</span>
+            </a>
+        @endif
+
         <section aria-labelledby="license-heading" class="rounded-3xl border-2 border-ink bg-white p-6 shadow-[0_4px_0_var(--color-ink)]">
             <h2 id="license-heading" class="font-display text-xl font-bold text-plum">Lesen institusi</h2>
             @if ($license)
